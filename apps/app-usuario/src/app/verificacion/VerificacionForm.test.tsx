@@ -130,6 +130,27 @@ describe("VerificacionForm", () => {
     expect(await screen.findByText("¡Identidad Verificada con Éxito!")).toBeInTheDocument();
   });
 
+  it("finaliza una prueba al recibir el mensaje de Didit sin consultar una verificación real", async () => {
+    const user = userEvent.setup();
+    iniciarVerificacionDiditUsuarioMock.mockResolvedValueOnce({
+      url: "https://verify.didit.me/session/sandbox",
+      sandbox: true,
+    });
+
+    render(<VerificacionForm fotoPerfilInicial="https://cdn.example/foto.jpg" soloDidit />);
+    await user.click(screen.getByRole("button", { name: /iniciar verificación con didit/i }));
+    await screen.findByRole("button", { name: "Finalizar prueba" });
+
+    fireEvent(window, new MessageEvent("message", {
+      origin: "https://verify.didit.me",
+      data: { type: "didit:completed" },
+    }));
+
+    expect(await screen.findByText(/prueba de didit finalizada/i)).toBeInTheDocument();
+    expect(obtenerEstadoVerificacionDiditUsuarioMock).not.toHaveBeenCalled();
+    expect(pushMock).not.toHaveBeenCalled();
+  });
+
   it("rechaza archivo no soportado y HEIC con guía, y completa envío manual de documentos", async () => {
     const user = userEvent.setup();
     actualizarPerfilUsuarioMock.mockResolvedValueOnce({});

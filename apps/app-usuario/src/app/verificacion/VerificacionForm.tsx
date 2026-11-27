@@ -119,9 +119,10 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
 
   /* Didit Verification State */
   const [mostrarDiditModal, setMostrarDiditModal] = useState(false);
-  const [urlDidit, setUrlDidit] = useState<string | null>(null);
-  const [sessionIdDidit, setSessionIdDidit] = useState<string | null>(null);
-  const [sandboxDidit, setSandboxDidit] = useState(false);
+  const [sesionDidit, setSesionDidit] = useState<{ url: string; sessionId?: string | null; sandbox?: boolean } | null>(null);
+  const [pruebaDiditFinalizada, setPruebaDiditFinalizada] = useState(false);
+  const sessionIdDidit = sesionDidit?.sessionId ?? null;
+  const sandboxDidit = sesionDidit?.sandbox === true;
   const [cargandoDidit, setCargandoDidit] = useState(false);
   const [errorDidit, setErrorDidit] = useState<string | null>(null);
   const [fotoPerfilUrl, setFotoPerfilUrl] = useState(fotoPerfilInicial ?? "");
@@ -193,10 +194,9 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
   async function iniciarDidit() {
     if (cargandoDidit) return;
     setCargandoDidit(true);
-    setSandboxDidit(false);
+    setPruebaDiditFinalizada(false);
     setErrorDidit(null);
-    setUrlDidit(null);
-    setSessionIdDidit(null);
+    setSesionDidit(null);
     setMostrarDiditModal(true);
     try {
       // RUUM-USR-F5-001 (CB-3): Intentar iniciar sesión mediante endpoint con rate limit de clave compuesta
@@ -214,9 +214,7 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
         });
         if (res.ok) {
           const datos = (await res.json()) as { url: string; sessionId?: string; sandbox?: boolean };
-          setSandboxDidit(datos.sandbox === true);
-          setUrlDidit(datos.url);
-          setSessionIdDidit(datos.sessionId ?? null);
+          setSesionDidit(datos);
           sesionIniciada = true;
         } else if (res.status === 429) {
           const errJson = await res.json().catch(() => null);
@@ -231,10 +229,7 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
       if (!sesionIniciada) {
         // Respaldo de llamada directa si el endpoint de aplicación no está disponible
         const cliente = crearClienteNavegador();
-        const { url, sessionId, sandbox } = await iniciarVerificacionDiditUsuario(cliente);
-        setSandboxDidit(sandbox === true);
-        setUrlDidit(url);
-        setSessionIdDidit(sessionId ?? null);
+        setSesionDidit(await iniciarVerificacionDiditUsuario(cliente));
       }
     } catch (err) {
       setErrorDidit(
@@ -246,10 +241,9 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
   }
 
   function cerrarDidit() {
-    const teniaSesion = Boolean(sessionIdDidit);
+    const teniaSesion = !sandboxDidit && Boolean(sessionIdDidit);
     setMostrarDiditModal(false);
-    setUrlDidit(null);
-    setSessionIdDidit(null);
+    setSesionDidit(null);
     setErrorDidit(null);
     if (teniaSesion) {
       setPollingDiditActivo(true);
@@ -327,10 +321,6 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
 
   async function finalizarDidit() {
     if (cargandoDidit) return;
-    if (sandboxDidit) {
-      cerrarDidit();
-      return;
-    }
     /* CORRECCIÓN stale-session: sin sessionId el lookup devolvía la última
        verificación del usuario (podía ser de un intento anterior) y marcar
        éxito/rechazo equivocado. Se captura el id al inicio y se exige para
@@ -353,8 +343,7 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
 
       if (resultado === "verificado") {
         setMostrarDiditModal(false);
-        setUrlDidit(null);
-        setSessionIdDidit(null);
+        setSesionDidit(null);
         setVerificacionCompletada(true);
         router.push(destinoExito);
         router.refresh();
@@ -640,15 +629,20 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
       </VerificationSheet>
 
       {/* Modal Didit */}
+      {pruebaDiditFinalizada && <Aviso tono="info">Prueba de Didit finalizada. El estado de tu cuenta sigue igual.</Aviso>}
+
       <DiditVerificationModal
         isOpen={mostrarDiditModal}
-        url={urlDidit}
+        url={sesionDidit?.url ?? null}
         sandbox={sandboxDidit}
         cargando={cargandoDidit}
         error={errorDidit}
         onCerrar={cerrarDidit}
         onReintentar={iniciarDidit}
-        onFinalizar={finalizarDidit}
+        onFinalizar={sandboxDidit ? () => {
+          cerrarDidit();
+          setPruebaDiditFinalizada(true);
+        } : finalizarDidit}
       />
 
       {!soloDidit && (

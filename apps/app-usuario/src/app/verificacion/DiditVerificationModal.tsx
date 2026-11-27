@@ -60,7 +60,7 @@ export function DiditVerificationModal({
   }, [isOpen, onCerrar, dialogRef]);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || !url || cargando) return;
     const handleMessage = (event: MessageEvent) => {
       if (!esOrigenDiditValido(event.origin)) return;
       // V-1: defensa en profundidad — el intérprete también valida el origen.
@@ -71,7 +71,7 @@ export function DiditVerificationModal({
     };
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, [isOpen, onCerrar, onFinalizar]);
+  }, [isOpen, url, cargando, onCerrar, onFinalizar]);
 
   if (!isOpen) return null;
 
@@ -201,7 +201,9 @@ export function DiditVerificationModal({
             </div>
             <div className="p-4 bg-[#071930] border-t border-[#1a3a5c] flex flex-col sm:flex-row items-center justify-between gap-3">
               <p className="text-xs text-[#a8b5cc] text-center sm:text-left leading-relaxed">
-                Tu cuenta se actualizará automáticamente al completar la prueba. Si abriste en nueva ventana, vuelve aquí y pulsa el botón.
+                {sandbox
+                  ? "Si completaste la prueba en otra ventana, vuelve aquí para finalizar."
+                  : "Tu cuenta se actualizará automáticamente al completar la verificación. Si abriste en otra ventana, vuelve aquí y pulsa el botón."}
               </p>
               <button
                 type="button"
@@ -209,7 +211,7 @@ export function DiditVerificationModal({
                 disabled={cargando}
                 className="w-full sm:w-auto shrink-0 rounded-2xl bg-sky-500 px-5 py-2.5 text-xs font-bold text-[#0a2342] hover:bg-sky-400 transition cursor-pointer"
               >
-                Ya completé la verificación
+                {sandbox ? "Finalizar prueba" : "Ya completé la verificación"}
               </button>
             </div>
           </div>
