@@ -8,11 +8,11 @@
  *  - rechazado     → mostrar opciones con aviso para reintentar
  */
 import Link from "next/link";
-import { MobileBadge, MobileCard } from "@ruum/ui";
 import { VerificacionForm } from "./VerificacionForm";
 import { obtenerUsuarioActual } from "@ruum/api/services";
 import { destinoSeguro } from "@ruum/shared/utils";
 import { logStructuredWarn } from "../../lib/logger";
+import { Badge, Card } from "@ruum/ui/base";
 
 interface Props {
   searchParams: Promise<{ next?: string }>;
@@ -21,7 +21,7 @@ interface Props {
 /* Pantalla cuando el usuario ya está verificado */
 function CuentaYaVerificada({ destino = "/viajes/nuevo" }: { destino?: string }) {
   return (
-    <MobileCard padding="lg" elevated className="text-center space-y-4 border-[#c8e6d8] bg-[#e9f3ee]/40 dark:border-[#135939] dark:bg-[#0a2e1f]/40">
+    <Card className="p-5 shadow-ui-md sm:p-6 text-center space-y-4 border-[#c8e6d8] bg-[#e9f3ee]/40 dark:border-[#135939] dark:bg-[#0a2e1f]/40">
       <div className="flex justify-center">
         <div className="flex size-16 items-center justify-center rounded-full bg-[#e9f3ee] text-[#08705f] dark:bg-[#0a2e1f] dark:text-[#4dd9a3]">
           <svg
@@ -40,7 +40,7 @@ function CuentaYaVerificada({ destino = "/viajes/nuevo" }: { destino?: string })
       </div>
 
       <div className="space-y-1.5">
-        <MobileBadge variante="exito" texto="Identidad confirmada" punto size="md" className="mx-auto" />
+        <Badge tone="success" dot className="mx-auto">Identidad confirmada</Badge>
         <h2 className="text-[20px] font-bold text-[#0a2342] dark:text-[#f6f8fb] pt-1">Cuenta Verificada</h2>
         <p className="text-[13.5px] leading-relaxed text-[#4e5f80] dark:text-[#a8b5cc]">
           Tu identidad ya se encuentra validada y tu cuenta está lista para solicitar y gestionar traslados vehiculares con conductores certificados.
@@ -61,7 +61,7 @@ function CuentaYaVerificada({ destino = "/viajes/nuevo" }: { destino?: string })
           Ir al inicio
         </Link>
       </div>
-    </MobileCard>
+    </Card>
   );
 }
 

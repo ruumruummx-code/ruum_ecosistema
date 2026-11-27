@@ -2,13 +2,15 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Aviso, Field, MobileShell, MobileCard, MobileButton } from "@ruum/ui";
+import { Aviso, Field } from "@ruum/ui";
 import { fortalezaPassword, observarSesionRecuperacion, passwordCumpleRequisitos, requisitosPassword, traducirErrorAuth } from "@ruum/shared/utils";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "../../lib/supabase-browser";
 import { obtenerHeadersCsrf } from "../../lib/csrf";
 import { obtenerDispositivo } from "../../lib/device-id";
 import { logStructuredWarn } from "../../lib/logger";
 import { LogoRuum } from "../experiencia-publica";
+import { MarcoPantalla, Card, Button } from "@ruum/ui/base";
+import { Loader2 } from "lucide-react";
 
 function FormularioNuevaPassword() {
   const router = useRouter();
@@ -185,7 +187,7 @@ function FormularioNuevaPassword() {
   const pwd = fortalezaPassword(password);
 
   return (
-    <MobileShell variant="compact">
+    <MarcoPantalla variant="compact">
       <div className="flex min-h-dvh flex-col justify-center px-4 py-8 sm:px-6">
         <Link
           href="/login"
@@ -198,9 +200,8 @@ function FormularioNuevaPassword() {
           <LogoRuum />
         </div>
 
-        <MobileCard
-          elevated
-          className="p-6 sm:p-7"
+        <Card
+          className="p-6 shadow-ui-md sm:p-7"
           aria-live="polite"
           aria-atomic="true"
         >
@@ -373,20 +374,22 @@ function FormularioNuevaPassword() {
                   </div>
                 )}
 
-                <MobileButton
+                <Button
                   type="submit"
+                  size="lg"
                   disabled={enviando || (esCuentaDistinta && !confirmadoCambioCuenta)}
-                  loading={enviando}
-                  className="mt-2"
+                  aria-busy={enviando}
+                  className="mt-2 w-full"
                 >
+                  {enviando && <Loader2 aria-hidden="true" className="animate-spin" />}
                   {enviando ? "Guardando…" : "Guardar nueva contraseña"}
-                </MobileButton>
+                </Button>
               </form>
             </>
           )}
-        </MobileCard>
+        </Card>
       </div>
-    </MobileShell>
+    </MarcoPantalla>
   );
 }
 

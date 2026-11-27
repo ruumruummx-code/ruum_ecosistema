@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { MobileShell } from "@ruum/ui";
+import { MarcoPantalla } from "@ruum/ui/base";
 export const metadata = { title: "Términos y condiciones — Ruum Ruum" };
 export default function PaginaTerminos() {
-return <MobileShell variant="compact" navInferiorVisible={false} className="user-v2-scope user-legal-shell" contentClassName="user-legal-content">
+return <MarcoPantalla variant="compact" navInferiorVisible={false} className="user-v2-scope user-legal-shell" contentClassName="user-legal-content">
 <div className="user-legal-view"><header className="user-legal-header"><div className="user-legal-appbar">
 <Link href="/cuenta?seccion=legal" className="user-profile-back">‹ Atrás</Link><h1>Términos y condiciones</h1>
 <a href="/docs-legales/terminos-y-condiciones-ruum-ruum.pdf" download aria-label="Descargar términos y condiciones en PDF"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M5 16v5h14v-5" /></svg></a>
@@ -99,5 +99,5 @@ return <MobileShell variant="compact" navInferiorVisible={false} className="user
             </section>
           </div>
 
-</div></div></MobileShell>;
+</div></div></MarcoPantalla>;
 }

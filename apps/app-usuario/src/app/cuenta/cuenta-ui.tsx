@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { ReactNode } from "react";
-import { Aviso, Button, Icono, PassportCard, SENDAS_ICONO, MobileShell } from "@ruum/ui";
+import { Aviso, Button, Icono, PassportCard, SENDAS_ICONO } from "@ruum/ui";
 import { ETIQUETA_TIPO_VEHICULO } from "@ruum/shared/constants";
 import type { Database } from "@ruum/shared/types";
 import type { RolEfectivoCuentaDTO } from "@ruum/api/services";
@@ -20,6 +20,7 @@ export {
   enmascararCreditoEmpresarial,
   enmascararDireccionResumen,
 } from "@ruum/api/services";
+import { MarcoPantalla } from "@ruum/ui/base";
 
 export type Usuario = Database["public"]["Tables"]["usuarios"]["Row"];
 export type Vehiculo = Database["public"]["Tables"]["vehiculos"]["Row"];
@@ -270,7 +271,7 @@ export function AvisoErrorCuenta({ mensaje }: { mensaje?: string | null }) {
   return (
     <>
       <NavegacionUsuario variante="claro" />
-      <MobileShell variant="compact" navInferiorVisible={true} as="main" className="user-v2-scope user-account-shell" contentClassName="user-account-content">
+      <MarcoPantalla variant="compact" navInferiorVisible={true} as="main" className="user-v2-scope user-account-shell" contentClassName="user-account-content">
         <div className="user-account-fallback text-center">
           <Aviso tono="danger">
             {mensaje ?? "No pudimos cargar tu cuenta en este momento. Inténtalo de nuevo en unos segundos."}
@@ -285,7 +286,7 @@ export function AvisoErrorCuenta({ mensaje }: { mensaje?: string | null }) {
             </Link>
           </div>
         </div>
-      </MobileShell>
+      </MarcoPantalla>
     </>
   );
 }
@@ -308,7 +309,7 @@ export function AvisoSinSesion() {
   return (
     <>
       <NavegacionUsuario variante="claro" />
-      <MobileShell variant="compact" navInferiorVisible={true} as="main" className="user-v2-scope user-account-shell" contentClassName="user-account-content">
+      <MarcoPantalla variant="compact" navInferiorVisible={true} as="main" className="user-v2-scope user-account-shell" contentClassName="user-account-content">
         <div className="user-account-fallback text-center">
           <Aviso tono="info">Inicia sesión para consultar y actualizar los datos de tu cuenta.</Aviso>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row justify-center">
@@ -320,7 +321,7 @@ export function AvisoSinSesion() {
             </Link>
           </div>
         </div>
-      </MobileShell>
+      </MarcoPantalla>
     </>
   );
 }

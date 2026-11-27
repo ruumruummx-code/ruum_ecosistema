@@ -4,8 +4,7 @@ import { redirect } from "next/navigation";
 import { UserDashboardLayout } from "../../components/layout/UserDashboardLayout";
 import { BotonReintentarSesion } from "../ReintentarSesion";
 import { CircleAlert } from "lucide-react";
-import { MobileShell } from "@ruum/ui";
-import { Button, EmptyState } from "@ruum/ui/base";
+import { Button, EmptyState, MarcoPantalla } from "@ruum/ui/base";
 import type { Database } from "@ruum/shared/types";
 import { NavegacionUsuario } from "../NavegacionUsuario";
 import { MisTraslados } from "./MisTraslados";
@@ -138,9 +137,9 @@ export default async function PaginaMisTraslados({
       <>
         <div className="flex h-full w-full flex-col lg:hidden">
           <NavegacionUsuario variante="claro" />
-          <MobileShell as="main" variant="wide" padding="none" conFondoCanvas={false} navInferiorVisible className="bg-ui-bg">
+          <MarcoPantalla as="main" variant="wide" padding="none" conFondoCanvas={false} navInferiorVisible className="bg-ui-bg">
             {aviso}
-          </MobileShell>
+          </MarcoPantalla>
         </div>
         <div className="hidden h-full w-full lg:flex">
           <UserDashboardLayout padding="ninguno" classNameContenido="bg-ui-bg">{aviso}</UserDashboardLayout>
@@ -177,9 +176,9 @@ export default async function PaginaMisTraslados({
     <>
       <div className="flex h-full w-full flex-col lg:hidden">
         <NavegacionUsuario variante="claro" notificaciones={notificaciones} />
-        <MobileShell as="main" variant="wide" padding="none" conFondoCanvas={false} navInferiorVisible className="bg-ui-bg">
+        <MarcoPantalla as="main" variant="wide" padding="none" conFondoCanvas={false} navInferiorVisible className="bg-ui-bg">
           {contenido}
-        </MobileShell>
+        </MarcoPantalla>
       </div>
       <div className="hidden h-full w-full lg:flex">
         <UserDashboardLayout

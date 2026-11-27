@@ -4,10 +4,10 @@ import path from "node:path";
 import os from "node:os";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
-import { MobileShell } from "@ruum/ui";
 import { NavegacionUsuario } from "../src/app/NavegacionUsuario";
 import { MisTraslados } from "../src/app/mis-viajes/MisTraslados";
 import type { ViajeLista } from "../src/app/mis-viajes/useGestionTraslados";
+import { MarcoPantalla } from "@ruum/ui/base";
 
 vi.mock("next/navigation", () => ({
   usePathname: () => "/mis-viajes",
@@ -45,9 +45,9 @@ describe.skipIf(process.env.RUN_RESPONSIVE_UI !== "1")("Traslados sin scroll de 
       for (const escenario of escenarios) {
         const html = renderToStaticMarkup(<div id="contenido-principal">
           <NavegacionUsuario notificaciones={[{ id: "demo", tono: "info", mensaje: "Tu cuenta está en proceso de verificación." }]} />
-          <MobileShell as="main" variant="wide" padding="none" conFondoCanvas={false} navInferiorVisible className="bg-ui-bg">
+          <MarcoPantalla as="main" variant="wide" padding="none" conFondoCanvas={false} navInferiorVisible className="bg-ui-bg">
             <MisTraslados traslados={escenario.viajes} autoActualizar={false} />
-          </MobileShell>
+          </MarcoPantalla>
         </div>);
         for (const [width, height] of tamanos) {
           await page.setViewportSize({ width, height });

@@ -1,12 +1,11 @@
-import { MobileShell } from "@ruum/ui";
-import { Skeleton } from "@ruum/ui/base";
+import { Skeleton, MarcoPantalla } from "@ruum/ui/base";
 import { NavegacionUsuario } from "../NavegacionUsuario";
 
 export default function Loading() {
   return (
     <>
       <NavegacionUsuario variante="claro" />
-      <MobileShell variant="wide" padding="none" conFondoCanvas={false} navInferiorVisible className="bg-ui-bg">
+      <MarcoPantalla variant="wide" padding="none" conFondoCanvas={false} navInferiorVisible className="bg-ui-bg">
         <div className="flex flex-col gap-4 px-4 pt-4 sm:px-6 sm:pt-6" role="status" aria-busy="true" aria-label="Cargando traslados">
           <Skeleton className="h-8 w-48" />
           <Skeleton className="h-20 rounded-lg" />
@@ -16,7 +15,7 @@ export default function Loading() {
             <Skeleton key={i} className="h-36 rounded-lg" />
           ))}
         </div>
-      </MobileShell>
+      </MarcoPantalla>
     </>
   );
 }

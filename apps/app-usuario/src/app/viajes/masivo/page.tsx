@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MobileShell } from "@ruum/ui";
-import { useMediaQuery } from "@ruum/ui/base";
+import { useMediaQuery, MarcoPantalla } from "@ruum/ui/base";
 import { NavegacionUsuario } from "../../NavegacionUsuario";
 import { UserDashboardLayout } from "../../../components/layout/UserDashboardLayout";
 import { CargaMasiva } from "./CargaMasiva";
@@ -49,9 +48,9 @@ export default function PaginaViajesMasivo() {
     <>
       <div className="flex h-full w-full flex-col lg:hidden">
         <NavegacionUsuario variante="claro" />
-        <MobileShell as="main" variant="wide" padding="none" conFondoCanvas={false} navInferiorVisible className="bg-ui-bg">
+        <MarcoPantalla as="main" variant="wide" padding="none" conFondoCanvas={false} navInferiorVisible className="bg-ui-bg">
           {contenido("movil")}
-        </MobileShell>
+        </MarcoPantalla>
       </div>
       <div className="hidden h-full w-full lg:flex">
         <UserDashboardLayout

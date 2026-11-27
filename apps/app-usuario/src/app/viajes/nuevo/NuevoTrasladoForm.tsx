@@ -1,7 +1,7 @@
 "use client";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Button, Aviso, MobileShell, useDialogAccesible } from "@ruum/ui";
+import { Button, Aviso, useDialogAccesible } from "@ruum/ui";
 import { NavegacionUsuario } from "../../NavegacionUsuario";
 import { useNuevoTraslado } from "./hooks/useNuevoTraslado";
 
@@ -10,6 +10,7 @@ import { CotizadorPortal } from "./components/CotizadorPortal";
 import { UserDashboardLayout } from "@/components/layout/UserDashboardLayout";
 import styles from "./components/cotizador.module.css";
 import { SeleccionVehiculoInicial } from "./SeleccionVehiculoInicial";
+import { MarcoPantalla } from "@ruum/ui/base";
 
 export function SeleccionUbicacionInicial({ t, lado, consulta }: { t: ReturnType<typeof useNuevoTraslado>; lado: "origen" | "destino"; consulta: string }) {
   const [cerrado, setCerrado] = useState(false);
@@ -74,7 +75,7 @@ export function NuevoTrasladoForm({ busquedaOrigenInicial = "", busquedaDestinoI
     return (
       <>
         <NavegacionUsuario variante="claro" mostrarNavegacionInferior={false} />
-        <MobileShell variant="compact" navInferiorVisible={false} as="main">
+        <MarcoPantalla variant="compact" navInferiorVisible={false} as="main">
           <div className="mx-auto max-w-xl py-8">
             <p className="font-body text-xs font-semibold uppercase tracking-wide text-[var(--user-color-pending-ink)] dark:text-[var(--user-color-pending-ink)]">
               Verificación requerida
@@ -100,7 +101,7 @@ export function NuevoTrasladoForm({ busquedaOrigenInicial = "", busquedaDestinoI
               </Link>
             </div>
           </div>
-        </MobileShell>
+        </MarcoPantalla>
       </>
     );
   }

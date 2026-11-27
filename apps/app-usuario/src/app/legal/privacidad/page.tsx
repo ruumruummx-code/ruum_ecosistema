@@ -1,5 +1,6 @@
-import { MobileCard, MobileHeader, MobileShell } from "@ruum/ui";
 import { NavegacionUsuario } from "../../NavegacionUsuario";
+import { Card, MarcoPantalla } from "@ruum/ui/base";
+import { EncabezadoRegreso } from "../../../components/EncabezadoRegreso";
 
 export const metadata = {
   title: "Aviso de privacidad — Ruum Ruum",
@@ -9,17 +10,17 @@ export default function PaginaPrivacidad() {
   return (
     <>
       <NavegacionUsuario variante="claro" />
-      <MobileShell variant="compact" navInferiorVisible={true}>
-        <MobileHeader
+      <MarcoPantalla variant="compact" navInferiorVisible={true}>
+        <EncabezadoRegreso
           titulo="Aviso de privacidad"
           subtitulo="Vigente desde el 3 de julio de 2026"
           enlaceAtras="/cuenta"
           etiquetaAtras="Volver a cuenta"
-          conBorde={false}
-          className="-mx-4 -mt-4 sm:-mx-6 sm:-mt-6 mb-4 border-b border-[#e6edf6] dark:border-[#1a3a5c]"
+          nivelTitulo="p"
+          className="-mx-4 -mt-4 mb-4 border-b border-ui-line sm:-mx-6 sm:-mt-6"
         />
 
-        <MobileCard radius="2xl" padding="lg" className="space-y-6 text-[#0a2342] dark:text-[#f6f8fb]">
+        <Card className="space-y-6 p-5 sm:p-6 text-[#0a2342] dark:text-[#f6f8fb]">
           <header className="border-b border-[#e6edf6] dark:border-[#1a3a5c] pb-4">
             <p className="text-[12px] font-bold uppercase tracking-wider text-[#4e5f80] dark:text-[#a8b5cc]">
               Documento legal
@@ -107,8 +108,8 @@ export default function PaginaPrivacidad() {
               <span>Descargar documento oficial (.docx)</span>
             </a>
           </div>
-        </MobileCard>
-      </MobileShell>
+        </Card>
+      </MarcoPantalla>
     </>
   );
 }

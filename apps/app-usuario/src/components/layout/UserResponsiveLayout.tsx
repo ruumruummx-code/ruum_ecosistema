@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import { MobileShell } from "@ruum/ui";
 import { NavegacionUsuario } from "../../app/NavegacionUsuario";
 import { ContenidoResponsivePersistente } from "../ContenidoResponsivePersistente";
 import { UserDashboardLayout } from "./UserDashboardLayout";
+import { MarcoPantalla } from "@ruum/ui/base";
 
 /** Añade el shell desktop a pantallas secundarias conservando su contenido y estado. */
 export function UserResponsiveLayout({
@@ -42,9 +42,9 @@ export function UserResponsiveLayout({
         <>
           {mobileNavigation && <NavegacionUsuario variante="claro" nombreUsuario={nombre} />}
           {mobileShell ? (
-            <MobileShell as="main" variant="compact" navInferiorVisible={mobileBottomNavigation} className={mobileClassName} contentClassName={mobileContentClassName}>
+            <MarcoPantalla as="main" variant="compact" navInferiorVisible={mobileBottomNavigation} className={mobileClassName} contentClassName={mobileContentClassName}>
               {contenido}
-            </MobileShell>
+            </MarcoPantalla>
           ) : <main>{contenido}</main>}
         </>
       )}

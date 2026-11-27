@@ -13,6 +13,10 @@
  *  - radio        radios arbitrarios (rounded-[22px], border-radius: 7px)
  *  - dark         variantes dark: (el tema lo resuelve la capa ui-*)
  *
+ * Además, trinquete de la entrada raíz heredada `@ruum/ui`: solo pueden importarla
+ * los archivos listados en "importRaiz" (los que ya lo hacían). Al migrar uno a
+ * `@ruum/ui/base` sale de la lista con --actualizar; ninguno nuevo puede entrar.
+ *
  * Uso: node scripts/check-estilos-ui.mjs [--actualizar] [--detalle]
  */
 import { readFileSync, writeFileSync, readdirSync, statSync, existsSync } from "node:fs";
@@ -53,19 +57,24 @@ function contar(texto) {
   }
   return r;
 }
+const IMPORT_RAIZ = /from\s*["']@ruum\/ui["']/;
 const total = (r) => Object.values(r).reduce((a, b) => a + b, 0);
 const rel = (f) => path.relative(RAIZ, f).split(path.sep).join("/");
 const enZona = (f, zonas) => zonas.some((z) => rel(f) === z || rel(f).startsWith(`${z.replace(/\/$/, "")}/`));
 
 let fallos = 0;
+const importRaiz = [];
 const lineaBase = {};
 const resumen = { hex: 0, paleta: 0, texto: 0, radio: 0, dark: 0 };
 
 for (const raiz of config.raices) {
   for (const f of archivos(path.join(RAIZ, raiz))) {
     if (enZona(f, config.excluir ?? [])) continue;
-    const r = contar(readFileSync(f, "utf8"));
+    const texto = readFileSync(f, "utf8");
+    const r = contar(texto);
     const n = total(r);
+    const importaRaiz = IMPORT_RAIZ.test(texto);
+    if (importaRaiz) importRaiz.push(rel(f));
     if (enZona(f, config.migradas)) {
       if (n > 0) {
         fallos++;
@@ -91,18 +100,29 @@ if (!actualizar) {
   }
 }
 
+const importRaizPrevio = new Set(config.importRaiz ?? []);
+if (!actualizar) {
+  for (const archivo of importRaiz) {
+    if (!importRaizPrevio.has(archivo)) {
+      fallos++;
+      console.error(`✗ ${archivo} importa de la entrada raíz "@ruum/ui", que está en retirada. Usa "@ruum/ui/base".`);
+    }
+  }
+}
+
 const totalActual = total(resumen);
 const totalPrevio = Object.values(previa).reduce((a, b) => a + b, 0);
 console.log(
-  `[estilos-ui] zonas migradas: ${config.migradas.length} · estilos sueltos en el resto: ${totalActual} (línea base ${totalPrevio}) ${JSON.stringify(resumen)}`,
+  `[estilos-ui] zonas migradas: ${config.migradas.length} · estilos sueltos en el resto: ${totalActual} (línea base ${totalPrevio}) ${JSON.stringify(resumen)} · archivos con import raíz de @ruum/ui: ${importRaiz.length} (línea base ${importRaizPrevio.size})`,
 );
 
 if (actualizar) {
   config.lineaBase = Object.fromEntries(Object.entries(lineaBase).sort(([a], [b]) => a.localeCompare(b)));
+  config.importRaiz = [...importRaiz].sort((a, b) => a.localeCompare(b));
   writeFileSync(CONFIG, `${JSON.stringify(config, null, 2)}\n`);
   console.log(`[estilos-ui] línea base actualizada (${Object.keys(lineaBase).length} archivos).`);
-} else if (totalActual < totalPrevio) {
-  console.log("[estilos-ui] Bajaron los estilos sueltos: ejecuta `pnpm check:estilos --actualizar` para fijar la nueva línea base.");
+} else if (totalActual < totalPrevio || importRaiz.length < importRaizPrevio.size) {
+  console.log("[estilos-ui] Bajaron los estilos sueltos o los imports raíz: ejecuta `pnpm check:estilos --actualizar` para fijar la nueva línea base.");
 }
 
 if (fallos > 0 && !actualizar) {

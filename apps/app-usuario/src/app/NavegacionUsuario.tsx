@@ -4,7 +4,8 @@ import React, { useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { NotificacionInicio } from "../lib/inicio";
-import { MobileShell, RuumHeader } from "@ruum/ui";
+import { RuumHeader } from "@ruum/ui";
+import { MarcoPantalla } from "@ruum/ui/base";
 
 type VarianteNavegacion = "claro" | "oscuro";
 

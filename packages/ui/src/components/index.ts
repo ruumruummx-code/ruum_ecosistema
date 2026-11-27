@@ -1,3 +1,10 @@
+/**
+ * @deprecated Entrada raíz heredada de `@ruum/ui`. Las pantallas nuevas o migradas
+ * importan de `@ruum/ui/base` (ver design-system/docs/sistema-base-v2.md).
+ * Los componentes Mobile* ya se retiraron: MobileShell → MarcoPantalla,
+ * MobileCard → Card, MobileButton → Button, MobileBadge → Badge.
+ * Esta entrada se eliminará cuando ninguna app la importe.
+ */
 export * from "./LogoMarca";
 export * from "./SelloConductor";
 export * from "./CredencialConductor";
@@ -31,10 +38,4 @@ export * from "./Chat";
 export * from "./MapaEstatico";
 export * from "./estado-visual";
 export * from "./etapas";
-export * from "./MobileBadge";
-export * from "./MobileCard";
-export * from "./MobileRow";
-export * from "./MobileHeader";
-export * from "./MobileButton";
-export * from "./MobileShell";
 export * from "./RuumHeader";

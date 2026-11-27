@@ -15,3 +15,4 @@ export { Skeleton } from "./skeleton";
 export { EmptyState } from "./empty-state";
 export { PageHeader } from "./page-header";
 export { useMediaQuery } from "./use-media-query";
+export { MarcoPantalla, type MarcoPantallaProps } from "./marco-pantalla";

@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { MobileShell } from "@ruum/ui";
 import { Vehiculos } from "./Vehiculos";
 import { construirNotificaciones } from "../../../lib/inicio";
 import { NavegacionUsuario } from "../../NavegacionUsuario";
 import { conCuenta } from "../cuenta-ui";
 import { UserDashboardLayout } from "../../../components/layout/UserDashboardLayout";
+import { MarcoPantalla } from "@ruum/ui/base";
 
 export const metadata: Metadata = {
   title: "Mis vehículos — Ruum Ruum",
@@ -21,9 +21,9 @@ export default async function PaginaVehiculos() {
       <>
         <div className="flex h-full w-full flex-col lg:hidden" data-marco="movil">
           <NavegacionUsuario variante="claro" nombreUsuario={cuenta.usuario?.nombre} notificaciones={notificaciones} />
-          <MobileShell as="main" variant="wide" padding="none" conFondoCanvas={false} navInferiorVisible className="bg-ui-bg">
+          <MarcoPantalla as="main" variant="wide" padding="none" conFondoCanvas={false} navInferiorVisible className="bg-ui-bg">
             {contenido}
-          </MobileShell>
+          </MarcoPantalla>
         </div>
         <div className="hidden h-full w-full lg:flex" data-marco="escritorio">
           <UserDashboardLayout
