@@ -107,18 +107,19 @@ if (hostedBuild && ["app-usuario", "panel-admin", "workspace"].includes(app)) {
     }
   }
 }
+const isCi = Boolean(process.env.CI || process.env.GITHUB_ACTIONS);
 for (const name of required.filter((n) => n.includes("SUPABASE_URL"))) {
   const value = process.env[name];
-  if (value && !/^https:\/\//.test(value) && !(localProduction && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?/.test(value)))
+  if (value && !/^https:\/\//.test(value) &&
+      !((localProduction || isCi) && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/|$)/.test(value)))
     invalid.push(`${name} debe usar https://`);
 }
-const isCi = Boolean(process.env.CI || process.env.GITHUB_ACTIONS);
 if (hostedBuild) {
   for (const name of ["NEXT_PUBLIC_APP_URL", "NEXT_PUBLIC_SUPABASE_URL"]) {
     const v = process.env[name];
     const isLocalhostHttp = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/|$)/.test(v || "");
-    // Solo el Compose local puede usar HTTP de localhost; producción/preview real exige HTTPS.
-    if (v && !/^https:\/\//.test(v) && !(localProduction && isLocalhostHttp)) invalid.push(`${name} debe usar https:// en producción`);
+    // Solo Compose local y CI pueden usar HTTP de localhost; producción/preview real exige HTTPS.
+    if (v && !/^https:\/\//.test(v) && !((localProduction || isCi) && isLocalhostHttp)) invalid.push(`${name} debe usar https:// en producción`);
   }
   const mapbox = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
   if (mapbox && !/^pk\./.test(mapbox)) invalid.push("NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN debe empezar con pk.");
