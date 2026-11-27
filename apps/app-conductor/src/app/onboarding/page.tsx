@@ -1,16 +1,30 @@
 "use client";
 
 import { Button as BaseButton } from "@ruum/ui/base";
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { marcarOnboardingVisto } from "../../lib/onboarding-visto";
+import { marcarOnboardingVisto, onboardingVisto } from "../../lib/onboarding-visto";
 
 export default function PaginaOnboarding() {
   const router = useRouter();
+  const eligioDestino = useRef(false);
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("desde") !== "inicio") return;
+
+    let activo = true;
+    void onboardingVisto().then((visto) => {
+      if (activo && visto && !eligioDestino.current) router.replace("/login");
+    });
+    return () => {
+      activo = false;
+    };
+  }, [router]);
 
   const finalizar = useCallback(
     async (destino: "/registro" | "/login") => {
+      eligioDestino.current = true;
       await marcarOnboardingVisto();
       // Si se llegó aquí desde un enlace protegido, el acceso devuelve al conductor a ese destino.
       const next = destino === "/login" ? new URLSearchParams(window.location.search).get("next") : null;

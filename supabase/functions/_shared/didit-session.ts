@@ -124,13 +124,13 @@ export function construirPayloadSesionDidit({
   portraitImage,
 }: {
   workflowId: string;
-  vendorData: string;
+  vendorData?: string;
   callbackUrl?: string;
   portraitImage?: string | null;
 }): Registro {
   return {
     workflow_id: workflowId,
-    vendor_data: vendorData,
+    ...(vendorData ? { vendor_data: vendorData } : {}),
     ...(callbackUrl ? { callback: callbackUrl, callback_method: "both" } : {}),
     ...(portraitImage ? { portrait_image: portraitImage } : {}),
     language: "es",

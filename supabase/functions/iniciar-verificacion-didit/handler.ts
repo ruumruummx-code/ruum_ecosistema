@@ -20,13 +20,6 @@ import { construirCabecerasCors, manejarCors } from "../_shared/cors-documentos.
 const UUID =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-function json(body: Record<string, unknown>, status = 200, extraHeaders: Record<string, string> = {}, req?: Request) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { ...construirCabecerasCors(req), ...extraHeaders, "Content-Type": "application/json" },
-  });
-}
-
 function esCallbackValido(valor: string): boolean {
   try {
     const url = new URL(valor);
@@ -40,11 +33,27 @@ function esCallbackValido(valor: string): boolean {
 export async function manejarInicioDidit(req: Request, entorno: Pick<typeof Deno.env, "get"> = Deno.env) {
   const rechazoCors = manejarCors(req);
   if (rechazoCors) return rechazoCors;
-  if (req.method !== "POST") return json({ error: "Método no permitido" }, 405, {}, req);
+  const cabecerasCors = construirCabecerasCors(req);
+  function json(
+    body: Record<string, unknown>,
+    status = 200,
+    extraHeaders: Record<string, string> = {},
+  ) {
+    return new Response(JSON.stringify(body), {
+      status,
+      headers: {
+        ...cabecerasCors,
+        ...extraHeaders,
+        "Content-Type": "application/json",
+      },
+    });
+  }
+
+  if (req.method !== "POST") return json({ error: "Método no permitido" }, 405);
 
   const authorization = req.headers.get("Authorization");
   if (!authorization) {
-    return json({ error: "Inicia sesión para continuar." }, 401, {}, req);
+    return json({ error: "Inicia sesión para continuar." }, 401);
   }
 
   const url = entorno.get("SUPABASE_URL") ?? "";
@@ -151,9 +160,15 @@ export async function manejarInicioDidit(req: Request, entorno: Pick<typeof Deno
     return json({ error: "Servicio temporalmente no disponible." }, 503);
   }
 
-  const diditApiKey = entorno.get("DIDIT_API_KEY") ?? "";
-  const diditWorkflowId = entorno.get("DIDIT_WORKFLOW_ID") ?? "";
-  const callbackUrl = entorno.get("DIDIT_CALLBACK_URL") ?? "";
+  const cuentaSandbox = entorno.get("DIDIT_SANDBOX_CONDUCTOR_AUTH_USER_ID")?.trim();
+  const esSandboxConductor = !esFlujoUsuario && sesion.user.id === cuentaSandbox;
+  const diditApiKey = entorno.get(
+    esSandboxConductor ? "DIDIT_SANDBOX_API_KEY" : "DIDIT_API_KEY",
+  ) ?? "";
+  const diditWorkflowId = entorno.get(
+    esSandboxConductor ? "DIDIT_SANDBOX_WORKFLOW_ID" : "DIDIT_WORKFLOW_ID",
+  ) ?? "";
+  const callbackUrl = esSandboxConductor ? "" : entorno.get("DIDIT_CALLBACK_URL") ?? "";
   if (!diditApiKey || !diditWorkflowId || !UUID.test(diditWorkflowId) || (callbackUrl && !esCallbackValido(callbackUrl))) {
     console.error("iniciar-verificacion-didit: configuración Didit ausente o inválida");
     return json({ error: "Servicio temporalmente no disponible." }, 503);
@@ -163,7 +178,10 @@ export async function manejarInicioDidit(req: Request, entorno: Pick<typeof Deno
      resultado. Si no apunta a .../functions/v1/webhook-didit, la verificación
      queda en `pendiente` para siempre aunque el usuario complete Didit.
      Se bloquea la creación de la sesión para evitar estados huérfanos. */
-  if (!callbackUrl || !callbackUrl.includes("/functions/v1/webhook-didit")) {
+  if (
+    !esSandboxConductor &&
+    (!callbackUrl || !callbackUrl.includes("/functions/v1/webhook-didit"))
+  ) {
     console.error(
       "iniciar-verificacion-didit: DIDIT_CALLBACK_URL no apunta al webhook-didit",
     );
@@ -185,7 +203,7 @@ export async function manejarInicioDidit(req: Request, entorno: Pick<typeof Deno
 
   const payloadDidit = construirPayloadSesionDidit({
     workflowId: diditWorkflowId,
-    vendorData,
+    vendorData: esSandboxConductor ? undefined : vendorData,
     callbackUrl,
     portraitImage,
   });
@@ -215,6 +233,15 @@ export async function manejarInicioDidit(req: Request, entorno: Pick<typeof Deno
   if (!respuestaDidit.ok) {
     const detalle = await respuestaDidit.text().catch(() => "");
     const detalleLegible = detalleRespuestaDidit(detalle);
+    if (
+      respuestaDidit.status === 400 &&
+      /\b(?:don['’]t have enough|not enough|insufficient) credits\b/i.test(detalleLegible)
+    ) {
+      console.error("iniciar-verificacion-didit: saldo insuficiente en Didit");
+      return json({
+        error: "La verificación de identidad no está disponible en este momento. Intenta más tarde.",
+      }, 503);
+    }
     console.error(
       "Error creando sesión Didit",
       respuestaDidit.status,
@@ -277,6 +304,11 @@ export async function manejarInicioDidit(req: Request, entorno: Pick<typeof Deno
       { error: "Respuesta incompleta del proveedor de identidad." },
       502,
     );
+  }
+
+  // El Sandbox se limita al flujo alojado de prueba.
+  if (esSandboxConductor) {
+    return json({ session_id: sessionId, url: verificationUrl }, 201);
   }
 
   const { data: verificacion, error: errorInsert } = await servicio.from(
