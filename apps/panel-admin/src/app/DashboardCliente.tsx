@@ -195,7 +195,7 @@ export default function DashboardCliente({ inicial }: { inicial: DashboardInitia
   const conexionGlobal = estadoConexionGlobal(estadoConexionDatos, actualizacionGlobal, ahora);
   const indice = (clave: IndicadorAccionableDashboard["clave"]) => indicadoresVisibles.find((item) => item.clave === clave);
   const kpisInicio = [
-    { etiqueta: "Traslados en curso", valor: indice("traslados_activos")?.valor ?? 0, detalle: "Servicios activos", href: puedeVerRuta(rolAdmin, "/viajes") ? "/viajes?filtro=activos" : "/alertas-sla", tono: "azul" },
+    { etiqueta: "Traslados abiertos", valor: indice("traslados_activos")?.valor ?? 0, detalle: "Incluye los que esperan conductor", href: puedeVerRuta(rolAdmin, "/viajes") ? "/viajes?filtro=activos" : "/alertas-sla", tono: "azul" },
     { etiqueta: "Pendientes de asignación", valor: indice("sin_asignacion")?.valor ?? 0, detalle: "Sin conductor asignado", href: puedeVerRuta(rolAdmin, "/viajes") ? "/viajes?filtro=sin_asignacion" : "/incidencias", tono: "ambar" },
     { etiqueta: "Incidencias abiertas", valor: incidencias.length, detalle: "Requieren seguimiento", href: "/incidencias?filtro=abiertas", tono: "rojo" },
     { etiqueta: "Documentos por revisar", valor: conductoresDocVencido.length, detalle: "Vencidos o incompletos", href: "/conductores", tono: "turquesa" },
@@ -286,8 +286,8 @@ export default function DashboardCliente({ inicial }: { inicial: DashboardInitia
             <EmptyState
               className="m-5 mt-0 flex-1 justify-center"
               icono={<Truck />}
-              titulo={cargando ? "Cargando traslados…" : puedeVerMapa ? "Sin traslados activos" : "Seguimiento de traslados"}
-              descripcion={puedeVerMapa ? "Cuando haya servicios en curso, aparecerán aquí." : "El resumen de ubicación está limitado para tu perfil."}
+              titulo={cargando ? "Cargando traslados…" : puedeVerMapa ? "Sin traslados en operación" : "Seguimiento de traslados"}
+              descripcion={puedeVerMapa ? "Aquí aparecen los traslados que ya tienen conductor asignado." : "El resumen de ubicación está limitado para tu perfil."}
             />
           )}
         </Card>

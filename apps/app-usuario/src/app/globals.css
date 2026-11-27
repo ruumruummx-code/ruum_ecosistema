@@ -1574,7 +1574,10 @@ input::placeholder, textarea::placeholder {
 .user-profile-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); flex-shrink: 0; width: min(calc(100% - 24px), 456px); margin: 8px auto; padding: 2px; border-radius: 12px; background: var(--user-color-surface-soft); }
 .user-profile-tabs button { min-height: 44px; border-radius: 10px; font-size: 14px; font-weight: 700; }
 .user-profile-tabs button[aria-selected="true"] { background: var(--user-color-surface); box-shadow: 0 1px 4px rgb(7 22 38 / 10%); }
-.user-profile-form { display: flex; flex: 1; min-height: 0; width: min(calc(100% - 24px), 456px); margin: 0 auto; overflow: hidden; }
+.user-profile-form { display: flex; flex-direction: column; flex: 1; min-height: 0; width: min(calc(100% - 24px), 456px); margin: 0 auto; overflow: hidden; }
+/* Tabs de @ruum/ui dentro del editor: barra horizontal arriba y panel visible ocupando el resto. */
+.user-profile-form [role="tablist"] { flex-shrink: 0; justify-content: center; }
+.user-profile-form [role="tabpanel"]:not([hidden]) { display: flex; flex: 1; min-height: 0; }
 .user-profile-panel { flex: 1; min-width: 0; min-height: 0; overflow-y: auto; padding: 2px; overscroll-behavior-y: contain; }
 .user-profile-panel[hidden] { display: none; }
 .user-profile-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; align-content: start; }

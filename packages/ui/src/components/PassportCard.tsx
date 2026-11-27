@@ -8,11 +8,13 @@ export interface PassportCardProps {
   acento?: boolean;
   /** Permite contenido sticky o overlays que deben sobresalir de la tarjeta. */
   clip?: boolean;
+  /** Trama decorativa tipo pasaporte. Desactívala en tarjetas de datos densos donde compite con el texto. */
+  guilloche?: boolean;
   className?: string;
 }
 
 /** Tarjeta exclusiva para identidad, pasaporte digital, certificados verificables y expediente resumido. */
-export function PassportCard({ children, folio, acento = false, clip = true, className = "" }: PassportCardProps) {
+export function PassportCard({ children, folio, acento = false, clip = true, guilloche = true, className = "" }: PassportCardProps) {
   return (
     <div
       className={[
@@ -23,7 +25,7 @@ export function PassportCard({ children, folio, acento = false, clip = true, cla
         className
       ].join(" ")}
     >
-      <svg
+      {guilloche && <svg
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 h-40 w-full text-text-tertiary opacity-20"
         viewBox="0 0 420 160"
@@ -35,7 +37,7 @@ export function PassportCard({ children, folio, acento = false, clip = true, cla
           stroke="currentColor"
           strokeWidth="1.2"
         />
-      </svg>
+      </svg>}
       {folio && (
         <div
           className="absolute right-0 top-0 flex h-10 w-10 items-start justify-end overflow-hidden"
