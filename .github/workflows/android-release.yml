@@ -1,0 +1,138 @@
+name: Android Release (AAB firmado)
+
+# RUUM-SEC-014b. Genera los AAB de produccion firmados con la llave de SUBIDA
+# (upload key) de cada app. La llave de firma final de la app la custodia Google
+# mediante Play App Signing. Ver docs/runbooks/android-signing.md.
+#
+# Las llaves viven unicamente en el environment protegido `android-release`
+# (Settings > Environments), con revisores obligatorios y restringido a tags
+# `v*.*.*-android`. Ningun job fuera de ese environment puede leerlas.
+
+on:
+  push:
+    tags:
+      - 'v*.*.*-android'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-aab:
+    name: AAB ${{ matrix.app }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    environment: android-release
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - app: app-conductor
+            package: '@ruum/app-conductor'
+            secret_prefix: CONDUCTOR
+          - app: app-usuario
+            package: '@ruum/app-usuario'
+            secret_prefix: USUARIO
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Verificar que el tag coincide con config/app-version.json
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          esperado="v$(jq -r .version config/app-version.json)-android"
+          if [ "${GITHUB_REF_NAME}" != "${esperado}" ]; then
+            echo "::error::El tag ${GITHUB_REF_NAME} no coincide con config/app-version.json (${esperado})"
+            exit 1
+          fi
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Setup pnpm 10
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          # No reutilizar ni escribir cache en builds de release.
+          cache-disabled: true
+
+      - name: Sincronizar proyecto Android de Capacitor
+        run: pnpm --filter "${{ matrix.package }}" exec cap sync android
+
+      - name: Guardia de depuracion WebView
+        run: |
+          cfg="apps/${{ matrix.app }}/android/app/src/main/assets/capacitor.config.json"
+          if jq -e '.android.webContentsDebuggingEnabled == true' "$cfg" >/dev/null; then
+            echo "::error::webContentsDebuggingEnabled=true en ${cfg}. Release bloqueado."
+            exit 1
+          fi
+
+      - name: Materializar llave de subida (solo en RUNNER_TEMP)
+        env:
+          KEYSTORE_B64: ${{ secrets[format('{0}_UPLOAD_KEYSTORE_B64', matrix.secret_prefix)] }}
+          STORE_PASSWORD: ${{ secrets[format('{0}_UPLOAD_STORE_PASSWORD', matrix.secret_prefix)] }}
+          KEY_ALIAS: ${{ secrets[format('{0}_UPLOAD_KEY_ALIAS', matrix.secret_prefix)] }}
+          KEY_PASSWORD: ${{ secrets[format('{0}_UPLOAD_KEY_PASSWORD', matrix.secret_prefix)] }}
+        run: |
+          for v in KEYSTORE_B64 STORE_PASSWORD KEY_ALIAS KEY_PASSWORD; do
+            if [ -z "${!v}" ]; then
+              echo "::error::Falta un secreto (${v}) de ${{ matrix.secret_prefix }}_UPLOAD_* en el environment android-release"
+              exit 1
+            fi
+          done
+          ks="${RUNNER_TEMP}/upload.keystore"
+          umask 077
+          printf '%s' "$KEYSTORE_B64" | base64 -d > "$ks"
+          {
+            echo "RUUM_ANDROID_KEYSTORE_PATH=$ks"
+            echo "RUUM_ANDROID_KEYSTORE_PASSWORD=$STORE_PASSWORD"
+            echo "RUUM_ANDROID_KEY_ALIAS=$KEY_ALIAS"
+            echo "RUUM_ANDROID_KEY_PASSWORD=$KEY_PASSWORD"
+          } >> "$GITHUB_ENV"
+
+      - name: Compilar AAB release
+        working-directory: apps/${{ matrix.app }}/android
+        run: |
+          chmod +x gradlew
+          ./gradlew bundleRelease --no-daemon --no-build-cache
+
+      - name: Verificar firma del AAB
+        run: |
+          aab="apps/${{ matrix.app }}/android/app/build/outputs/bundle/release/app-release.aab"
+          test -f "$aab"
+          jarsigner -verify -strict "$aab"
+          jarsigner -verify -verbose -certs "$aab" | grep -m1 -i "X.509" || true
+          out="${{ matrix.app }}-$(jq -r .version config/app-version.json)-$(jq -r .versionCode config/app-version.json).aab"
+          cp "$aab" "$out"
+          sha256sum "$out" | tee "$out.sha256"
+          echo "AAB_FILE=$out" >> "$GITHUB_ENV"
+
+      - name: Borrar llave de subida
+        if: always()
+        run: rm -f "${RUNNER_TEMP}/upload.keystore"
+
+      - name: Publicar artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.app }}-aab
+          path: |
+            ${{ env.AAB_FILE }}
+            ${{ env.AAB_FILE }}.sha256
+          retention-days: 30
+          if-no-files-found: error

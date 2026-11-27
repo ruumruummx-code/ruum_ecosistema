@@ -1,5 +1,6 @@
 name: Android Build & Validation (Release Reproducible)
 on:
+  workflow_dispatch:
   pull_request:
     paths:
       - 'apps/app-conductor/android/**'
@@ -45,6 +46,14 @@ jobs:
           echo "RUUM_ANDROID_KEYSTORE_PASSWORD=android" >> $GITHUB_ENV
           echo "RUUM_ANDROID_KEY_ALIAS=androidreleasekey" >> $GITHUB_ENV
           echo "RUUM_ANDROID_KEY_PASSWORD=android" >> $GITHUB_ENV
+      # Los proyectos Android de Capacitor dependen de archivos generados que estan en
+      # .gitignore (capacitor-cordova-android-plugins/, assets/public, capacitor.config.json,
+      # capacitor.plugins.json). Sin `cap sync` Gradle falla al configurar
+      # ':capacitor-cordova-android-plugins'. webDir es cap-shell (estatico), no requiere build web.
+      - name: Sincronizar proyectos Android de Capacitor
+        run: |
+          pnpm --filter @ruum/app-conductor exec cap sync android
+          pnpm --filter @ruum/app-usuario exec cap sync android
       - name: Build Release APK App Conductor
         run: |
           cd apps/app-conductor/android
