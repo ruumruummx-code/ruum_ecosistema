@@ -32,7 +32,12 @@
     "apps/panel-admin/src",
     "apps/app-usuario/src/app/InicioUsuario.tsx",
     "apps/app-usuario/src/app/dashboard",
-    "apps/app-usuario/src/app/viajes/masivo"
+    "apps/app-usuario/src/app/viajes/masivo",
+    "apps/app-usuario/src/app/cuenta/vehiculos/page.tsx",
+    "apps/app-usuario/src/app/cuenta/vehiculos/Vehiculos.tsx",
+    "apps/app-usuario/src/app/cuenta/vehiculos/DetalleVehiculo.tsx",
+    "apps/app-usuario/src/app/cuenta/vehiculos/VehiculoVisual.tsx",
+    "apps/app-usuario/src/app/cuenta/vehiculos/VehicleListItem.tsx"
   ],
   "excluir": [
     "packages/ui/src/styles/tokens.css",
@@ -61,8 +66,6 @@
     "apps/app-usuario/src/app/cuenta/selector-fiscal-sat.module.css": 18,
     "apps/app-usuario/src/app/cuenta/vehiculos/[id]/page.tsx": 1,
     "apps/app-usuario/src/app/cuenta/vehiculos/nuevo/NuevoVehiculo.tsx": 3,
-    "apps/app-usuario/src/app/cuenta/vehiculos/page.tsx": 1,
-    "apps/app-usuario/src/app/cuenta/vehiculos/vehiculos-desktop.module.css": 246,
     "apps/app-usuario/src/app/error.tsx": 3,
     "apps/app-usuario/src/app/FormularioPropuestaEmpresa.tsx": 8,
     "apps/app-usuario/src/app/global-error.tsx": 6,
