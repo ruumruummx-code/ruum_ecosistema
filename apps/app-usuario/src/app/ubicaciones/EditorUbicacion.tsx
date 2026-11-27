@@ -1,14 +1,30 @@
 "use client";
-import { useCallback, useRef, useState } from "react";
-import { useDialogAccesible } from "@ruum/ui";
+import { useCallback, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { Button, Input, Label, NativeSelect, Sheet, cn } from "@ruum/ui/base";
 import {
   validarDatosUbicacion,
   type DatosUbicacion,
   type OperacionUbicacion,
 } from "./libreta-ubicaciones";
-import { nombreUbicacion, IconoUbicacion as Icon } from "./UbicacionVisual";
+import { nombreUbicacion } from "./UbicacionVisual";
 import type { UbicacionUsuario } from "./ubicaciones-usuario";
-import s from "./ubicaciones-desktop.module.css";
+
+function Campo({ etiqueta, completo, children }: { etiqueta: string; completo?: boolean; children: ReactNode }) {
+  return (
+    <Label className={cn("flex flex-col gap-1.5", completo && "sm:col-span-2")}>
+      {etiqueta}
+      {children}
+    </Label>
+  );
+}
+
+function ErrorFormulario({ children }: { children: ReactNode }) {
+  return (
+    <p role="alert" className="rounded-md bg-ui-danger-soft p-3 text-sm font-medium text-ui-danger">
+      {children}
+    </p>
+  );
+}
 export function EditorUbicacion({
   ubicacion,
   cerrar,
@@ -18,15 +34,10 @@ export function EditorUbicacion({
   cerrar: () => void;
   guardar: (op: OperacionUbicacion) => Promise<void>;
 }) {
-  const bloqueo = useRef(false),
-    foco = useRef<HTMLButtonElement>(null);
+  const bloqueo = useRef(false);
   const cerrarSeguro = useCallback(() => {
     if (!bloqueo.current) cerrar();
   }, [cerrar]);
-  const dialog = useDialogAccesible({
-    focoInicial: foco,
-    alCancelar: cerrarSeguro,
-  });
   const [id] = useState(() =>
     ubicacion?.guardada ? ubicacion.id : `guardada:${crypto.randomUUID()}`,
   );
@@ -47,7 +58,7 @@ export function EditorUbicacion({
   function cambiar(campo: keyof typeof datos, valor: string) {
     setDatos((prev) => ({ ...prev, [campo]: valor }));
   }
-  async function enviar(event: React.FormEvent) {
+  async function enviar(event: FormEvent) {
     event.preventDefault();
     if (bloqueo.current) return;
     setError("");
@@ -79,171 +90,62 @@ export function EditorUbicacion({
       setOcupado(false);
     }
   }
+  const titulo = ubicacion?.guardada ? "Editar ubicación" : ubicacion ? "Guardar dirección en mi libreta" : "Nueva ubicación";
   return (
-    <dialog
-      ref={dialog}
-      className={s.dialog}
-      aria-labelledby="titulo-editor-ubicacion"
-    >
-      <header>
-        <h2 id="titulo-editor-ubicacion">
-          {ubicacion?.guardada
-            ? "Editar ubicación"
-            : ubicacion
-              ? "Guardar dirección en mi libreta"
-              : "Nueva ubicación"}
-        </h2>
-        <button
-          ref={foco}
-          disabled={ocupado}
-          aria-label="Cerrar editor de ubicación"
-          onClick={cerrarSeguro}
-        >
-          <Icon name="close" />
-        </button>
-      </header>
-      {ubicacion && !ubicacion.guardada && (
-        <p className={s.formHint}>
-          Se guardará una copia editable en tu libreta. El perfil y los
-          traslados anteriores conservarán sus datos.
-        </p>
-      )}
-      <form onSubmit={enviar}>
-        <div className={s.formGrid}>
-          <label className={s.full}>
-            Alias o nombre
-            <input
-              required
-              minLength={2}
-              maxLength={80}
-              value={datos.alias}
-              onChange={(e) => cambiar("alias", e.target.value)}
-              placeholder="Ej. Oficina corporativa"
-              disabled={ocupado}
-            />
-          </label>
-          <label className={s.full}>
-            Dirección
-            <input
-              required
-              minLength={2}
-              maxLength={300}
-              value={datos.direccion}
-              onChange={(e) => cambiar("direccion", e.target.value)}
-              placeholder="Calle, número y colonia"
-              disabled={ocupado}
-            />
-          </label>
-          <label>
-            Ciudad o municipio
-            <input
-              required
-              minLength={2}
-              maxLength={100}
-              value={datos.ciudad}
-              onChange={(e) => cambiar("ciudad", e.target.value)}
-              disabled={ocupado}
-            />
-          </label>
-          <label>
-            Estado
-            <input
-              maxLength={100}
-              value={datos.estado}
-              onChange={(e) => cambiar("estado", e.target.value)}
-              disabled={ocupado}
-            />
-          </label>
-          <label>
-            Código postal
-            <input
-              inputMode="numeric"
-              pattern="[0-9]{5}"
-              maxLength={5}
-              value={datos.codigoPostal}
-              onChange={(e) => cambiar("codigoPostal", e.target.value)}
-              disabled={ocupado}
-            />
-          </label>
-          <label>
-            Tipo de ubicación
-            <select
-              value={datos.tipo}
-              onChange={(e) => cambiar("tipo", e.target.value)}
-              disabled={ocupado}
-            >
-              <option value="otro">Otro</option>
-              <option value="trabajo">Trabajo</option>
-            </select>
-          </label>
-          <label className={s.full}>
-            Referencia
-            <input
-              maxLength={300}
-              value={datos.referencia}
-              onChange={(e) => cambiar("referencia", e.target.value)}
-              placeholder="Opcional"
-              disabled={ocupado}
-            />
-          </label>
-          <label>
-            Latitud (opcional)
-            <input
-              type="number"
-              step="any"
-              min={-90}
-              max={90}
-              value={datos.lat}
-              onChange={(e) => cambiar("lat", e.target.value)}
-              disabled={ocupado}
-            />
-          </label>
-          <label>
-            Longitud (opcional)
-            <input
-              type="number"
-              step="any"
-              min={-180}
-              max={180}
-              value={datos.lng}
-              onChange={(e) => cambiar("lng", e.target.value)}
-              disabled={ocupado}
-            />
-          </label>
-        </div>
-        <label className={s.checkbox}>
-          <input
-            type="checkbox"
-            checked={favorita}
-            onChange={(e) => setFavorita(e.target.checked)}
-            disabled={ocupado}
-          />
-          Marcar como frecuente
-        </label>
-        {error && (
-          <p role="alert" className={s.formError}>
-            {error}
+    <Sheet open onClose={cerrarSeguro} titulo={titulo} etiquetaCerrar="Cerrar editor de ubicación" className="sm:max-w-xl">
+      <form onSubmit={enviar} className="flex flex-col gap-4 pb-2">
+        {ubicacion && !ubicacion.guardada && (
+          <p className="rounded-md bg-ui-brand-soft p-3 text-sm text-ui-brand-soft-fg">
+            Se guardará una copia editable en tu libreta. El perfil y los traslados anteriores conservarán sus datos.
           </p>
         )}
-        <footer>
-          <button
-            type="button"
-            className={s.outline}
-            disabled={ocupado}
-            onClick={cerrarSeguro}
-          >
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Campo etiqueta="Alias o nombre" completo>
+            <Input required minLength={2} maxLength={80} value={datos.alias} onChange={(e) => cambiar("alias", e.target.value)} placeholder="Ej. Oficina corporativa" disabled={ocupado} />
+          </Campo>
+          <Campo etiqueta="Dirección" completo>
+            <Input required minLength={2} maxLength={300} value={datos.direccion} onChange={(e) => cambiar("direccion", e.target.value)} placeholder="Calle, número y colonia" disabled={ocupado} />
+          </Campo>
+          <Campo etiqueta="Ciudad o municipio">
+            <Input required minLength={2} maxLength={100} value={datos.ciudad} onChange={(e) => cambiar("ciudad", e.target.value)} disabled={ocupado} />
+          </Campo>
+          <Campo etiqueta="Estado">
+            <Input maxLength={100} value={datos.estado} onChange={(e) => cambiar("estado", e.target.value)} disabled={ocupado} />
+          </Campo>
+          <Campo etiqueta="Código postal">
+            <Input inputMode="numeric" pattern="[0-9]{5}" maxLength={5} value={datos.codigoPostal} onChange={(e) => cambiar("codigoPostal", e.target.value)} disabled={ocupado} />
+          </Campo>
+          <Campo etiqueta="Tipo de ubicación">
+            <NativeSelect value={datos.tipo} onChange={(e) => cambiar("tipo", e.target.value)} disabled={ocupado}>
+              <option value="otro">Otro</option>
+              <option value="trabajo">Trabajo</option>
+            </NativeSelect>
+          </Campo>
+          <Campo etiqueta="Referencia" completo>
+            <Input maxLength={300} value={datos.referencia} onChange={(e) => cambiar("referencia", e.target.value)} placeholder="Opcional" disabled={ocupado} />
+          </Campo>
+          <Campo etiqueta="Latitud (opcional)">
+            <Input type="number" step="any" min={-90} max={90} value={datos.lat} onChange={(e) => cambiar("lat", e.target.value)} disabled={ocupado} />
+          </Campo>
+          <Campo etiqueta="Longitud (opcional)">
+            <Input type="number" step="any" min={-180} max={180} value={datos.lng} onChange={(e) => cambiar("lng", e.target.value)} disabled={ocupado} />
+          </Campo>
+        </div>
+        <Label className="flex min-h-11 cursor-pointer items-center gap-2">
+          <input type="checkbox" className="size-4 accent-ui-brand" checked={favorita} onChange={(e) => setFavorita(e.target.checked)} disabled={ocupado} />
+          Marcar como frecuente
+        </Label>
+        {error && <ErrorFormulario>{error}</ErrorFormulario>}
+        <div className="flex flex-col-reverse gap-2 border-t border-ui-line pt-3 sm:flex-row sm:justify-end">
+          <Button variant="outline" disabled={ocupado} onClick={cerrarSeguro}>
             Cancelar
-          </button>
-          <button className={s.primary} disabled={ocupado} type="submit">
-            {ocupado
-              ? "Guardando…"
-              : ubicacion?.guardada
-                ? "Guardar cambios"
-                : "Guardar ubicación"}
-          </button>
-        </footer>
+          </Button>
+          <Button type="submit" disabled={ocupado}>
+            {ocupado ? "Guardando…" : ubicacion?.guardada ? "Guardar cambios" : "Guardar ubicación"}
+          </Button>
+        </div>
       </form>
-    </dialog>
+    </Sheet>
   );
 }
 export function ConfirmarEliminarUbicacion({
@@ -255,15 +157,10 @@ export function ConfirmarEliminarUbicacion({
   cerrar: () => void;
   eliminar: () => Promise<void>;
 }) {
-  const foco = useRef<HTMLButtonElement>(null),
-    bloqueo = useRef(false);
+  const bloqueo = useRef(false);
   const cerrarSeguro = useCallback(() => {
     if (!bloqueo.current) cerrar();
   }, [cerrar]);
-  const dialog = useDialogAccesible({
-    focoInicial: foco,
-    alCancelar: cerrarSeguro,
-  });
   const [ocupado, setOcupado] = useState(false),
     [error, setError] = useState("");
   async function confirmar() {
@@ -283,45 +180,24 @@ export function ConfirmarEliminarUbicacion({
     }
   }
   return (
-    <dialog
-      ref={dialog}
-      className={s.dialog}
-      aria-labelledby="titulo-eliminar-ubicacion"
-    >
-      <header>
-        <h2 id="titulo-eliminar-ubicacion">Eliminar ubicación</h2>
-        <button
-          ref={foco}
-          aria-label="Cerrar confirmación"
-          disabled={ocupado}
-          onClick={cerrarSeguro}
-        >
-          <Icon name="close" />
-        </button>
-      </header>
-      <strong>{nombreUbicacion(ubicacion)}</strong>
-      <p>
-        {ubicacion.guardada
-          ? "Esta dirección se eliminará de tu libreta."
-          : "Esta dirección se quitará de Mis ubicaciones. No se modificarán el perfil ni los traslados anteriores."}
-      </p>
-      {error && (
-        <p role="alert" className={s.formError}>
-          {error}
+    <Sheet open onClose={cerrarSeguro} titulo="Eliminar ubicación" etiquetaCerrar="Cerrar confirmación">
+      <div className="flex flex-col gap-3 pb-2 text-sm">
+        <strong className="text-base font-semibold">{nombreUbicacion(ubicacion)}</strong>
+        <p className="text-ui-fg-muted">
+          {ubicacion.guardada
+            ? "Esta dirección se eliminará de tu libreta."
+            : "Esta dirección se quitará de Mis ubicaciones. No se modificarán el perfil ni los traslados anteriores."}
         </p>
-      )}
-      <div className={s.confirmActions}>
-        <button className={s.outline} disabled={ocupado} onClick={cerrarSeguro}>
-          Conservar ubicación
-        </button>
-        <button
-          className={s.dangerButton}
-          disabled={ocupado}
-          onClick={confirmar}
-        >
-          {ocupado ? "Eliminando…" : "Confirmar eliminación"}
-        </button>
+        {error && <ErrorFormulario>{error}</ErrorFormulario>}
+        <div className="flex flex-col-reverse gap-2 border-t border-ui-line pt-3 sm:flex-row sm:justify-end">
+          <Button variant="outline" disabled={ocupado} onClick={cerrarSeguro}>
+            Conservar ubicación
+          </Button>
+          <Button variant="danger" disabled={ocupado} onClick={confirmar}>
+            {ocupado ? "Eliminando…" : "Confirmar eliminación"}
+          </Button>
+        </div>
       </div>
-    </dialog>
+    </Sheet>
   );
 }
