@@ -3,13 +3,29 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { obtenerAdminActual } from "@ruum/api/services";
-import { crearClienteNavegador, tieneSupabaseConfigurado } from "../lib/supabase-browser";
+import { crearClienteNavegador, puedeUsarDatosDemo, tieneSupabaseConfigurado } from "../lib/supabase-browser";
 import { normalizarRolAdmin, puedeVerRuta } from "../lib/roles-admin";
+
+/**
+ * Rol simulado de los smoke tests (cookie `ruum_smoke_rol` o global
+ * `__RUUM_SMOKE_ROL__`). Solo se lee en modo demo explícito fuera de un build
+ * de producción, igual que en el middleware; en cualquier otro caso se ignora.
+ */
+export function leerRolSimulado(): string | null {
+  if (!puedeUsarDatosDemo()) return null;
+  const cookieRol = typeof document !== "undefined"
+    ? document.cookie.split("; ").find((r) => r.startsWith("ruum_smoke_rol="))?.split("=")[1]
+    : undefined;
+  const globalRol = typeof window !== "undefined"
+    ? (window as unknown as { __RUUM_SMOKE_ROL__?: string }).__RUUM_SMOKE_ROL__
+    : undefined;
+  return cookieRol ?? globalRol ?? null;
+}
 
 /**
  * Guard de navegación por rol operativo.
  * Solo aplica con sesión admin real (Supabase configurado + fila en admins),
- * o en smoke tests con rol simulado via cookie / global.
+ * o en smoke tests con rol simulado (solo en modo demo).
  * La autoridad de datos sigue en `es_admin()` / RLS; esto es coherencia UX.
  */
 export function GuardRutaRol({ children }: { children: ReactNode }) {
@@ -29,11 +45,7 @@ export function GuardRutaRol({ children }: { children: ReactNode }) {
         return;
       }
 
-      // Soporte para smoke tests E2E y pruebas por rol
-      const cookieRol = typeof document !== "undefined"
-        ? document.cookie.split("; ").find((r) => r.startsWith("ruum_smoke_rol="))?.split("=")[1]
-        : null;
-      const rolSimulado = cookieRol ?? (typeof window !== "undefined" ? (window as unknown as { __RUUM_SMOKE_ROL__?: string }).__RUUM_SMOKE_ROL__ : null);
+      const rolSimulado = leerRolSimulado();
 
       if (rolSimulado) {
         const rol = normalizarRolAdmin(rolSimulado);
