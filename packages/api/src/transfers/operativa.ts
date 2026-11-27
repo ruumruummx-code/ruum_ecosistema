@@ -44,21 +44,15 @@ async function validarEvidenciaCompletaParaAdmin(cliente: Cliente, trasladoId: s
   }
 }
 
-async function validarPagoCompletadoParaAdmin(cliente: Cliente, trasladoId: string) {
-  const { data, error } = await cliente
-    .from("pagos")
-    .select("id")
-    .eq("traslado_id", trasladoId)
-    .eq("estado", "completado")
-    .limit(1);
-
-  if (error) throw error;
-
-  if ((data ?? []).length === 0) {
-    throw new Error("No se puede cambiar a pago_completado: no existe un pago con estado completado para este viaje.");
-  }
-}
-
+/*
+ * Los roles operativos de Torre (operador, supervisor) gestionan traslados pero
+ * no tienen `pagos:leer`, así que la RLS de `pagos` les devuelve 0 filas. Leer
+ * `pagos` desde el navegador hacía que todo traslado pagado pareciera "sin pago"
+ * y Torre no podía publicarlo a conductores. El pago se valida con la RPC
+ * SECURITY DEFINER `traslado_tiene_metodo_pago_registrado` y, para
+ * `pago_completado`, en `admin_cambiar_estado_traslado` (PAGO_INEXISTENTE);
+ * el trigger `exigir_pago_anticipado_antes_de_operar` sigue siendo la garantía final.
+ */
 async function validarPagoAnticipadoParaOperar(cliente: Cliente, trasladoId: string, nuevoEstado: EstadoTraslado) {
   if (nuevoEstado !== "servicio_confirmado" && nuevoEstado !== "pendiente_de_conductor") return;
   const { data: traslado, error } = await cliente
@@ -70,16 +64,13 @@ async function validarPagoAnticipadoParaOperar(cliente: Cliente, trasladoId: str
   if (error) throw error;
   if (!traslado || traslado.tipo_pago !== "anticipado") return;
 
-  const { data: pagos, error: errorPagos } = await cliente
-    .from("pagos")
-    .select("id")
-    .eq("traslado_id", trasladoId)
-    .eq("estado", "completado")
-    .limit(1);
+  const { data: pagado, error: errorPago } = await cliente.rpc("traslado_tiene_metodo_pago_registrado", {
+    p_traslado_id: trasladoId
+  });
 
-  if (errorPagos) throw errorPagos;
+  if (errorPago) throw errorPago;
 
-  if ((pagos ?? []).length === 0) {
+  if (!pagado) {
     throw new Error(
       `No se puede avanzar a ${nuevoEstado}: el traslado anticipado no tiene un pago electrónico completado (Stripe).`
     );
@@ -93,10 +84,18 @@ async function validarPrerequisitosEstatusAdmin(cliente: Cliente, trasladoId: st
   if (nuevoEstado === "evidencia_final_completada") {
     await validarEvidenciaCompletaParaAdmin(cliente, trasladoId, "final");
   }
-  if (nuevoEstado === "pago_completado") {
-    await validarPagoCompletadoParaAdmin(cliente, trasladoId);
-  }
   await validarPagoAnticipadoParaOperar(cliente, trasladoId, nuevoEstado);
+}
+
+function mensajeErrorCambioEstatus(error: unknown): unknown {
+  const mensaje = (error as { message?: string } | null)?.message ?? "";
+  if (mensaje.includes("PAGO_INEXISTENTE")) {
+    return new Error("No se puede cambiar a pago_completado: no existe un pago con estado completado para este viaje.");
+  }
+  if (mensaje.includes("PAGO_ANTICIPADO_REQUERIDO")) {
+    return new Error("No se puede avanzar: el traslado anticipado no tiene un pago electrónico completado (Stripe).");
+  }
+  return error;
 }
 
 export async function asignarConductorAdmin(
@@ -157,7 +156,7 @@ export async function cambiarEstatusAdmin(
       p_version_esperada: versionEsperada,
       p_aprobacion_id: aprobacionId
     });
-    if (error) throw error;
+    if (error) throw mensajeErrorCambioEstatus(error);
     if (!data?.ejecutado) throw new Error("No se pudo cambiar el estado del traslado.");
   });
 }
