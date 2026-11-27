@@ -6,6 +6,7 @@ import userEvent from "@testing-library/user-event";
 const mocks = vi.hoisted(() => ({
   pathname: "/cuenta",
   sesion: true as boolean,
+  sinPerfil: false as boolean,
   versionTerminos: null as number | null,
   registrar: vi.fn(),
 }));
@@ -15,7 +16,9 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("@ruum/api/services", () => ({
-  obtenerUsuarioActual: vi.fn(async () => ({ version_terminos_aceptada: mocks.versionTerminos })),
+  obtenerUsuarioActual: vi.fn(async () =>
+    mocks.sinPerfil ? null : { version_terminos_aceptada: mocks.versionTerminos },
+  ),
   registrarConsentimientoUsuario: mocks.registrar,
 }));
 
@@ -32,8 +35,15 @@ describe("PuertaConsentimiento", () => {
   beforeEach(() => {
     mocks.pathname = "/cuenta";
     mocks.sesion = true;
+    mocks.sinPerfil = false;
     mocks.versionTerminos = null;
     mocks.registrar.mockReset().mockResolvedValue({ version: 1, aceptado_en: "2026-01-01" });
+  });
+
+  it("no muestra el muro si el usuario autenticado aún no tiene fila en usuarios", async () => {
+    mocks.sinPerfil = true;
+    render(<PuertaConsentimiento />);
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
   });
 
   it("muestra el muro con sesion y sin consentimiento", async () => {

@@ -5,6 +5,7 @@ import { Aviso, Field, useDialogAccesible } from "@ruum/ui";
 import { VERSION_TERMINOS_VIGENTE } from "@ruum/shared/constants";
 import { registrarConsentimientoUsuario } from "@ruum/api/services";
 import { crearClienteNavegador } from "../lib/supabase-browser";
+import { logStructuredWarn } from "../lib/logger";
 
 /**
  * PR-07: No fabricar aceptación de términos.
@@ -49,7 +50,14 @@ export function ConsentimientoTerminosWall({
       });
       onAceptado?.();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "No se pudo registrar el consentimiento.");
+      logStructuredWarn("consentimiento/ConsentimientoTerminos", "registrar_consentimiento_fallido", e);
+      const mensaje =
+        e instanceof Error
+          ? e.message
+          : typeof e === "object" && e !== null && "message" in e && typeof (e as { message?: unknown }).message === "string"
+            ? (e as { message: string }).message
+            : null;
+      setError(mensaje || "No se pudo registrar el consentimiento.");
     } finally {
       setEnviando(false);
     }

@@ -670,7 +670,11 @@ export async function registrarConsentimientoUsuario(
     .eq("version", version)
     .maybeSingle();
 
-  if (errorVersion) throw errorVersion;
+  if (errorVersion) {
+    throw errorVersion instanceof Error
+      ? errorVersion
+      : new Error((errorVersion as { message?: string }).message ?? "No se pudo validar la versión de términos.");
+  }
   if (!versionRow) {
     throw new Error(`La versión ${version} de términos no está vigente.`);
   }
@@ -689,8 +693,14 @@ export async function registrarConsentimientoUsuario(
 
   // Fallback: inserción directa + actualización + auditoría (para entornos sin RPC migrado)
   const detalleRpc = rpcError as { message?: string; code?: string } | null;
-  if (rpcError && !String(detalleRpc?.message ?? "").includes("does not exist") && !String(detalleRpc?.code ?? "").includes("42883")) {
-    throw rpcError;
+  const rpcInexistente =
+    String(detalleRpc?.message ?? "").includes("does not exist") ||
+    String(detalleRpc?.code ?? "").includes("42883") ||
+    String(detalleRpc?.code ?? "").includes("PGRST202");
+  if (rpcError && !rpcInexistente) {
+    throw rpcError instanceof Error
+      ? rpcError
+      : new Error(detalleRpc?.message || "No se pudo registrar el consentimiento.");
   }
 
   const { data: sesion } = await cliente.auth.getUser();

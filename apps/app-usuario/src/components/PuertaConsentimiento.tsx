@@ -41,17 +41,26 @@ export function PuertaConsentimiento() {
 
   useEffect(() => {
     let activo = true;
-    if (esRutaSinMuro(pathname)) return;
+    if (esRutaSinMuro(pathname)) {
+      setRequiere(false);
+      return;
+    }
     void (async () => {
       try {
         const cliente = crearClienteNavegador();
         const { data: { session } } = await cliente.auth.getSession();
-        if (!activo || !session) return;
+        if (!activo) return;
+        if (!session) {
+          setRequiere(false);
+          return;
+        }
         const usuario = await obtenerUsuarioActual(cliente);
         if (!activo) return;
-        if (requiereConsentimiento(usuario?.version_terminos_aceptada)) {
-          setRequiere(true);
+        if (!usuario) {
+          setRequiere(false);
+          return;
         }
+        setRequiere(requiereConsentimiento(usuario.version_terminos_aceptada));
       } catch (err) {
         // Fail-open: sin verificación no hay barrera (se reintentará al navegar).
         logStructuredWarn("consentimiento/PuertaConsentimiento", "verificacion_consentimiento_fallida", err, {
