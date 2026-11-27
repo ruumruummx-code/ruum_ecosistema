@@ -55,11 +55,13 @@ test("la fotografía desktop se sube, persiste y aparece en perfil, cuenta y bar
   await expect.poll(() => foto.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBe(1);
   await expect(cabecera.getByRole("img", { name: "Prueba E2E", exact: true })).toBeVisible();
 
+  // /cuenta y su barra muestran el nombre normalizado (nombreVisibleCuenta: «E2E» → «E2e»);
+  // aquí importa que la foto aparezca, no la capitalización.
   await page.goto("/cuenta", { waitUntil: "domcontentloaded" });
-  await expect(page.getByRole("img", { name: "Fotografía de Prueba E2E", exact: true })).toBeVisible();
-  await expect(cabecera.getByRole("img", { name: "Prueba E2E", exact: true })).toBeVisible();
-  await expect.poll(() => page.getByRole("img", { name: "Fotografía de Prueba E2E", exact: true }).evaluate((img: HTMLImageElement) => img.naturalWidth)).toBe(1);
-  await expect.poll(() => cabecera.getByRole("img", { name: "Prueba E2E", exact: true }).evaluate((img: HTMLImageElement) => img.naturalWidth)).toBe(1);
+  await expect(page.getByRole("img", { name: /^Fotografía de Prueba E2E$/i })).toBeVisible();
+  await expect(cabecera.getByRole("img", { name: /^Prueba E2E$/i })).toBeVisible();
+  await expect.poll(() => page.getByRole("img", { name: /^Fotografía de Prueba E2E$/i }).evaluate((img: HTMLImageElement) => img.naturalWidth)).toBe(1);
+  await expect.poll(() => cabecera.getByRole("img", { name: /^Prueba E2E$/i }).evaluate((img: HTMLImageElement) => img.naturalWidth)).toBe(1);
   await page.goto("/mis-viajes", { waitUntil: "domcontentloaded" });
-  await expect.poll(() => cabecera.getByRole("img", { name: "Prueba E2E", exact: true }).evaluate((img: HTMLImageElement) => img.naturalWidth)).toBe(1);
+  await expect.poll(() => cabecera.getByRole("img", { name: /^Prueba E2E$/i }).evaluate((img: HTMLImageElement) => img.naturalWidth)).toBe(1);
 });

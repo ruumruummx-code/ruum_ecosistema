@@ -29,17 +29,17 @@ import {
 test.describe("Flujos críticos de la aplicación", () => {
   test("la aplicación carga y el login responde", async ({ page }) => {
     await page.goto("/login", { waitUntil: "domcontentloaded" });
-    await expect(page.getByRole("heading", { name: /Inicia sesión/ })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Bienvenido/ })).toBeVisible();
     // formulario de acceso presente con sus campos reales
     await expect(page.locator("#login-email")).toBeVisible();
     await expect(page.locator("#login-password")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Iniciar sesión" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Ingresar" })).toBeVisible();
   });
 
   test("el formulario de login muestra errores cuando faltan datos", async ({ page }) => {
     await page.goto("/login", { waitUntil: "domcontentloaded" });
     await esperarHidratacion(page);
-    await page.getByRole("button", { name: "Iniciar sesión" }).click();
+    await page.getByRole("button", { name: "Ingresar" }).click();
     // validación del lado del cliente: el usuario ve qué falta
     await expect(page.getByText("Introduce tu correo electrónico.")).toBeVisible();
   });
@@ -49,7 +49,7 @@ test.describe("Flujos críticos de la aplicación", () => {
     await esperarHidratacion(page);
     await page.locator("#login-email").fill("usuario.e2e@correo.test");
     await page.locator("#login-password").fill("ClaveE2E123!");
-    await page.getByRole("button", { name: "Iniciar sesión" }).click();
+    await page.getByRole("button", { name: "Ingresar" }).click();
 
     await page.waitForURL("/", { timeout: 30_000, waitUntil: "domcontentloaded" });
     expect(await rutaActual(page)).toBe("/");
@@ -60,7 +60,7 @@ test.describe("Flujos críticos de la aplicación", () => {
     await esperarHidratacion(page);
     await page.locator("#login-email").fill("no-existe@correo.test");
     await page.locator("#login-password").fill("ClaveIncorrecta123");
-    await page.getByRole("button", { name: "Iniciar sesión" }).click();
+    await page.getByRole("button", { name: "Ingresar" }).click();
 
     await expect(page.getByText("No pudimos iniciar sesión. Verifica tus datos e intenta de nuevo.")).toBeVisible({ timeout: 30_000 });
   });

@@ -234,7 +234,7 @@ test.describe("PR-02 Recuperación PKCE — app-usuario", () => {
     const passInput = page.locator('input[type="password"]').first();
     await emailInput.fill("usuario-e2e@ruum.test");
     await passInput.fill("NuevaSegura123");
-    const entrar = page.getByRole("button", { name: /entrar|iniciar sesión/i });
+    const entrar = page.getByRole("button", { name: /^ingresar$|entrar|iniciar sesión/i });
     await entrar.click();
     // La API de login valida la contraseña contra el doble del servidor.
     await page.waitForURL("/", { waitUntil: "domcontentloaded" });
