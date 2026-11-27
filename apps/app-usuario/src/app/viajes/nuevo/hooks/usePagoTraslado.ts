@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { crearClienteNavegador } from "@/lib/supabase-browser";
 import { verificarPagoAnticipadoCompletado } from "@ruum/api/services";
 import { useTrasladoRealtime } from "@/state/AppStateProvider";
@@ -15,6 +15,14 @@ interface DependenciasPago {
  * tarda más de 12 s, junto con reintento manual ilimitado de verificación.
  */
 export function usePagoTraslado({ estadoTrasladoId, trasladoCreado }: DependenciasPago) {
+  const montadoRef = useRef(true);
+  useEffect(() => {
+    montadoRef.current = true;
+    return () => {
+      montadoRef.current = false;
+    };
+  }, []);
+
   const {
     pagoConfirmado,
     pagoEnProcesoConfirmacion = false,
@@ -51,10 +59,13 @@ export function usePagoTraslado({ estadoTrasladoId, trasladoCreado }: Dependenci
       let confirmado = false;
       // Sondeo inicial de hasta 12 segundos (6 intentos x 2s)
       for (let intento = 0; intento < 6 && !confirmado; intento++) {
+        if (!montadoRef.current) return;
         if (intento > 0) await new Promise((resolver) => setTimeout(resolver, 2000));
+        if (!montadoRef.current) return;
         confirmado = await verificarPagoAnticipadoCompletado(cliente, trasladoCreado.id);
       }
 
+      if (!montadoRef.current) return;
       if (!confirmado) {
         // En lugar de fallar de manera bloqueante, pasa al estado intermedio
         setPagoEnProcesoConfirmacion(true);
@@ -64,6 +75,7 @@ export function usePagoTraslado({ estadoTrasladoId, trasladoCreado }: Dependenci
         setPagoEnProcesoConfirmacion(false);
       }
     } catch (err) {
+      if (!montadoRef.current) return;
       setPagoEnProcesoConfirmacion(true);
       setErrorVerificacionPago(
         err instanceof Error
@@ -71,7 +83,7 @@ export function usePagoTraslado({ estadoTrasladoId, trasladoCreado }: Dependenci
           : "No pudimos verificar tu pago de inmediato. Puedes reintentar la verificación.",
       );
     } finally {
-      setVerificandoPago(false);
+      if (montadoRef.current) setVerificandoPago(false);
     }
   }, [trasladoCreado, verificandoPago, setPagoConfirmado, setPagoEnProcesoConfirmacion]);
 

@@ -92,7 +92,15 @@ export function PagoTraslado({ trasladoId, monto }: PagoTrasladoProps) {
   // Si el reconciliador o webhook resuelve después de los 18s, la vista actualiza sola sin acción del usuario
   useEffect(() => {
     if (estadoResolucion !== "conciliacion_pendiente") return;
+    let intentosPasivos = 0;
+    const MAX_INTENTOS_PASIVOS = 36; // ~6 minutos; el usuario siempre puede usar el botón manual
     const intervalo = setInterval(async () => {
+      if (typeof document !== "undefined" && document.visibilityState === "hidden") return;
+      intentosPasivos += 1;
+      if (intentosPasivos > MAX_INTENTOS_PASIVOS) {
+        clearInterval(intervalo);
+        return;
+      }
       const confirmado = await consultarEstadoPago();
       if (confirmado && activoRef.current) {
         setEstadoResolucion("confirmado");
@@ -104,10 +112,10 @@ export function PagoTraslado({ trasladoId, monto }: PagoTrasladoProps) {
   }, [estadoResolucion, consultarEstadoPago, actualizar, router]);
 
   const handlePagoStripeCompletado = useCallback(() => {
-    // Señalizar en realtime e iniciar verificación basada en sistema
-    actualizar({ pagoConfirmado: true });
+    // Iniciar verificación durable contra el servidor antes de marcar pagoConfirmado
+    // (marcar pagoConfirmado aquí cortocircuitaba la verificación vía pagadoRealtime).
     iniciarVerificacionDurable();
-  }, [actualizar, iniciarVerificacionDurable]);
+  }, [iniciarVerificacionDurable]);
 
   // Pantalla de Verificación en Proceso (Webhook en tránsito)
   if (estadoResolucion === "verificando_confirmacion") {

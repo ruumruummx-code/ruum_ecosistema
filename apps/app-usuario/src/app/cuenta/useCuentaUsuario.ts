@@ -63,6 +63,11 @@ export function useCuentaUsuario(cuenta: CuentaReal) {
         localStorage.removeItem("ruum-onboarding-paso:exp");
         localStorage.removeItem("ruum-onboarding-visto");
         localStorage.removeItem("ruum-onboarding-visto:exp");
+        localStorage.removeItem("ruum:draft:fiscal");
+        if (cuenta.usuario?.id) {
+          localStorage.removeItem(`ruum_draft_fiscal_${cuenta.usuario.id}`);
+        }
+        localStorage.removeItem("ruum_draft_fiscal_default");
       } catch {
         // Modo incógnito o sin localStorage disponible
       }

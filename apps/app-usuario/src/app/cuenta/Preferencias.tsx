@@ -18,6 +18,8 @@ type Usuario = Database["public"]["Tables"]["usuarios"]["Row"];
 export interface PreferenciasProps {
   usuario?: Usuario | null;
   escritorio?: boolean;
+  /** Cuando PreferenciasCliente ya administra los efectos del DOM, evita doble escritura. */
+  sincronizarDom?: boolean;
 }
 
 interface InterruptorProps {
@@ -129,7 +131,7 @@ function aplicarUsoDatosEnDocumento(datos: "Activado" | "Desactivado") {
    Componente Principal Preferencias
 ───────────────────────────────────────────────────────────── */
 
-export function Preferencias({ usuario, escritorio = false }: PreferenciasProps) {
+export function Preferencias({ usuario, escritorio = false, sincronizarDom = true }: PreferenciasProps) {
   const { fijarModo, modo } = useTema();
   const idiomaAvisoId = useId();
   const modoAnterior = useRef(modo);
@@ -192,12 +194,12 @@ export function Preferencias({ usuario, escritorio = false }: PreferenciasProps)
   const preferenciasPendientesRef = useRef<Record<string, unknown>>(pendientesIniciales.general);
   const [toastMensaje, setToastMensaje] = useState<string | null>(null);
 
-  useEffect(() => { fijarModo(tema === "Automático" ? "auto" : tema === "Oscuro" ? "dark" : "light"); aplicarTemaEnDocumento(tema); }, [tema, fijarModo]);
+  useEffect(() => { if (!sincronizarDom) return; fijarModo(tema === "Automático" ? "auto" : tema === "Oscuro" ? "dark" : "light"); aplicarTemaEnDocumento(tema); }, [tema, fijarModo, sincronizarDom]);
   useEffect(() => { if (modoAnterior.current !== modo) { modoAnterior.current = modo; setTema(modo === "auto" ? "Automático" : modo === "dark" ? "Oscuro" : "Claro"); } }, [modo]);
-  useEffect(() => aplicarAccesibilidadEnDocumento(accesibilidad), [accesibilidad]);
-  useEffect(() => { normalizarIdiomaLocal(usuario?.id); aplicarIdiomaDisponible(); }, [usuario?.id]);
-  useEffect(() => aplicarUnidadesEnDocumento(unidades), [unidades]);
-  useEffect(() => aplicarUsoDatosEnDocumento(usoDatos), [usoDatos]);
+  useEffect(() => { if (sincronizarDom) aplicarAccesibilidadEnDocumento(accesibilidad); }, [accesibilidad, sincronizarDom]);
+  useEffect(() => { if (!sincronizarDom) return; normalizarIdiomaLocal(usuario?.id); aplicarIdiomaDisponible(); }, [usuario?.id, sincronizarDom]);
+  useEffect(() => { if (sincronizarDom) aplicarUnidadesEnDocumento(unidades); }, [unidades, sincronizarDom]);
+  useEffect(() => { if (sincronizarDom) aplicarUsoDatosEnDocumento(usoDatos); }, [usoDatos, sincronizarDom]);
   useEffect(() => { if (!toastMensaje) return; const t = setTimeout(() => setToastMensaje(null), 3000); return () => clearTimeout(t); }, [toastMensaje]);
 
   function encolarGuardado(tipo: "general" | "notificacion", cambios: Record<string, unknown>) {

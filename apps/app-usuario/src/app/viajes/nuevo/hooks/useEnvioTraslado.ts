@@ -244,6 +244,7 @@ export function useEnvioTraslado(params: ParametrosEnvioTraslado) {
           const j = await respPaso.json().catch(() => null) as { error?: string; detalles?: string[]; codigo?: string } | null;
           if (j?.codigo === "telefono_no_verificado" && typeof window !== "undefined") {
             window.location.assign("/cuenta/verificar-telefono");
+            return;
           }
           const detalles = Array.isArray(j?.detalles) && j.detalles.length ? ` ${j.detalles.join(" ")}` : "";
           const mensaje = j?.error

@@ -116,6 +116,9 @@ export async function manejarInicioDidit(req: Request, entorno: Pick<typeof Deno
     if (!perfilUsuario) {
       return json({ error: "Perfil de usuario no encontrado." }, 404);
     }
+    if (perfilUsuario.estado_verificacion === "verificado") {
+      return json({ error: "Tu identidad ya se encuentra verificada." }, 409);
+    }
 
     usuarioValidoId = perfilUsuario.id;
     fotoPerfilUrl = perfilUsuario.foto_url;
@@ -218,6 +221,7 @@ export async function manejarInicioDidit(req: Request, entorno: Pick<typeof Deno
         "x-api-key": diditApiKey,
       },
       body: JSON.stringify(payloadDidit),
+      signal: AbortSignal.timeout(12_000),
     });
   } catch (error) {
     console.error(
@@ -259,10 +263,7 @@ export async function manejarInicioDidit(req: Request, entorno: Pick<typeof Deno
       }, 422);
     }
     return json({
-      error: `Error al conectar con Didit (HTTP ${respuestaDidit.status}): ${
-        detalleLegible ||
-        "Verifica que DIDIT_API_KEY y DIDIT_WORKFLOW_ID sean válidos."
-      }`,
+      error: "No fue posible iniciar la verificación con el proveedor de identidad. Intenta nuevamente más tarde.",
     }, 502);
   }
 

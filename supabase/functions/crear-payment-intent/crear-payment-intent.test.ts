@@ -45,6 +45,7 @@ const sinContenido = () => new Response(null, { status: 204 });
 function rutasPago(cambios: RutasSimuladas = {}): RutasSimuladas {
   return {
     [`GET ${SUPABASE}/auth/v1/user`]: { id: USUARIO },
+    [`POST ${rest}/rpc/consumir_rate_limit`]: [{ permitido: true, reintentar_en: 0 }],
     [`GET ${rest}/usuarios`]: usuario,
     [`GET ${rest}/traslados`]: cotizacion,
     [`POST ${rest}/rpc/piso_cobro_traslado`]: 699,

@@ -199,6 +199,9 @@ async function crearPaymentIntent(
       status: respuesta.status,
       errorBackend: data?.error,
     });
+    if (respuesta.status >= 400 && respuesta.status < 500 && data?.error) {
+      throw new Error(data.error);
+    }
     throw new Error(
       "Tuvimos un problema temporal al procesar la sesión de pago seguro. Por favor intenta más tarde o contacta a soporte.",
     );
@@ -339,20 +342,31 @@ export function PagoStripe({
 
         const intentId = inicio.clientSecret?.split("_secret_")[0];
         if (intentId && /^pi_[A-Za-z0-9]+$/.test(intentId)) {
-          const sesion = await fetch("/api/cuenta/metodos-pago", {
-            method: "POST",
-            headers: await obtenerHeadersCsrfAsync({ "Content-Type": "application/json" }),
-            body: JSON.stringify({ accion: "sesion", intentId }),
-            signal: abortCtrl.signal,
-          });
-          const datosSesion = await sesion.json();
-          if (!sesion.ok) {
-            logStructuredWarn("pago-stripe", "fallo_sesion_metodos_pago", undefined, {
-              trasladoId,
-              error: datosSesion.error,
+          try {
+            const sesion = await fetch("/api/cuenta/metodos-pago", {
+              method: "POST",
+              headers: await obtenerHeadersCsrfAsync({ "Content-Type": "application/json" }),
+              body: JSON.stringify({ accion: "sesion", intentId }),
+              signal: abortCtrl.signal,
             });
-          } else {
-            setCustomerSessionClientSecret(datosSesion.customerSessionClientSecret ?? undefined);
+            const datosSesion = await sesion.json().catch(() => null) as {
+              customerSessionClientSecret?: string | null;
+              error?: string;
+            } | null;
+            if (!sesion.ok) {
+              logStructuredWarn("pago-stripe", "fallo_sesion_metodos_pago", undefined, {
+                trasladoId,
+                status: sesion.status,
+                error: datosSesion?.error,
+              });
+            } else {
+              setCustomerSessionClientSecret(datosSesion?.customerSessionClientSecret ?? undefined);
+            }
+          } catch (errSesion) {
+            if (abortCtrl.signal.aborted) throw errSesion;
+            logStructuredWarn("pago-stripe", "error_red_sesion_metodos_pago", errSesion, {
+              trasladoId,
+            });
           }
         }
 

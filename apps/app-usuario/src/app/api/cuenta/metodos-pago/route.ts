@@ -10,8 +10,8 @@ const esquema = z.discriminatedUnion("accion", [
   z.object({ accion: z.enum(["eliminar", "predeterminar"]), id: z.string().regex(/^pm_[A-Za-z0-9]+$/) }).strict(),
   z.object({ accion: z.literal("sesion"), intentId: z.string().regex(/^pi_[A-Za-z0-9]+$/) }).strict(),
 ]);
-function json(datos: unknown, status = 200) {
-  return NextResponse.json(datos, { status, headers: { "Cache-Control": "no-store" } });
+function json(datos: unknown, status = 200, extraHeaders?: Record<string, string>) {
+  return NextResponse.json(datos, { status, headers: { "Cache-Control": "no-store", ...extraHeaders } });
 }
 async function manejar(request: NextRequest, mutacion: boolean) {
   if (mutacion) {
@@ -23,7 +23,11 @@ async function manejar(request: NextRequest, mutacion: boolean) {
     if (!auth.ok) return auth.errorResponse;
     const { user } = auth;
     const limite = await rateLimitConVentana(`uid:${user.id}`, "billetera", 30, 60000);
-    if (!limite.allowed) return json({ error: "Espera antes de volver a intentarlo." }, 429);
+    if (!limite.allowed) {
+      return json({ error: "Espera antes de volver a intentarlo." }, 429, {
+        "Retry-After": String(limite.retryAfterSec || 60),
+      });
+    }
     if (!mutacion) return json(await listarTarjetasBilletera(user.id));
     const entrada = esquema.safeParse(await request.json().catch(() => null));
     if (!entrada.success) return json({ error: "Solicitud inválida." }, 400);

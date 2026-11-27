@@ -154,7 +154,19 @@ export function CambiarContrasena() {
         throw new Error("Tu contraseña se actualizó, pero no pudimos cerrar las sesiones solicitadas. No se confirmó su revocación. Contacta a soporte.");
       }
       if (!mantenerSesion) {
+        try {
+          localStorage.removeItem("ruumruum.traslados-nuevo.borrador.v2");
+          localStorage.removeItem("ruum-onboarding-paso");
+          localStorage.removeItem("ruum-onboarding-paso:exp");
+          localStorage.removeItem("ruum-onboarding-visto");
+          localStorage.removeItem("ruum-onboarding-visto:exp");
+          localStorage.removeItem("ruum:draft:fiscal");
+          localStorage.removeItem("ruum_draft_fiscal_default");
+        } catch {
+          // Modo incógnito o sin localStorage disponible
+        }
         router.replace("/login?contrasena=actualizada");
+        router.refresh?.();
         return;
       }
       setExito(true);
@@ -196,12 +208,8 @@ export function CambiarContrasena() {
             </span>
           </div>
 
-          {/* Selector de idioma */}
-          <div className="flex items-center">
-            <span className="rounded-full bg-[#f1f5fa] px-2.5 py-1 text-xs font-bold text-[#0a2342] dark:bg-[#0f2d52] dark:text-white">
-              ES ∨
-            </span>
-          </div>
+          {/* Espaciador simétrico */}
+          <span aria-hidden="true" className="size-10" />
         </div>
 
         {/* Título y subtítulo */}
@@ -345,7 +353,6 @@ export function CambiarContrasena() {
             type="submit"
             form="cambiar-clave-form"
             disabled={!valida || guardando}
-            aria-label="Guardar"
             className="mt-2 flex h-[50px] w-full items-center justify-center gap-2 rounded-2xl bg-[#0a2342] px-5 text-[15px] font-bold text-white shadow-sm transition hover:bg-[#103460] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#0066FF] dark:hover:bg-[#1a75ff] cursor-pointer sm:h-[52px]"
           >
             {guardando ? (

@@ -30,7 +30,7 @@ function completar() {
 
 it("verifica la contraseña actual antes de actualizar y limpia los campos al guardar", async () => {
   completar();
-  fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
+  fireEvent.click(screen.getByRole("button", { name: /Actualizar contraseña/i }));
   await screen.findByText("Tu contraseña se actualizó correctamente.");
   expect(mocks.verificar).toHaveBeenCalledWith({ email: "registro@ruum.test", password: "Anterior1" });
   expect(mocks.actualizar).toHaveBeenCalledWith({ password: "NuevaSegura2" });
@@ -43,7 +43,7 @@ it("verifica la contraseña actual antes de actualizar y limpia los campos al gu
 it("no actualiza si la contraseña actual es incorrecta", async () => {
   mocks.verificar.mockResolvedValue({ data: { user: null }, error: { message: "Invalid credentials" } });
   completar();
-  fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
+  fireEvent.click(screen.getByRole("button", { name: /Actualizar contraseña/i }));
   await screen.findByRole("alert");
   expect(mocks.actualizar).not.toHaveBeenCalled();
   expect(mocks.cerrar).not.toHaveBeenCalled();
@@ -52,7 +52,7 @@ it("no actualiza si la contraseña actual es incorrecta", async () => {
 it("cierra todas las sesiones y redirige al login si se desmarca la opción", async () => {
   completar();
   fireEvent.click(screen.getByRole("checkbox"));
-  fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
+  fireEvent.click(screen.getByRole("button", { name: /Actualizar contraseña/i }));
   await waitFor(() => expect(mocks.replace).toHaveBeenCalledWith("/login?contrasena=actualizada"));
   expect(mocks.cerrar).toHaveBeenCalledWith({ scope: "global" });
 });
@@ -60,7 +60,7 @@ it("cierra todas las sesiones y redirige al login si se desmarca la opción", as
 it("no revoca sesiones si falla la actualización de contraseña", async () => {
   mocks.actualizar.mockResolvedValue({ error: { message: "fallo" } });
   completar();
-  fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
+  fireEvent.click(screen.getByRole("button", { name: /Actualizar contraseña/i }));
   await screen.findByRole("alert");
   expect(mocks.cerrar).not.toHaveBeenCalled();
   expect(screen.queryByRole("status")).not.toBeInTheDocument();
@@ -70,7 +70,7 @@ it.each([true, false])("informa el fallo parcial de revocación con mantenerSesi
   mocks.cerrar.mockResolvedValue({ error: { message: "fallo" } });
   completar();
   if (!mantener) fireEvent.click(screen.getByRole("checkbox"));
-  fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
+  fireEvent.click(screen.getByRole("button", { name: /Actualizar contraseña/i }));
   expect(await screen.findByRole("alert")).toHaveTextContent("Tu contraseña se actualizó, pero no pudimos cerrar las sesiones solicitadas");
   expect(screen.queryByRole("status")).not.toBeInTheDocument();
   expect(mocks.replace).not.toHaveBeenCalled();
@@ -80,7 +80,7 @@ it.each([true, false])("informa el fallo parcial de revocación con mantenerSesi
 it("impide guardar contraseñas que no coinciden", async () => {
   completar();
   fireEvent.change(screen.getByLabelText(/^Confirmar nueva/), { target: { value: "OtraClave3" } });
-  await waitFor(() => expect(screen.getByRole("button", { name: "Guardar" })).toBeDisabled());
+  await waitFor(() => expect(screen.getByRole("button", { name: /Actualizar contraseña/i })).toBeDisabled());
   expect(mocks.actualizar).not.toHaveBeenCalled();
 });
 

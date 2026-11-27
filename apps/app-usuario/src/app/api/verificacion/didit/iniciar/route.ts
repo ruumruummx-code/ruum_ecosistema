@@ -1,6 +1,6 @@
 import { solicitarSesionDiditUsuario } from "@ruum/api/services";
 import { NextRequest, NextResponse } from "next/server";
-import { crearClienteServidor } from "@/lib/supabase-server";
+import { validarSesionYRolUsuario } from "@/lib/guardia-rol-usuario";
 import { obtenerIp, rateLimitConVentana } from "@/lib/csp-rate-limit";
 import { verificarCsrfORechazar } from "@/lib/csrf";
 import { logStructuredInfo, logStructuredWarn } from "@/lib/logger";
@@ -24,19 +24,10 @@ export async function POST(request: NextRequest) {
   const rechazoCsrf = verificarCsrfORechazar(request);
   if (rechazoCsrf) return rechazoCsrf;
 
-  // 2. Verificación de sesión de usuario
-  const cliente = await crearClienteServidor();
-  const {
-    data: { user },
-    error: errorAuth,
-  } = await cliente.auth.getUser();
-
-  if (errorAuth || !user) {
-    return NextResponse.json(
-      { error: "Inicia sesión para continuar con la verificación." },
-      { status: 401, headers: { "Cache-Control": "no-store" } }
-    );
-  }
+  // 2. Verificación de sesión y rol de usuario
+  const auth = await validarSesionYRolUsuario();
+  if (!auth.ok) return auth.errorResponse;
+  const { user, cliente } = auth;
 
   const ip = obtenerIp(request);
   const userIdHash = hashIdentificador(user.id);
@@ -108,13 +99,16 @@ export async function POST(request: NextRequest) {
         error,
         { userIdHash }
       );
+      const statusError = (error as { status?: number; context?: { status?: number } } | null)?.status
+        ?? (error as { context?: { status?: number } } | null)?.context?.status;
+      const statusHttp = typeof statusError === "number" && statusError >= 400 && statusError < 500 ? statusError : 502;
       return NextResponse.json(
         {
           error:
             error?.message ??
             "No fue posible generar la sesión de verificación. Intenta nuevamente.",
         },
-        { status: 502, headers: { "Cache-Control": "no-store" } }
+        { status: statusHttp, headers: { "Cache-Control": "no-store" } }
       );
     }
 

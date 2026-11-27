@@ -9,6 +9,7 @@ import { rateLimitMasivo } from "@/lib/rate-limit-masivos";
 import { logStructuredError, logStructuredWarn } from "@/lib/logger";
 import { registrarMetricaCotizacion } from "@/lib/carga-masiva-telemetria";
 import { verificarCsrfORechazar } from "@/lib/csrf";
+import { verificacionTelefonoSuspendida } from "@/lib/phone-verification";
 import { clienteMasivoServicio, stripeMasivo, validarFilasServidor } from "@/lib/carga-masiva-server";
 import { previsualizarTarifasMasivasUsuario, verificarUsuarioMasivo, guardarCheckoutMasivoServidor, reservarCheckoutMasivoServidor, vincularPagoMasivoServidor, eliminarCheckoutMasivoServidor, obtenerClienteBilleteraServidor } from "@ruum/api/services";
 import { coordenadaPostalMasiva, ErrorServicioCotizacion } from "@/lib/mapbox-masivo";
@@ -29,10 +30,14 @@ const LIMITE_CPU_MS = 240_000;
 
 function hashRuta(filas: Record<string, string>[]): string {
   const entradas = filas.map((fila) => ({
-    origen: [fila.origenCodigoPostal, fila.origen_calle, fila.origen_numero, fila.origen_colonia],
-    destino: [fila.destinoCodigoPostal, fila.destino_calle, fila.destino_numero, fila.destino_colonia],
-    marca: fila.marca, modelo: fila.modelo, anio: fila.anio, condicion: fila.condicion,
-    modalidad: fila.modalidad_programacion, fecha: fila.fecha_hora_programada,
+    origen: [fila.origen_direccion, fila.origen_ciudad, fila.origen_lat, fila.origen_lng],
+    destino: [fila.destino_direccion, fila.destino_ciudad, fila.destino_lat, fila.destino_lng],
+    marca: fila.vehiculo_marca,
+    modelo: fila.vehiculo_modelo,
+    anio: fila.vehiculo_anio,
+    condicion: fila.condicion,
+    modalidad: fila.modalidad_programacion,
+    fecha: fila.fecha_hora_programada,
   }));
   return createHash("sha256").update(JSON.stringify(entradas)).digest("hex");
 }
@@ -43,6 +48,12 @@ export async function POST(request: NextRequest) {
   const auth = await validarSesionYRolUsuario();
   if (!auth.ok) return auth.errorResponse;
   const { user, cliente } = auth;
+  if (!verificacionTelefonoSuspendida() && user.user_metadata?.telefono_verificado === false) {
+    return NextResponse.json(
+      { error: "Verifica tu número de teléfono antes de solicitar traslados.", codigo: "telefono_no_verificado" },
+      { status: 403 }
+    );
+  }
   const limite = await rateLimitMasivo(request, user.id, "masivos-cotizar", 5);
   if (!limite.allowed) return NextResponse.json({ error: "Espera antes de cotizar otra carga." }, { status: 429, headers: { "Retry-After": String(limite.retryAfterSec) } });
   const raw = await request.text().catch(() => "");
@@ -216,9 +227,9 @@ export async function POST(request: NextRequest) {
       const d = fila.datos;
       const ruta = rutas.get(fila.indice)!;
       const { origen, destino } = ruta;
-      const tarifa = tarifasPorIndice.get(fila.indice)!;
-      if (!tarifa.disponible || !tarifa.tarifa || tarifa.tarifa <= 0 || !tarifa.categoria_tarifa || !tarifa.gama) {
-        fila.errorCotizacion = tarifa.motivo ?? "No hay tarifa disponible para este vehículo y ruta.";
+      const tarifa = tarifasPorIndice.get(fila.indice);
+      if (!tarifa || !tarifa.disponible || !tarifa.tarifa || tarifa.tarifa <= 0 || !tarifa.categoria_tarifa || !tarifa.gama) {
+        fila.errorCotizacion = tarifa?.motivo ?? "No hay tarifa disponible para este vehículo y ruta.";
         continue;
       }
         const precio = Math.round(tarifa.tarifa * 100);

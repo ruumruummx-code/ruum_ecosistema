@@ -370,7 +370,7 @@ export function DatosPersonales({ usuario, fotoUrlInicial, correoRegistro, escri
             },
             versionEsperada: version,
             archivoNuevaFoto: archivoFoto,
-            fotoUrlPrevia: usuario.foto_url,
+            fotoUrlPrevia: fotoPath.trim() || usuario.foto_url,
           });
         } catch (errSaga) {
           // Si la RPC transaccional no está disponible (ej. en mocks o bases legadas sin migración),
@@ -457,7 +457,7 @@ export function DatosPersonales({ usuario, fotoUrlInicial, correoRegistro, escri
           <div className="user-profile-photo">
             {fotoUrl ? <Image src={fotoUrl} alt="Foto de perfil" width={48} height={48} unoptimized /> : <span aria-hidden="true">{iniciales(nombre, apellido)}</span>}
             <button type="button" onClick={() => fileInputRef.current?.click()} disabled={subiendoFoto || guardando} aria-label="Cambiar foto de perfil"><IconoCamara />{subiendoFoto ? "Subiendo foto…" : "Cambiar foto"}</button>
-            <input ref={fileInputRef} type="file" accept="image/*" aria-label="Archivo de foto de perfil" onChange={(event) => { const archivo = event.target.files?.[0]; event.target.value = ""; void cargarFoto(archivo); }} hidden />
+            <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" aria-label="Archivo de foto de perfil" onChange={(event) => { const archivo = event.target.files?.[0]; event.target.value = ""; void cargarFoto(archivo); }} hidden />
           </div>
           <div className="user-profile-grid">
             <CampoPerfil id="nombre" etiqueta="Nombre(s)"><input id="nombre" autoComplete="given-name" value={nombre} onChange={(e) => setNombre(e.target.value)} required /></CampoPerfil>

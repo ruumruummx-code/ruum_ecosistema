@@ -17,8 +17,8 @@ export function MetodosPago() {
     setCargando(true); setError(null);
     try {
       const respuesta = await fetch("/api/cuenta/metodos-pago", { cache: "no-store", signal });
-      const datos = await respuesta.json();
-      if (!respuesta.ok) throw new Error(datos.error ?? "No pudimos consultar tus tarjetas.");
+      const datos = await respuesta.json().catch(() => null) as { tarjetas?: Tarjeta[]; error?: string } | null;
+      if (!respuesta.ok || !Array.isArray(datos?.tarjetas)) throw new Error(datos?.error ?? "No pudimos consultar tus tarjetas.");
       setTarjetas(datos.tarjetas);
     } catch (err) {
       if (!signal?.aborted) setError(err instanceof Error ? err.message : "No pudimos consultar tus tarjetas.");
@@ -32,16 +32,18 @@ export function MetodosPago() {
   async function operar(accion: "agregar" | "eliminar" | "predeterminar", id?: string) {
     if (bloqueo.current) return;
     bloqueo.current = true; setOcupado(true); setError(null); setAviso("");
+    let redirigiendo = false;
     try {
       const respuesta = await fetch("/api/cuenta/metodos-pago", {
         method: "POST", headers: await obtenerHeadersCsrfAsync({ "Content-Type": "application/json" }),
         body: JSON.stringify(accion === "agregar" ? { accion, clave: crypto.randomUUID() } : { accion, id }),
       });
-      const datos = await respuesta.json();
-      if (!respuesta.ok) throw new Error(datos.error ?? "No pudimos guardar el cambio.");
+      const datos = await respuesta.json().catch(() => null) as { url?: string; error?: string } | null;
+      if (!respuesta.ok) throw new Error(datos?.error ?? "No pudimos guardar el cambio.");
       if (accion === "agregar") {
-        const destino = new URL(datos.url);
+        const destino = new URL(String(datos?.url ?? ""));
         if (destino.protocol !== "https:" || destino.hostname !== "checkout.stripe.com") throw new Error("No pudimos abrir el registro seguro.");
+        redirigiendo = true;
         window.location.assign(destino.href); return;
       }
       setEliminar(null);
@@ -49,7 +51,7 @@ export function MetodosPago() {
       await consultar();
     } catch (err) {
       setError(err instanceof Error ? err.message : "No pudimos completar la operación.");
-    } finally { bloqueo.current = false; setOcupado(false); }
+    } finally { if (!redirigiendo) { bloqueo.current = false; setOcupado(false); } }
   }
   return <section className="user-v2-scope mx-auto w-full max-w-2xl space-y-5 p-5" aria-busy={ocupado || cargando}>
     <Link href="/cuenta?seccion=perfil" className="text-sm underline">Volver a mi cuenta</Link>

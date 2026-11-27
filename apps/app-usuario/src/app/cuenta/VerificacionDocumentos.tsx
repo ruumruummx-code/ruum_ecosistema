@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Icono } from "@ruum/ui";
 import type { Database } from "@ruum/shared/types";
 import { listarDocumentosCuentaUsuario, type DocumentoCuenta, type TipoDocumentoCuenta } from "@ruum/api/services";
@@ -50,6 +51,7 @@ function estadoFiscal(usuario: Usuario, empresa: Empresa | null, fiscalConfigura
   return { texto: "Sin configurar", tono: "neutral" };
 }
 export function VerificacionDocumentos({ usuario, empresa = null }: VerificacionDocumentosProps) {
+  const router = useRouter();
   const [documentos, setDocumentos] = useState<DocumentoCuenta[]>([]);
   const [ine, setIne] = useState<Omit<DocumentoCuenta, "tipo"> | undefined>(() => usuario.doc_identidad_url ? { ruta: usuario.doc_identidad_url, subido_en: usuario.doc_identidad_subido_en ?? "", estado: usuario.estado_verificacion === "verificado" ? "verificado" : usuario.estado_verificacion === "rechazado" ? "rechazado" : "en_revision" } : undefined);
   const [cargando, setCargando] = useState(true);
@@ -120,6 +122,7 @@ export function VerificacionDocumentos({ usuario, empresa = null }: Verificacion
         if (tarea === "ine") setIne(dato);
         else setDocumentos(prev => [...prev.filter(d => d.tipo !== tarea), { ...dato, tipo: tarea as TipoDocumentoCuenta }]);
         setTarea(null); setAviso(`${seleccion.titulo}: ${estadoDocumento(dato, false, false, tarea === "ine").texto}.`);
+        router.refresh?.();
       }} />}
     </HojaTareaCuenta>}
   </div>;

@@ -89,7 +89,7 @@ export async function GET(
     ];
 
     const estadoConfirmaPago = traslado.tipo_pago === "al_cierre"
-      ? traslado.estado === "pago_completado"
+      ? traslado.estado === "pago_completado" || traslado.estado === "servicio_cerrado"
       : estadosConfirmados.includes(traslado.estado);
     if (estadoConfirmaPago) {
       return NextResponse.json({
