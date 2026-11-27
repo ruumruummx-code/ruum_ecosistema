@@ -9,7 +9,7 @@
 - **Prioridad:** 🔴 Alta
 - **Bloquea a:** `RUUM-SEC-012` (F1.4: Sanitización de esquema y drift local) — Fecha límite de cierre: 2026-12-14
 - **Dependencia de:** `RUUM-SEC-EPIC-001` (Fase 0: Mitigación Inmediata / RUUM-SEC-002)
-- **Estado:** To Do (Deuda Técnica Aceptada en Gate G0)
+- **Estado:** En curso — comparación prod↔staging hecha el 2026-11-27 (ver `docs/supabase-drift-2026-11.md` §4); falta `db diff --linked` con credenciales
 
 ---
 
