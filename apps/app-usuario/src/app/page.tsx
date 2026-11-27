@@ -94,7 +94,7 @@ export default async function PaginaInicio({
   const forzarLanding = params.landing === "true";
 
   // C-08: no silenciar error de Supabase — mostrar Aviso en lugar de landing/redirect confuso
-  if (error && sesionActiva && !usuario) {
+  if (error && !usuario && !forzarLanding) {
     const esConfigError = error === "config_error";
     return (
       <>

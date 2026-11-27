@@ -5,7 +5,7 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { traducirErrorAuth, validarDestinoSeguro } from "@ruum/shared/utils";
-import { crearClienteNavegador, tieneSupabaseConfigurado } from "../../lib/supabase-browser";
+import { tieneSupabaseConfigurado } from "../../lib/supabase-browser";
 import { onboardingVisto } from "../../lib/onboarding-visto";
 import { esEmailLoginValido, validarCredencialesLogin } from "./login-validation";
 
@@ -25,6 +25,8 @@ function FormularioLogin() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const destinoPostLogin = validarDestinoSeguro(searchParams.get("next"), "/panel");
+  const motivo = searchParams.get("reason");
+  const avisoContrasena = searchParams.get("contrasena") === "actualizada";
 
   const [checkingOnboarding, setCheckingOnboarding] = useState(true);
   // Primer arranque: mostrar el recorrido de bienvenida antes del acceso.
@@ -68,6 +70,7 @@ function FormularioLogin() {
 
   async function iniciarSesion(e: React.FormEvent) {
     e.preventDefault();
+    if (enviando) return;
     const credencialInvalida = validarCredencialesLogin(email, password);
     if (credencialInvalida === "email") {
       setEmailError(MENSAJE_CORREO_INVALIDO);
@@ -83,12 +86,25 @@ function FormularioLogin() {
     setError(null);
 
     try {
-      const cliente = crearClienteNavegador();
-      const { error: errorAuth } = await cliente.auth.signInWithPassword({ email: email.trim(), password });
-      if (errorAuth) throw errorAuth;
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
+        signal: AbortSignal.timeout(12_000),
+      });
+      const cuerpo = (await res.json().catch(() => null)) as { error?: string } | null;
+      if (!res.ok) {
+        throw new Error(cuerpo?.error || "No pudimos iniciar sesión. Verifica tus datos e intenta de nuevo.");
+      }
       router.replace(destinoPostLogin);
+      router.refresh();
     } catch (err) {
-      setError(traducirErrorAuth(err));
+      const nombre = err instanceof Error ? err.name : "";
+      if (nombre === "TimeoutError" || nombre === "AbortError") {
+        setError("El servidor tardó demasiado en responder. Revisa tu conexión e inténtalo de nuevo.");
+      } else {
+        setError(err instanceof Error ? err.message : traducirErrorAuth(err));
+      }
     } finally {
       setEnviando(false);
     }
@@ -99,6 +115,12 @@ function FormularioLogin() {
   }
 
   const supabaseNoConfigurado = !tieneSupabaseConfigurado();
+  const avisoInformativo =
+    avisoContrasena
+      ? "Tu contraseña fue actualizada. Inicia sesión con tu nueva contraseña."
+      : motivo === "cuenta_distinta"
+      ? "El enlace que abriste pertenece a otra cuenta. Mantuvimos tu sesión actual; si quieres cambiar de cuenta, cierra sesión primero."
+      : null;
 
   return (
     <>
@@ -109,6 +131,11 @@ function FormularioLogin() {
             <p>Accede a tu cuenta de conductor.</p>
           </div>
         </header>
+        {avisoInformativo && (
+          <p className={styles.status} role="status" aria-live="polite">
+            {avisoInformativo}
+          </p>
+        )}
         <form className={styles.form} onSubmit={iniciarSesion} noValidate>
           <div className={styles.field}>
             <label htmlFor="correo-conductor">Correo</label>

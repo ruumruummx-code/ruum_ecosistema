@@ -10,10 +10,10 @@ const MAX_POR_HORA = 20;
 const VENTANA_MS = 60 * 60 * 1000;
 
 function opcionesExpiracion() {
-  const isProd = process.env.NODE_ENV === "production";
+  const secure = process.env.NODE_ENV !== "development";
   return {
     httpOnly: true as const,
-    secure: isProd,
+    secure,
     sameSite: "lax" as const,
     maxAge: 0,
     path: RUTA_COOKIE_RECOVERY,

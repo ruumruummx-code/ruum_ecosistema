@@ -7,15 +7,25 @@
     search.indexOf("nueva-password") !== -1 ||
     search.indexOf("recovery") !== -1;
   var origin = window.location.origin;
+  var causa =
+    hash.indexOf("otp_expired") !== -1 || hash.indexOf("expired") !== -1
+      ? "&causa=expirado"
+      : "";
   var fallback = isRecovery
-    ? origin + "/recuperar-password?error=enlace_invalido"
-    : origin + "/login?reason=email_confirmation&error=enlace_invalido";
+    ? origin + "/recuperar-password?error=enlace_invalido" + causa
+    : origin + "/login?reason=email_confirmation&error=enlace_invalido" + causa;
 
-  if (
-    hash.indexOf("access_token=") !== -1 ||
-    hash.indexOf("refresh_token=") !== -1 ||
-    hash.indexOf("code=") !== -1
-  ) {
+  if (hash.indexOf("code=") !== -1 && hash.indexOf("access_token=") === -1) {
+    var params = new URLSearchParams(hash.slice(1));
+    var code = params.get("code");
+    if (code) {
+      var tipo = isRecovery ? "&type=recovery&next=%2Fnueva-password" : "";
+      window.location.replace(origin + "/auth/callback?code=" + encodeURIComponent(code) + tipo);
+      return;
+    }
+  }
+
+  if (hash.indexOf("access_token=") !== -1 || hash.indexOf("refresh_token=") !== -1) {
     var target = isRecovery ? origin + "/nueva-password" : origin + "/";
     window.location.replace(target + hash);
   } else {

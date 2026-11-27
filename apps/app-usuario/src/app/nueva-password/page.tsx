@@ -6,6 +6,7 @@ import { Aviso, Field, MobileShell, MobileCard, MobileButton } from "@ruum/ui";
 import { fortalezaPassword, observarSesionRecuperacion, passwordCumpleRequisitos, requisitosPassword, traducirErrorAuth } from "@ruum/shared/utils";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "../../lib/supabase-browser";
 import { obtenerHeadersCsrf } from "../../lib/csrf";
+import { obtenerDispositivo } from "../../lib/device-id";
 import { logStructuredWarn } from "../../lib/logger";
 import { LogoRuum } from "../experiencia-publica";
 
@@ -52,7 +53,12 @@ function FormularioNuevaPassword() {
 
     async function verificarAutorizacion() {
       try {
-        const res = await fetch("/api/recovery/verify", { cache: "no-store", credentials: "same-origin" });
+        const dispositivo = obtenerDispositivo();
+        const res = await fetch("/api/recovery/verify", {
+          cache: "no-store",
+          credentials: "same-origin",
+          ...(dispositivo ? { headers: { "x-device-id": dispositivo } } : {}),
+        });
         const data = (await res.json().catch(() => ({}))) as { authorized?: boolean; autorizado?: boolean };
         const autorizadoServidor = Boolean(data.authorized ?? data.autorizado);
         if (autorizadoServidor && activo && montadoRef.current) {
@@ -119,11 +125,16 @@ function FormularioNuevaPassword() {
 
       try {
         const headersCsrf = obtenerHeadersCsrf();
+        const dispositivo = obtenerDispositivo();
+        const headersClear = {
+          ...headersCsrf,
+          ...(dispositivo ? { "x-device-id": dispositivo } : {}),
+        };
         await fetch("/api/recovery/clear", {
           method: "POST",
           cache: "no-store",
           credentials: "same-origin",
-          ...(Object.keys(headersCsrf).length > 0 ? { headers: headersCsrf } : {}),
+          ...(Object.keys(headersClear).length > 0 ? { headers: headersClear } : {}),
         });
       } catch (err) {
         logStructuredWarn("nueva-password", "limpiar_cookie_recovery_fallido", err);

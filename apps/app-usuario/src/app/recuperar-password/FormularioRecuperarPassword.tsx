@@ -8,6 +8,7 @@ import { TEXTOS_CARGANDO } from "@ruum/shared/constants";
 import { traducirErrorAuth } from "@ruum/shared/utils";
 import { registrarEventoUx } from "../../lib/analytics";
 import { obtenerHeadersCsrf } from "../../lib/csrf";
+import { obtenerDispositivo } from "../../lib/device-id";
 import { VerificacionHumana } from "../../components/VerificacionHumana";
 
 function IconoCorreo({ className = "size-4 text-[#566889]" }: { className?: string }) {
@@ -102,22 +103,16 @@ export function FormularioRecuperarPassword({
     }
   }, [errorInicial]);
 
-  // Manejo de la cuenta regresiva de 30 segundos tras enviar el enlace
+  // Manejo de la cuenta regresiva de 30 segundos tras cada envío/reenvío exitoso.
+  const hayEspera = enviado && segundosRestantes > 0;
   useEffect(() => {
-    if (!enviado) return;
-    setSegundosRestantes(30);
+    if (!hayEspera) return;
     const intervalo = setInterval(() => {
-      setSegundosRestantes((prev) => {
-        if (prev <= 1) {
-          clearInterval(intervalo);
-          return 0;
-        }
-        return prev - 1;
-      });
+      setSegundosRestantes((prev) => (prev <= 1 ? 0 : prev - 1));
     }, 1000);
 
     return () => clearInterval(intervalo);
-  }, [enviado]);
+  }, [hayEspera]);
 
   async function enviar(e?: React.FormEvent) {
     if (e) e.preventDefault();
@@ -148,11 +143,13 @@ export function FormularioRecuperarPassword({
 
     try {
       const headersCsrf = obtenerHeadersCsrf();
+      const dispositivo = obtenerDispositivo();
       const res = await fetch("/api/recovery/request", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           ...headersCsrf,
+          ...(dispositivo ? { "x-device-id": dispositivo } : {}),
         },
         body: JSON.stringify({ email: correo, captchaToken: captchaToken ?? undefined }),
       });
@@ -160,8 +157,8 @@ export function FormularioRecuperarPassword({
       const data = (await res.json().catch(() => ({}))) as { error?: string; captchaRequerido?: boolean };
 
       if (res.status === 428 && data.captchaRequerido) {
-        // Se muestra el widget; el token es de un solo uso y el límite de
-        // 30 s no aplica al reintento tras completar la verificación.
+        // Se muestra el widget; si ocurría durante un reenvío, volver al formulario para que el CAPTCHA sea visible.
+        setEnviado(false);
         setCaptchaRequerido(true);
         setCaptchaToken(null);
         ultimoEnvioRef.current = 0;
@@ -176,9 +173,11 @@ export function FormularioRecuperarPassword({
 
       setCaptchaRequerido(false);
       setCaptchaToken(null);
+      setSegundosRestantes(30);
       setEnviado(true);
       registrarEventoUx("recuperacion_exitosa");
     } catch (err) {
+      ultimoEnvioRef.current = 0;
       setError(traducirErrorAuth(err, "No pudimos enviar el correo. Intenta de nuevo."));
       registrarEventoUx("recuperacion_error", { motivo: "proveedor" });
     } finally {
@@ -283,6 +282,13 @@ export function FormularioRecuperarPassword({
                   </p>
                 </div>
               </div>
+
+              {/* Error en reenvío */}
+              {error && (
+                <div role="alert" aria-atomic="true" className="mt-3 w-full text-left">
+                  <Aviso tono="danger">{error}</Aviso>
+                </div>
+              )}
 
               {/* Botón de acción: Reenviar enlace con estados activos/desactivados accesibles */}
               <button

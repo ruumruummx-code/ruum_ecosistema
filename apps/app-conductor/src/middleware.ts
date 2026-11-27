@@ -23,6 +23,8 @@ const RUTAS_PUBLICAS_CONDUCTOR = [
   "/403",
   "/api/health",
   "/api/csp-report",
+  "/api/auth/login",
+  "/api/recovery/request",
   "/api/recovery/verify",
   "/api/recovery/clear",
   "/theme-init.js",
