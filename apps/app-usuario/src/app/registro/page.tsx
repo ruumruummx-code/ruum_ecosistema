@@ -47,6 +47,7 @@ export default function PaginaRegistro() {
   const [verificandoOtp, setVerificandoOtp] = useState(false);
   const [errorOtp, setErrorOtp] = useState<string | null>(null);
   const [segundosReenvio, setSegundosReenvio] = useState(0);
+  const ultimoTelefonoOtpRef = useRef<string>("");
 
   /* Paso 2: credenciales */
   const [email, setEmail] = useState("");
@@ -198,6 +199,7 @@ export default function PaginaRegistro() {
       if (!res.ok) {
         setErrorOtp(cuerpo?.error ?? "No pudimos enviar el código SMS. Intenta de nuevo.");
       } else {
+        ultimoTelefonoOtpRef.current = digitos;
         setSegundosReenvio(60);
       }
     } catch (err) {
@@ -283,8 +285,12 @@ export default function PaginaRegistro() {
     }
 
     setModalVerificacionAbierto(true);
-    setCodigoOtp("");
     setErrorOtp(null);
+    if (ultimoTelefonoOtpRef.current === digitos && segundosReenvio > 0) {
+      requestAnimationFrame(() => otpRef.current?.focus());
+      return;
+    }
+    setCodigoOtp("");
     await enviarOtpSms(digitos);
   }
 

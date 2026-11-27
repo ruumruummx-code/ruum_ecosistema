@@ -109,6 +109,7 @@ export function useRegistroConductorLogic() {
   const hidratacionRemotaCompletaRef = useRef(false);
   const omitirPrimerGuardadoRemotoRef = useRef(false);
   const ultimoGuardadoRemotoRef = useRef("");
+  const ultimoConsentimientoGuardadoRef = useRef("");
   const solicitudRemotaIdRef = useRef<string | null>(null);
   const aceptadosEnRef = useRef(new Date().toISOString());
   const aceptacionLegalAlEnviarRef = useRef(false);
@@ -424,13 +425,13 @@ export function useRegistroConductorLogic() {
     setEsperaReenvioOtp(ESPERA_REENVIO_OTP_SEGUNDOS);
   }
 
-  async function crearCuentaParaContinuar() {
+  async function crearCuentaParaContinuar(gestionarEstadoEnvio = true) {
     if (!validarPaso(0)) return false;
     if (!tieneSupabaseConfigurado()) {
       setError("Supabase no está configurado. El registro no está disponible en este entorno.");
       return false;
     }
-    setEnviando(true);
+    if (gestionarEstadoEnvio) setEnviando(true);
     setError(null);
     try {
       const cliente = crearClienteNavegador();
@@ -451,6 +452,12 @@ export function useRegistroConductorLogic() {
       });
       if (errorAuth) throw errorAuth;
       if (!datosAuth.user) throw new Error("No se pudo crear la cuenta. Intenta de nuevo.");
+      // Protección contra usuarios ficticios de correo duplicado (sin identidades ni sesión):
+      // evita atrapar al usuario en la pantalla OTP por un correo que no se enviará.
+      if (!datosAuth.session && datosAuth.user.identities?.length === 0) {
+        setError("No pudimos completar el registro. Si ya tienes una cuenta, inicia sesión o recupera tu contraseña.");
+        return false;
+      }
       limpiarBorradorRegistroLocal();
       if (datosAuth.session) {
         await prepararSolicitudBorrador(cliente);
@@ -464,7 +471,7 @@ export function useRegistroConductorLogic() {
       setError(traducirErrorAuth(err));
       return false;
     } finally {
-      setEnviando(false);
+      if (gestionarEstadoEnvio) setEnviando(false);
     }
   }
 
@@ -563,20 +570,16 @@ export function useRegistroConductorLogic() {
 
   async function crearCuenta(e: FormEvent) {
     e.preventDefault();
-    const todoValido = PASOS_REGISTRO.every((_, indice) => validarPaso(indice, false, true));
+    const todoValido = PASOS_REGISTRO.every((_, indice) => validarPaso(indice, false, false));
     if (!todoValido) {
       const primerPasoConError = PASOS_REGISTRO.findIndex((_, indice) => !validarPaso(indice));
       setPaso(primerPasoConError >= 0 ? primerPasoConError : paso);
       return;
     }
     if (!tieneSupabaseConfigurado()) {
-      setError(" El registro no está disponible en este entorno.");
+      setError("El registro no está disponible en este entorno.");
       return;
     }
-    aceptacionLegalAlEnviarRef.current = true;
-    aceptadosEnRef.current = new Date().toISOString();
-    setAceptaTerminos(true);
-    setConfirmaPrivacidad(true);
 
     setEnviando(true);
     setError(null);
@@ -586,7 +589,7 @@ export function useRegistroConductorLogic() {
     try {
       const cliente = crearClienteNavegador();
       if (!sesionAutenticada) {
-        const cuentaLista = await crearCuentaParaContinuar();
+        const cuentaLista = await crearCuentaParaContinuar(false);
         if (!cuentaLista) return;
         cuentaCreada = true;
       }
@@ -841,6 +844,7 @@ export function useRegistroConductorLogic() {
       autorizaVerificacion ? { tipoDocumento: "autorizacion_antecedentes" as const, version: 1 } : null,
       declaraSinSuspensiones ? { tipoDocumento: "declaracion_suspensiones" as const, version: 1 } : null,
     ].filter((valor): valor is NonNullable<typeof valor> => valor !== null);
+    const firmaConsentimientos = JSON.stringify(consentimientos);
     const firma = JSON.stringify({ expediente, paso, consentimientos });
     if (firma === ultimoGuardadoRemotoRef.current) return;
     setEstadoGuardadoRemoto("guardando");
@@ -848,7 +852,10 @@ export function useRegistroConductorLogic() {
     const timer = setTimeout(async () => {
       try {
         const cliente = crearClienteNavegador();
-        if (consentimientos.length) await registrarConsentimientosConductor(cliente, solicitudRemotaId, consentimientos, canalRegistro(), VERSION_APP_REGISTRO);
+        if (consentimientos.length && firmaConsentimientos !== ultimoConsentimientoGuardadoRef.current) {
+          await registrarConsentimientosConductor(cliente, solicitudRemotaId, consentimientos, canalRegistro(), VERSION_APP_REGISTRO);
+          ultimoConsentimientoGuardadoRef.current = firmaConsentimientos;
+        }
         await guardarBorradorConductor(cliente, expediente, paso + 1);
         ultimoGuardadoRemotoRef.current = firma;
         setEstadoGuardadoRemoto("guardado");
@@ -874,10 +881,18 @@ export function useRegistroConductorLogic() {
     const solicitudId = solicitudRemotaIdRef.current ?? solicitudRemotaId;
     if (!solicitudId) return;
 
+    const MAX_INTENTOS_POLLING = 120;
     let cancelado = false;
+    let intentos = 0;
     let timer: ReturnType<typeof setTimeout>;
 
     const verificar = async () => {
+      if (cancelado || intentos >= MAX_INTENTOS_POLLING) return;
+      if (typeof document !== "undefined" && document.visibilityState === "hidden") {
+        timer = setTimeout(verificar, 5000);
+        return;
+      }
+      intentos += 1;
       try {
         const cliente = crearClienteNavegador();
         const estado = await obtenerEstadoVerificacionDiditConductor(cliente, solicitudId);
@@ -890,16 +905,25 @@ export function useRegistroConductorLogic() {
           router.push(sesionActivaTrasRegistro ? "/panel" : "/login");
           return;
         }
-        timer = setTimeout(verificar, 3000);
+        timer = setTimeout(verificar, Math.min(3000 + intentos * 250, 15000));
       } catch {
         timer = setTimeout(verificar, 5000);
       }
     };
 
-    verificar();
+    const alVolverVisible = () => {
+      if (document.visibilityState === "visible" && !cancelado && intentos < MAX_INTENTOS_POLLING) {
+        clearTimeout(timer);
+        void verificar();
+      }
+    };
+
+    document.addEventListener("visibilitychange", alVolverVisible);
+    void verificar();
     return () => {
       cancelado = true;
       clearTimeout(timer);
+      document.removeEventListener("visibilitychange", alVolverVisible);
     };
   }, [mostrarVerificacionDidit, urlVerificacionDidit, solicitudRemotaId, sesionActivaTrasRegistro, router, registrarTelemetria]);
 
@@ -937,8 +961,8 @@ export function useRegistroConductorLogic() {
     && !validarCampoRegistroConductor("telefono", telefono)
     && !validarCampoRegistroConductor("email", email)
     && (sesionAutenticada || (!validarCampoRegistroConductor("password", password) && Boolean(confirmacionPassword) && password === confirmacionPassword));
-  const domicilioYContactoCompletos = (["codigoPostal", "estado", "ciudad", "colonia", "calle", "numero", "referencias", "contactoEmergenciaNombre", "contactoEmergenciaTelefono"] as const).every((campo) => {
-    const valores = { codigoPostal, estado, ciudad, colonia, calle, numero, referencias, contactoEmergenciaNombre, contactoEmergenciaTelefono };
+  const domicilioYContactoCompletos = (["nombre", "apellidos", "curp", "codigoPostal", "estado", "ciudad", "colonia", "calle", "numero", "referencias", "contactoEmergenciaNombre", "contactoEmergenciaTelefono"] as const).every((campo) => {
+    const valores = { nombre, apellidos, curp, codigoPostal, estado, ciudad, colonia, calle, numero, referencias, contactoEmergenciaNombre, contactoEmergenciaTelefono };
     return !validarCampoRegistroConductor(campo, valores[campo]);
   });
 

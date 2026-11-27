@@ -4,6 +4,7 @@ import { crearClienteServidor } from "@ruum/api/supabase/server-client";
 import { obtenerIp, rateLimitConVentana } from "@/lib/csp-rate-limit";
 import { normalizarCorreoRegistro, soloDigitos } from "@/lib/registro-usuario";
 import { verificarCsrfORechazar } from "@/lib/csrf";
+import { registrarConsentimientoPostAuth } from "@/lib/consentimiento-usuario";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -96,6 +97,8 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    await registrarConsentimientoPostAuth(supabase, request.headers.get("user-agent"));
 
     return NextResponse.json({ ok: true });
   } catch (e) {

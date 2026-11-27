@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { validarSesionYRolUsuario } from "@/lib/guardia-rol-usuario";
 import { crearClienteServicio } from "@/lib/supabase-servicio";
 import { verificarCsrfORechazar } from "@/lib/csrf";
-import { consumirTokenTelefono } from "@/lib/phone-verification";
+import { consumirTokenTelefono, liberarTokenTelefono } from "@/lib/phone-verification";
 import { soloDigitos } from "@/lib/registro-usuario";
 import { logStructuredWarn } from "@/lib/logger";
 
@@ -36,15 +36,21 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: verificacion.error ?? "No pudimos validar la verificación." }, { status: 400 });
   }
 
+  let actualizado = false;
   try {
     const servicio = crearClienteServicio();
     const { error } = await servicio.auth.admin.updateUserById(user.id, {
       user_metadata: { ...user.user_metadata, telefono_verificado: true, telefono_verificado_en: new Date().toISOString() },
     });
     if (error) throw error;
+    actualizado = true;
   } catch (err) {
     logStructuredWarn("api/cuenta/telefono", "actualizar_telefono_verificado_fallido", err);
     return NextResponse.json({ error: "No pudimos guardar la verificación. Intenta de nuevo." }, { status: 503 });
+  } finally {
+    if (!actualizado) {
+      await liberarTokenTelefono(telefono, token);
+    }
   }
 
   // Refresca el JWT para que user_metadata refleje el cambio de inmediato.

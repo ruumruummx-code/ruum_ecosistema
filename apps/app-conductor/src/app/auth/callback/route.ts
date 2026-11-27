@@ -9,14 +9,43 @@ type TipoOtpSanitizado = "signup" | "recovery" | "magiclink" | "email";
 const COOKIE_RECOVERY = COOKIE_RECOVERY_CONDUCTOR;
 
 function opcionesCookieRecovery() {
-  const isProd = process.env.NODE_ENV === "production";
+  const secure = process.env.NODE_ENV !== "development";
   return {
     httpOnly: true as const,
-    secure: isProd,
+    secure,
     sameSite: "lax" as const,
     maxAge: MAX_AGE_RECOVERY_S,
     path: RUTA_COOKIE_RECOVERY,
   };
+}
+
+type CookieSesion = { name: string; value: string };
+
+function esCookieSesionSupabase(nombre: string) {
+  return nombre.startsWith("sb-") && nombre.includes("-auth-token") && !nombre.endsWith("-code-verifier");
+}
+
+async function revertirCambioDeCuenta(
+  cookieStore: Awaited<ReturnType<typeof cookies>>,
+  supabase: ReturnType<typeof crearClienteServidor>,
+  sesionPrevia: CookieSesion[]
+) {
+  try {
+    await supabase.auth.signOut({ scope: "local" });
+  } catch {
+    // best-effort
+  }
+  try {
+    for (const cookie of cookieStore.getAll()) {
+      if (esCookieSesionSupabase(cookie.name)) cookieStore.delete(cookie.name);
+    }
+    const secure = process.env.NODE_ENV !== "development";
+    for (const cookie of sesionPrevia) {
+      cookieStore.set(cookie.name, cookie.value, { path: "/", sameSite: "lax", secure, httpOnly: false });
+    }
+  } catch {
+    // best-effort
+  }
 }
 
 async function setRecoveryCookie(cookieStore: Awaited<ReturnType<typeof cookies>>, supabase: ReturnType<typeof crearClienteServidor>) {
@@ -108,14 +137,32 @@ export async function GET(request: NextRequest) {
     }
   }
 
+  // Detectar sesión previa para evitar Login CSRF (reemplazo silencioso de sesión)
+  let usuarioPrevioId: string | null = null;
+  try {
+    const { data: dataPrevia } = await supabase.auth.getUser();
+    usuarioPrevioId = dataPrevia?.user?.id ?? null;
+  } catch {
+    // Sin sesión previa activa
+  }
+  const sesionPrevia: CookieSesion[] = usuarioPrevioId
+    ? cookieStore.getAll().filter((c) => esCookieSesionSupabase(c.name)).map(({ name, value }) => ({ name, value }))
+    : [];
+  const destinoCuentaDistinta = "/login?reason=cuenta_distinta";
+
   // 1. Flujo PKCE (autorización por código)
   if (code) {
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data: dataAuth, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
       if (type === "recovery") {
         await setRecoveryCookie(cookieStore, supabase);
       } else {
         clearRecoveryCookie(cookieStore);
+        const nuevoUserId = dataAuth?.user?.id ?? null;
+        if (usuarioPrevioId && nuevoUserId && nuevoUserId !== usuarioPrevioId) {
+          await revertirCambioDeCuenta(cookieStore, supabase, sesionPrevia);
+          return NextResponse.redirect(`${origin}${destinoCuentaDistinta}`);
+        }
       }
       const destino = await destinoComoConductor();
       return NextResponse.redirect(`${origin}${destino}`);
@@ -127,7 +174,7 @@ export async function GET(request: NextRequest) {
 
   // 2. Flujo OTP / Hash (verificación de token por correo)
   if (tokenHash) {
-    const { error } = await supabase.auth.verifyOtp({
+    const { data: dataAuth, error } = await supabase.auth.verifyOtp({
       type,
       token_hash: tokenHash,
     });
@@ -136,6 +183,11 @@ export async function GET(request: NextRequest) {
         await setRecoveryCookie(cookieStore, supabase);
       } else {
         clearRecoveryCookie(cookieStore);
+        const nuevoUserId = dataAuth?.user?.id ?? null;
+        if (usuarioPrevioId && nuevoUserId && nuevoUserId !== usuarioPrevioId) {
+          await revertirCambioDeCuenta(cookieStore, supabase, sesionPrevia);
+          return NextResponse.redirect(`${origin}${destinoCuentaDistinta}`);
+        }
       }
       const destino = await destinoComoConductor();
       return NextResponse.redirect(`${origin}${destino}`);
@@ -146,7 +198,10 @@ export async function GET(request: NextRequest) {
   }
 
   // 3. Respuesta HTML/JS ligera para capturar fragmentos de hash en el navegador (#access_token=...)
-  // P2 CSP: script externo sin interpolación para permitir hash/nonce y evitar 'unsafe-inline'
+  // CSP3 ('strict-dynamic' + nonce): el script externo debe llevar el nonce inyectado por middleware.
+  const nonce = request.headers.get("x-nonce") ?? "";
+  const attrNonce = nonce ? ` nonce="${nonce.replace(/[^A-Za-z0-9+/=_-]/g, "")}"` : "";
+
   const htmlFallback = `
     <!DOCTYPE html>
     <html lang="es">
@@ -163,7 +218,7 @@ export async function GET(request: NextRequest) {
       <div class="card">
         <p>Verificando tu enlace...</p>
       </div>
-      <script src="/auth-callback-fallback.js"></script>
+      <script src="/auth-callback-fallback.js"${attrNonce}></script>
     </body>
     </html>
   `;
