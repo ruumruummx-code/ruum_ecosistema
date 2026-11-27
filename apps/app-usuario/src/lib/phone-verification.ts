@@ -20,11 +20,7 @@ function obtenerSecretoFirma(): string {
   return s;
 }
 
-/**
- * Genera un token HMAC criptográficamente firmado que certifica que el número
- * de teléfono de 10 dígitos fue validado exitosamente contra Twilio Verify.
- */
-export function generarTokenTelefono(telefonoDiezDigitos: string): string {
+function firmarTokenTelefono(telefonoDiezDigitos: string): { token: string; nonce: string } {
   const tel = soloDigitos(telefonoDiezDigitos, 10);
   const timestamp = Date.now().toString();
   const secreto = obtenerSecretoFirma();
@@ -35,7 +31,15 @@ export function generarTokenTelefono(telefonoDiezDigitos: string): string {
     .update(`${tel}:${timestamp}:${nonce}`)
     .digest("hex");
 
-  const token = `${tel}:${timestamp}:${nonce}:${hmac}`;
+  return { token: `${tel}:${timestamp}:${nonce}:${hmac}`, nonce };
+}
+
+/**
+ * Genera un token HMAC criptográficamente firmado que certifica que el número
+ * de teléfono de 10 dígitos fue validado exitosamente contra Twilio Verify.
+ */
+export function generarTokenTelefono(telefonoDiezDigitos: string): string {
+  const { token, nonce } = firmarTokenTelefono(telefonoDiezDigitos);
   const redis = getRedis();
   if (redis) {
     void redis.set(`phone-token:${nonce}`, "1", { nx: true, ex: TOKEN_NONCE_TTL_SEC }).catch(() => undefined);
@@ -45,10 +49,9 @@ export function generarTokenTelefono(telefonoDiezDigitos: string): string {
   return token;
 }
 
-/** Variante usada por la ruta HTTP: espera la persistencia del nonce antes de responder. */
+/** Variante usada por la ruta HTTP: espera la persistencia del nonce antes de responder (una sola escritura Redis). */
 export async function generarTokenTelefonoDurable(telefonoDiezDigitos: string): Promise<string> {
-  const token = generarTokenTelefono(telefonoDiezDigitos);
-  const nonce = token.split(":")[2];
+  const { token, nonce } = firmarTokenTelefono(telefonoDiezDigitos);
   const redis = getRedis();
   if (!redis && process.env.NODE_ENV === "production") {
     throw new Error("PHONE_NONCE_STORE_UNAVAILABLE");
@@ -60,6 +63,8 @@ export async function generarTokenTelefonoDurable(telefonoDiezDigitos: string): 
       logStructuredWarn("auth/phone-verification", "nonce_redis_fallido", error);
       throw new Error("PHONE_NONCE_STORE_UNAVAILABLE");
     }
+  } else {
+    noncesLocales.set(nonce, Date.now() + TOKEN_NONCE_TTL_SEC * 1000);
   }
   return token;
 }
@@ -299,7 +304,7 @@ export async function enviarCodigoTwilioVerify(
       return {
         ok: false,
         status: "error",
-        error: datos?.message || "No pudimos enviar el mensaje SMS. Revisa tu número e intenta de nuevo.",
+        error: "No pudimos enviar el mensaje SMS. Revisa tu número e intenta de nuevo.",
       };
     }
 
@@ -392,7 +397,7 @@ export async function verificarCodigoTwilioVerify(
       return {
         ok: false,
         status: "failed",
-        error: datos?.message || "No pudimos validar el código ingresado.",
+        error: "No pudimos validar el código ingresado.",
       };
     }
 

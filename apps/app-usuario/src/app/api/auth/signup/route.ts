@@ -17,6 +17,7 @@ import {
 } from "@/lib/phone-verification";
 import { passwordCumpleRequisitos } from "@ruum/shared/utils";
 import { verificarCsrfORechazar } from "@/lib/csrf";
+import { registrarConsentimientoPostAuth } from "@/lib/consentimiento-usuario";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -216,6 +217,10 @@ export async function POST(request: NextRequest) {
     // identidades y sin sesión. Esa respuesta no implica que haya enviado correo.
     if (!data.session && data.user.identities?.length === 0) {
       return NextResponse.json({ error: MENSAJE_REGISTRO_NO_COMPLETADO }, { status: 400 });
+    }
+
+    if (data.session) {
+      await registrarConsentimientoPostAuth(supabase, request.headers.get("user-agent"));
     }
 
     altaCompletada = true;

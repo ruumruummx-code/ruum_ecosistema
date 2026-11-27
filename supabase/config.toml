@@ -167,7 +167,11 @@ site_url = "http://localhost:3000"
 # excluía http://localhost:3000 (el origen real en `next dev`).
 additional_redirect_urls = [
   "http://localhost:3000",
+  "http://localhost:3001",
+  "http://localhost:3002",
   "http://127.0.0.1:3000",
+  "http://127.0.0.1:3001",
+  "http://127.0.0.1:3002",
   "https://127.0.0.1:3000",
 ]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).

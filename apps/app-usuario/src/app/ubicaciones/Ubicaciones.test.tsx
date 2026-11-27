@@ -8,7 +8,7 @@ import {
   within,
 } from "@testing-library/react";
 import type { Database } from "@ruum/shared/types";
-import { UbicacionesDesktop } from "./UbicacionesDesktop";
+import { Ubicaciones } from "./Ubicaciones";
 import {
   construirUbicaciones,
   direccionCompleta,
@@ -21,6 +21,7 @@ import {
   leerLibreta,
   validarDatosUbicacion,
   type DatosUbicacion,
+  type OperacionUbicacion,
 } from "./libreta-ubicaciones";
 const { refresh, push, mutar, copiar } = vi.hoisted(() => ({
   refresh: vi.fn(),
@@ -33,6 +34,25 @@ vi.mock("./cliente-ubicaciones", () => ({ guardarOperacionUbicacion: mutar }));
 vi.mock("next/dynamic", () => ({
   default: () => () => <div>Mapa de la ubicación</div>,
 }));
+/* jsdom no implementa <dialog> modal; Sheet lo usa. */
+HTMLDialogElement.prototype.showModal ??= function (this: HTMLDialogElement) {
+  this.setAttribute("open", "");
+};
+HTMLDialogElement.prototype.close ??= function (this: HTMLDialogElement) {
+  this.removeAttribute("open");
+};
+function simularAncho(ancho: number) {
+  window.matchMedia = vi.fn((query: string) => ({
+    matches: Number(/min-width:\s*(\d+)px/.exec(query)?.[1] ?? 0) <= ancho,
+    media: query,
+    onchange: null,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  })) as unknown as typeof window.matchMedia;
+}
 type Usuario = Database["public"]["Tables"]["usuarios"]["Row"];
 type Traslado = Database["public"]["Views"]["pasaporte_digital"]["Row"];
 const usuario = {
@@ -75,6 +95,7 @@ const id = "guardada:80000000-0000-4000-8000-000000000001";
 const lista = () => construirUbicaciones(usuario, traslados);
 beforeEach(() => {
   vi.clearAllMocks();
+  simularAncho(1280);
   copiar.mockResolvedValue(undefined);
   Object.defineProperty(navigator, "clipboard", {
     configurable: true,
@@ -213,9 +234,9 @@ describe("Libreta de ubicaciones", () => {
     ).toEqual(libretaVacia());
   });
 });
-describe("Mis ubicaciones desktop", () => {
+describe("Mis ubicaciones", () => {
   it("selecciona filas y sincroniza metadata y enlace", () => {
-    render(<UbicacionesDesktop ubicaciones={lista()} />);
+    render(<Ubicaciones ubicaciones={lista()} />);
     fireEvent.click(screen.getByRole("button", { name: "Ver Juárez 25" }));
     const detalle = screen.getByRole("complementary", {
       name: "Detalle de Juárez 25",
@@ -230,7 +251,7 @@ describe("Mis ubicaciones desktop", () => {
     expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
   });
   it("filtra sin acentos, admite vacío y limpia filtros", () => {
-    render(<UbicacionesDesktop ubicaciones={lista()} />);
+    render(<Ubicaciones ubicaciones={lista()} />);
     fireEvent.change(screen.getByRole("searchbox"), {
       target: { value: "JUAREZ" },
     });
@@ -245,7 +266,7 @@ describe("Mis ubicaciones desktop", () => {
     expect(screen.getAllByRole("listitem")).toHaveLength(2);
   });
   it("usa una sola clasificación y permite acceder a una dirección por cada rol", () => {
-    render(<UbicacionesDesktop ubicaciones={lista()} />);
+    render(<Ubicaciones ubicaciones={lista()} />);
     expect(screen.queryByRole("combobox", { name: "Tipo de ubicación" })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Orígenes (2)" }));
     expect(screen.getAllByRole("listitem")).toHaveLength(2);
@@ -255,7 +276,7 @@ describe("Mis ubicaciones desktop", () => {
   });
   it("identifica de forma explícita el destino y ofrece ambos campos en el panel", () => {
     const destino = { ...lista()[1], fuentes: ["destino"] } satisfies UbicacionUsuario;
-    render(<UbicacionesDesktop ubicaciones={[destino]} />);
+    render(<Ubicaciones ubicaciones={[destino]} />);
     const fila = within(screen.getByRole("listitem"));
     const panel = within(screen.getByRole("complementary"));
     expect(fila.getByRole("link", { name: "Usar como destino" })).toHaveAttribute("href", enlaceBuscarUbicacion(destino, "destino"));
@@ -263,7 +284,7 @@ describe("Mis ubicaciones desktop", () => {
     expect(panel.getByRole("link", { name: "Usar como destino" })).toHaveAttribute("href", enlaceBuscarUbicacion(destino, "destino"));
   });
   it("copia y notifica únicamente el resultado del portapapeles", async () => {
-    render(<UbicacionesDesktop ubicaciones={lista()} />);
+    render(<Ubicaciones ubicaciones={lista()} />);
     fireEvent.click(screen.getByRole("button", { name: "Copiar dirección" }));
     await waitFor(() =>
       expect(screen.getByText("Dirección copiada")).toBeInTheDocument(),
@@ -278,7 +299,7 @@ describe("Mis ubicaciones desktop", () => {
     );
   });
   it("persiste favoritos y conserva el estado ante un error", async () => {
-    render(<UbicacionesDesktop ubicaciones={lista()} />);
+    render(<Ubicaciones ubicaciones={lista()} />);
     fireEvent.click(
       screen.getByRole("button", {
         name: "Marcar ubicación seleccionada como frecuente",
@@ -315,7 +336,7 @@ describe("Mis ubicaciones desktop", () => {
       usos: 0,
       ultimoUso: null,
     }));
-    render(<UbicacionesDesktop ubicaciones={muchas} />);
+    render(<Ubicaciones ubicaciones={muchas} />);
     expect(screen.getAllByRole("listitem")).toHaveLength(10);
     fireEvent.click(screen.getByRole("button", { name: "Página 3" }));
     expect(screen.getAllByRole("listitem")).toHaveLength(3);
@@ -324,7 +345,7 @@ describe("Mis ubicaciones desktop", () => {
     );
   });
   it("abre el editor real del perfil y refresca la lista", () => {
-    render(<UbicacionesDesktop ubicaciones={lista()} />);
+    render(<Ubicaciones ubicaciones={lista()} />);
     fireEvent.click(screen.getByRole("button", { name: "Editar" }));
     expect(push).toHaveBeenCalledWith("/cuenta/datos-personales");
     fireEvent.click(
@@ -333,7 +354,7 @@ describe("Mis ubicaciones desktop", () => {
     expect(refresh).toHaveBeenCalled();
   });
   it("presenta un estado vacío útil", () => {
-    render(<UbicacionesDesktop ubicaciones={[]} />);
+    render(<Ubicaciones ubicaciones={[]} />);
     expect(
       screen.getByRole("heading", {
         name: "Aún no tienes direcciones registradas",
@@ -342,5 +363,31 @@ describe("Mis ubicaciones desktop", () => {
     expect(
       screen.getByRole("link", { name: "Completar domicilio del perfil" }),
     ).toHaveAttribute("href", "/cuenta/datos-personales");
+  });
+
+  it("en pantallas angostas no abre detalle hasta elegir y lo muestra en una hoja", () => {
+    simularAncho(390);
+    render(<Ubicaciones ubicaciones={lista()} />);
+    expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Ver Juárez 25" }));
+    const hoja = within(screen.getByRole("dialog", { name: "Juárez 25" }));
+    expect(hoja.getByText("19.2, -99.5")).toBeInTheDocument();
+    expect(hoja.getByRole("link", { name: "Usar como origen" })).toHaveAttribute("href", enlaceBuscarUbicacion(lista()[1], "origen"));
+    fireEvent.click(hoja.getByRole("button", { name: "Cerrar detalle" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+  it("crea una ubicación desde el editor y la deja seleccionada", async () => {
+    mutar.mockImplementationOnce(async (op: OperacionUbicacion) => ({ ok: true, libreta: aplicarOperacionLibreta(libretaVacia(), op) }));
+    render(<Ubicaciones ubicaciones={lista()} />);
+    fireEvent.click(screen.getByRole("button", { name: "Nueva ubicación" }));
+    const editor = within(screen.getByRole("dialog", { name: "Nueva ubicación" }));
+    fireEvent.change(editor.getByLabelText("Alias o nombre"), { target: { value: "Oficina Norte" } });
+    fireEvent.change(editor.getByLabelText("Dirección"), { target: { value: "Insurgentes 100" } });
+    fireEvent.change(editor.getByLabelText("Ciudad o municipio"), { target: { value: "Toluca" } });
+    fireEvent.click(editor.getByRole("button", { name: "Guardar ubicación" }));
+    await waitFor(() => expect(screen.getByRole("complementary", { name: "Detalle de Oficina Norte" })).toBeInTheDocument());
+    expect(screen.queryByRole("dialog", { name: "Nueva ubicación" })).not.toBeInTheDocument();
+    expect(screen.getByText("Ubicación guardada")).toBeInTheDocument();
   });
 });

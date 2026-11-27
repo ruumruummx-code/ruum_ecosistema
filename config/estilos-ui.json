@@ -41,7 +41,8 @@
     "apps/app-usuario/src/app/cuenta/page.tsx",
     "apps/app-usuario/src/app/cuenta/Cuenta.tsx",
     "apps/app-usuario/src/app/cuenta/DialogoCuenta.tsx",
-    "apps/app-usuario/src/app/cuenta/cuenta-model.ts"
+    "apps/app-usuario/src/app/cuenta/cuenta-model.ts",
+    "apps/app-usuario/src/app/ubicaciones"
   ],
   "excluir": [
     "packages/ui/src/styles/tokens.css",
@@ -87,9 +88,6 @@
     "apps/app-usuario/src/app/soporte/FormularioSoporte.tsx": 66,
     "apps/app-usuario/src/app/soporte/SoporteResponsive.tsx": 1,
     "apps/app-usuario/src/app/TemaProvider.tsx": 2,
-    "apps/app-usuario/src/app/ubicaciones/MapaUbicacion.tsx": 1,
-    "apps/app-usuario/src/app/ubicaciones/ubicaciones-desktop.module.css": 191,
-    "apps/app-usuario/src/app/ubicaciones/UbicacionesMovil.tsx": 19,
     "apps/app-usuario/src/app/verificacion/DiditVerificationModal.tsx": 38,
     "apps/app-usuario/src/app/verificacion/page.tsx": 55,
     "apps/app-usuario/src/app/verificacion/VerificacionForm.tsx": 228,

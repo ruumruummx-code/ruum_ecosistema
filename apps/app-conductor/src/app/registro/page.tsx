@@ -351,13 +351,6 @@ export default function PaginaRegistroConductor() {
               </Aviso>
             )}
 
-                            {r.paso === 2 && (
-                  <p className={styles.microcopy}>
-                    Al continuar, declaras que tu licencia es válida y autorizas la verificación de antecedentes y datos biométricos. <a href="/legal/privacidad?volver=%2Fregistro" target="_blank" rel="noopener noreferrer">Privacidad</a> · <a href="/legal/terminos?volver=%2Fregistro" target="_blank" rel="noopener noreferrer">Términos</a>
-                    <BaseButton variant="ghost" type="button" className={styles.legalTrigger} onClick={() => r.setMostrarDetalleConsentimiento(true)}>Ver declaración</BaseButton>
-                  </p>
-                )}
-
                 {r.paso === 0 && (
                   <p className={styles.accountLogin} hidden={accountSection==="security" && !r.sesionAutenticada}>
                     ¿Ya tienes una cuenta? <Link href="/login">Entrar</Link>
@@ -385,7 +378,8 @@ export default function PaginaRegistroConductor() {
                         r.documentoDisponible("licenciaFrente") &&
                         r.documentoDisponible("licenciaReverso") &&
                         r.documentoDisponible("identificacionOficial")
-                      ))
+                      )) ||
+                    (r.paso === 4 && (!r.aceptaTerminos || !r.confirmaPrivacidad))
                   }
                 >
                   {!r.registroListo
@@ -397,7 +391,7 @@ export default function PaginaRegistroConductor() {
                     : r.paso === 1
                     ? "Guardar y continuar"
                     : r.paso === 4
-                    ? "Crear cuenta"
+                    ? "Enviar solicitud"
                     : "Continuar"}
                   {(r.paso < 2 || r.paso >= 3) && <RegistrationIcon name="arrow" />}
                 </BaseButton>
