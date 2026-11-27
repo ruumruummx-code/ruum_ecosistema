@@ -165,13 +165,15 @@ export async function manejarInicioDidit(req: Request, entorno: Pick<typeof Deno
 
   const cuentaSandbox = entorno.get("DIDIT_SANDBOX_CONDUCTOR_AUTH_USER_ID")?.trim();
   const esSandboxConductor = !esFlujoUsuario && sesion.user.id === cuentaSandbox;
+  const esSandboxUsuario = esFlujoUsuario && entorno.get("DIDIT_SANDBOX_USUARIO_ENABLED") === "true";
+  const esSandbox = esSandboxConductor || esSandboxUsuario;
   const diditApiKey = entorno.get(
-    esSandboxConductor ? "DIDIT_SANDBOX_API_KEY" : "DIDIT_API_KEY",
+    esSandbox ? "DIDIT_SANDBOX_API_KEY" : "DIDIT_API_KEY",
   ) ?? "";
   const diditWorkflowId = entorno.get(
-    esSandboxConductor ? "DIDIT_SANDBOX_WORKFLOW_ID" : "DIDIT_WORKFLOW_ID",
+    esSandbox ? "DIDIT_SANDBOX_WORKFLOW_ID" : "DIDIT_WORKFLOW_ID",
   ) ?? "";
-  const callbackUrl = esSandboxConductor ? "" : entorno.get("DIDIT_CALLBACK_URL") ?? "";
+  const callbackUrl = esSandbox ? "" : entorno.get("DIDIT_CALLBACK_URL") ?? "";
   if (!diditApiKey || !diditWorkflowId || !UUID.test(diditWorkflowId) || (callbackUrl && !esCallbackValido(callbackUrl))) {
     console.error("iniciar-verificacion-didit: configuración Didit ausente o inválida");
     return json({ error: "Servicio temporalmente no disponible." }, 503);
@@ -182,7 +184,7 @@ export async function manejarInicioDidit(req: Request, entorno: Pick<typeof Deno
      queda en `pendiente` para siempre aunque el usuario complete Didit.
      Se bloquea la creación de la sesión para evitar estados huérfanos. */
   if (
-    !esSandboxConductor &&
+    !esSandbox &&
     (!callbackUrl || !callbackUrl.includes("/functions/v1/webhook-didit"))
   ) {
     console.error(
@@ -192,7 +194,7 @@ export async function manejarInicioDidit(req: Request, entorno: Pick<typeof Deno
   }
 
   let portraitImage: string | null = null;
-  if (esFlujoUsuario) {
+  if (esFlujoUsuario && !esSandbox) {
     const rutaFoto = rutaFotoPerfilDidit(fotoPerfilUrl, url, sesion.user.id);
     if (rutaFoto) {
       const { data: fotoFirmada, error: errorFoto } = await servicio.storage
@@ -206,7 +208,7 @@ export async function manejarInicioDidit(req: Request, entorno: Pick<typeof Deno
 
   const payloadDidit = construirPayloadSesionDidit({
     workflowId: diditWorkflowId,
-    vendorData: esSandboxConductor ? undefined : vendorData,
+    vendorData: esSandbox ? undefined : vendorData,
     callbackUrl,
     portraitImage,
   });
@@ -308,6 +310,9 @@ export async function manejarInicioDidit(req: Request, entorno: Pick<typeof Deno
   }
 
   // El Sandbox se limita al flujo alojado de prueba.
+  if (esSandboxUsuario) {
+    return json({ url: verificationUrl, sandbox: true }, 201);
+  }
   if (esSandboxConductor) {
     return json({ session_id: sessionId, url: verificationUrl }, 201);
   }

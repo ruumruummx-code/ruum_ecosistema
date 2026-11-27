@@ -516,7 +516,7 @@ export async function auditarAccesoDocumentoPii(
 }
 
 export function solicitarSesionDiditUsuario(cliente: Cliente) {
-  return cliente.functions.invoke<{ url?: string; sessionId?: string }>("iniciar-verificacion-didit", {
+  return cliente.functions.invoke<{ url?: string; sessionId?: string; session_id?: string; sandbox?: boolean }>("iniciar-verificacion-didit", {
     body: { tipo: "usuario" }
   });
 }
@@ -525,7 +525,7 @@ export function solicitarSesionDiditUsuario(cliente: Cliente) {
  * Inicia una sesión de verificación de identidad con Didit (OCR + liveness + face match)
  * para el usuario/pasajero actual. Devuelve la URL del flujo hospedado por Didit.
  */
-export async function iniciarVerificacionDiditUsuario(cliente: Cliente): Promise<{ url: string; sessionId?: string }> {
+export async function iniciarVerificacionDiditUsuario(cliente: Cliente): Promise<{ url: string; sessionId?: string; sandbox?: boolean }> {
   const { data: sesion } = await cliente.auth.getUser();
   if (!sesion.user) throw new Error("Inicia sesión para continuar con la verificación.");
 
@@ -551,12 +551,17 @@ export async function iniciarVerificacionDiditUsuario(cliente: Cliente): Promise
     session_url?: string;
     session_id?: string;
     sessionId?: string;
+    sandbox?: boolean;
   } | null;
   const urlFinal = respuesta?.url ?? respuesta?.verification_url ?? respuesta?.session_url;
   if (!urlFinal || typeof urlFinal !== "string" || !urlFinal.startsWith("https://")) {
     throw new Error("No se recibió una URL válida del servicio de verificación de identidad.");
   }
-  return { url: urlFinal, sessionId: respuesta?.session_id ?? respuesta?.sessionId };
+  return {
+    url: urlFinal,
+    sessionId: respuesta?.session_id ?? respuesta?.sessionId,
+    ...(respuesta?.sandbox === true ? { sandbox: true } : {}),
+  };
 }
 
 /**
