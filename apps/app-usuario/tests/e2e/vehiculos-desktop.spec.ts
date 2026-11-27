@@ -20,7 +20,7 @@ test("Vehículos desktop: fidelidad, selección, filtros y scroll interno", asyn
       .querySelector<HTMLElement>("script[data-nextjs-dev-overlay]")
       ?.style.setProperty("display", "none", "important"),
   );
-  const main = page.getByTestId("vehicles-desktop");
+  const main = page.locator('[data-marco="escritorio"]').getByTestId("vehiculos");
   await expect(
     main.getByRole("heading", { name: "Mis vehículos", exact: true }),
   ).toBeVisible();
@@ -64,7 +64,7 @@ test("Vehículos desktop: fidelidad, selección, filtros y scroll interno", asyn
         main: el.scrollHeight - el.clientHeight,
         listX: list.scrollWidth - list.clientWidth,
         listY: getComputedStyle(list).overflowY,
-        panel: panel.scrollHeight - panel.clientHeight,
+        panelY: getComputedStyle(panel).overflowY,
         content: content.scrollHeight - content.clientHeight,
       };
     });
@@ -73,7 +73,6 @@ test("Vehículos desktop: fidelidad, selección, filtros y scroll interno", asyn
       "horizontal",
       "main",
       "listX",
-      "panel",
       "content",
     ] as const)
       expect(
@@ -81,6 +80,8 @@ test("Vehículos desktop: fidelidad, selección, filtros y scroll interno", asyn
         JSON.stringify({ width, height, geometry }),
       ).toBeLessThanOrEqual(1);
     expect(geometry.listY).toBe("auto");
+    // El panel de detalle se desplaza por dentro cuando no cabe en la altura disponible.
+    expect(geometry.panelY).toBe("auto");
     for (const tab of ["Documentos", "Historial", "Información"]) {
       await main.getByRole("tab", { name: tab, exact: true }).click();
       const overflow = await main

@@ -1,5 +1,5 @@
 /** @vitest-environment jsdom */
-import { describe, expect, it, vi, afterEach } from "vitest";
+import { describe, expect, it, vi, afterEach, beforeEach } from "vitest";
 import {
   cleanup,
   fireEvent,
@@ -9,7 +9,7 @@ import {
 } from "@testing-library/react";
 import type { Vehiculo } from "../cuenta-ui";
 import type { TrasladoVehiculo } from "./vehiculos-model";
-import { VehiculosDesktop } from "./VehiculosDesktop";
+import { Vehiculos } from "./Vehiculos";
 import { nombreVehiculo } from "./VehicleListItem";
 const { refresh } = vi.hoisted(() => ({ refresh: vi.fn() }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh }) }));
@@ -52,10 +52,37 @@ const vehiculos = [
     transmision: "manual",
   } as Vehiculo,
 ];
+function simularAncho(ancho: number) {
+  Object.defineProperty(window, "matchMedia", {
+    configurable: true,
+    writable: true,
+    value: (query: string) => ({
+      matches: ancho >= Number(/min-width:\s*(\d+)px/.exec(query)?.[1] ?? 0),
+      media: query,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    }),
+  });
+}
+beforeEach(() => {
+  simularAncho(1280);
+  // jsdom no implementa <dialog>.showModal/close (lo usa Sheet).
+  HTMLDialogElement.prototype.showModal = function (this: HTMLDialogElement) {
+    this.setAttribute("open", "");
+  };
+  HTMLDialogElement.prototype.close = function (this: HTMLDialogElement) {
+    this.removeAttribute("open");
+  };
+});
+/** Radix activa la pestaña con el botón principal del ratón (mousedown), como en el navegador. */
+function seleccionarPestana(pestana: HTMLElement) {
+  fireEvent.mouseDown(pestana);
+  fireEvent.click(pestana);
+}
 afterEach(cleanup);
-describe("Mis vehículos desktop", () => {
+describe("Mis vehículos", () => {
   it("busca placas normalizadas, conserva el resultado vacío y limpia filtros", () => {
-    render(<VehiculosDesktop vehiculos={vehiculos} />);
+    render(<Vehiculos vehiculos={vehiculos} />);
     fireEvent.change(screen.getByRole("searchbox"), {
       target: { value: "abca" },
     });
@@ -78,7 +105,7 @@ describe("Mis vehículos desktop", () => {
     expect(screen.getAllByRole("listitem")).toHaveLength(2);
   });
   it("combina alias, tipo y estado sin recuperar resultados excluidos", () => {
-    render(<VehiculosDesktop vehiculos={vehiculos} />);
+    render(<Vehiculos vehiculos={vehiculos} />);
     fireEvent.change(screen.getByRole("searchbox"), {
       target: { value: "familiar" },
     });
@@ -102,7 +129,7 @@ describe("Mis vehículos desktop", () => {
   });
   it("ordena por fecha o nombre sin modificar los datos originales", () => {
     const ids = vehiculos.map((v) => v.id);
-    render(<VehiculosDesktop vehiculos={vehiculos} />);
+    render(<Vehiculos vehiculos={vehiculos} />);
     const lista = within(
       screen.getByRole("list", { name: "Vehículos guardados" }),
     );
@@ -124,7 +151,7 @@ describe("Mis vehículos desktop", () => {
         creado_en: "2026-10-25T12:00:00Z",
       },
     ] as TrasladoVehiculo[];
-    render(<VehiculosDesktop vehiculos={vehiculos} traslados={traslados} />);
+    render(<Vehiculos vehiculos={vehiculos} traslados={traslados} />);
     fireEvent.click(
       screen.getByRole("button", { name: "Ver Nissan RAV4 2025" }),
     );
@@ -138,11 +165,11 @@ describe("Mis vehículos desktop", () => {
     expect(
       panel.getByRole("link", { name: "Seleccionar para traslado" }),
     ).toHaveAttribute("href", "/viajes/nuevo?vehiculo=b");
-    fireEvent.click(panel.getByRole("tab", { name: "Documentos" }));
+    seleccionarPestana(panel.getByRole("tab", { name: "Documentos" }));
     expect(panel.getByRole("tab", { name: "Documentos" })).toHaveAttribute("aria-selected", "true");
     expect(panel.getByText("Tarjeta de circulación")).toBeInTheDocument();
     expect(panel.getByText(/No hay archivos de documentos vinculados a este vehículo/)).toBeInTheDocument();
-    fireEvent.click(panel.getByRole("tab", { name: "Historial" }));
+    seleccionarPestana(panel.getByRole("tab", { name: "Historial" }));
     expect(panel.getByRole("link", { name: /Toluca/ })).toHaveAttribute(
       "href",
       "/viajes/viaje-b",
@@ -159,7 +186,7 @@ describe("Mis vehículos desktop", () => {
     );
   });
   it("permite recorrer las pestañas con teclado", () => {
-    render(<VehiculosDesktop vehiculos={vehiculos} />);
+    render(<Vehiculos vehiculos={vehiculos} />);
     fireEvent.keyDown(screen.getByRole("tab", { name: "Información" }), {
       key: "ArrowRight",
     });
@@ -167,12 +194,12 @@ describe("Mis vehículos desktop", () => {
       "aria-selected",
       "false",
     );
-    fireEvent.click(screen.getByRole("tab", { name: "Documentos" }));
+    seleccionarPestana(screen.getByRole("tab", { name: "Documentos" }));
     expect(screen.getByRole("tabpanel", { name: "Documentos" })).toBeInTheDocument();
     expect(screen.getByRole("tab", { name: "Documentos" })).toHaveFocus();
   });
   it("filtra por transmisión y color desde Más filtros", () => {
-    render(<VehiculosDesktop vehiculos={vehiculos} />);
+    render(<Vehiculos vehiculos={vehiculos} />);
     fireEvent.click(screen.getByRole("button", { name: "Más filtros" }));
     fireEvent.change(screen.getByRole("combobox", { name: "Transmisión" }), {
       target: { value: "Manual" },
@@ -186,7 +213,7 @@ describe("Mis vehículos desktop", () => {
     ).toBeInTheDocument();
   });
   it("muestra el total sin paginación cuando el filtro deja una sola página", () => {
-    render(<VehiculosDesktop vehiculos={vehiculos} />);
+    render(<Vehiculos vehiculos={vehiculos} />);
     fireEvent.change(screen.getByRole("searchbox"), { target: { value: "abca" } });
     expect(screen.getByRole("status")).toHaveTextContent("Mostrando 1 de 2 vehículos");
     expect(screen.queryByRole("navigation", { name: "Páginas de vehículos" })).not.toBeInTheDocument();
@@ -194,7 +221,7 @@ describe("Mis vehículos desktop", () => {
   });
   it("pagina cinco tarjetas y actualiza el detalle al cambiar de página", () => {
     render(
-      <VehiculosDesktop
+      <Vehiculos
         vehiculos={Array.from({ length: 7 }, (_, i) => ({
           ...vehiculo(String(i)),
           creado_en: `2026-10-${String(27 - i).padStart(2, "0")}T12:00:00Z`,
@@ -213,7 +240,7 @@ describe("Mis vehículos desktop", () => {
     expect(screen.getByText("VIN-5")).toBeInTheDocument();
   });
   it("ofrece el flujo autorizado de corrección, sin fingir que se guardaron cambios", () => {
-    render(<VehiculosDesktop vehiculos={vehiculos} />);
+    render(<Vehiculos vehiculos={vehiculos} />);
     fireEvent.click(screen.getByRole("button", { name: "Editar" }));
     const dialogo = within(
       screen.getByRole("dialog", { name: "Editar información del vehículo" }),
@@ -225,7 +252,7 @@ describe("Mis vehículos desktop", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
   it("no inventa cantidades, combustible o vigencias; actualiza desde el servidor", () => {
-    render(<VehiculosDesktop vehiculos={[]} />);
+    render(<Vehiculos vehiculos={[]} />);
     expect(
       screen.getByRole("heading", { name: "Sin vehículos registrados" }),
     ).toBeInTheDocument();
@@ -248,5 +275,12 @@ describe("Mis vehículos desktop", () => {
         anio: null,
       } as unknown as Vehiculo),
     ).toBe("Vehículo sin información");
+  });
+  it("en móvil no abre panel: cada vehículo enlaza a su página de detalle", () => {
+    simularAncho(390);
+    render(<Vehiculos vehiculos={vehiculos} />);
+    expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Ver Nissan RAV4 2025" })).toHaveAttribute("href", "/cuenta/vehiculos/b");
+    expect(screen.queryByRole("button", { name: "Ver Nissan RAV4 2025" })).not.toBeInTheDocument();
   });
 });

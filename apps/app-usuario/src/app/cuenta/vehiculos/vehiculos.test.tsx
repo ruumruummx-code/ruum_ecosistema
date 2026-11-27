@@ -40,17 +40,18 @@ describe("Mis vehículos", () => {
     cuenta.vehiculos = [vehiculo];
     const { container } = render(await PaginaVehiculos());
     const mobile = within(
-      container.querySelector(".user-vehicles-content") as HTMLElement,
+      container.querySelector('[data-marco="movil"]') as HTMLElement,
     );
-    const listas = screen.getAllByRole("list", { name: "Vehículos guardados" });
-    const lista = listas[0];
+    const lista = mobile.getByRole("list", { name: "Vehículos guardados" });
     expect(within(lista).getAllByRole("listitem")).toHaveLength(1);
+    expect(within(lista).getByText("Toyota RAV4 2025")).toBeInTheDocument();
+    expect(within(lista).getByText("ABC-123")).toBeInTheDocument();
     expect(
-      within(lista).getByRole("link", { name: "Toyota RAV4 2025 ABC-123" }),
+      within(lista).getByRole("link", { name: "Ver Toyota RAV4 2025" }),
     ).toHaveAttribute("href", "/cuenta/vehiculos/auto-1");
+    // Color y VIN solo aparecen en el detalle.
     expect(mobile.queryByText("Rojo")).not.toBeInTheDocument();
     expect(mobile.queryByText("VIN-PRIVADO")).not.toBeInTheDocument();
-    expect(mobile.queryByText("Familiar")).not.toBeInTheDocument();
     expect(
       screen.queryByText("Sin fotografías guardadas"),
     ).not.toBeInTheDocument();
@@ -90,7 +91,8 @@ describe("Mis vehículos", () => {
     expect(
       screen.getAllByText("Sin vehículos registrados").length,
     ).toBeGreaterThanOrEqual(1);
-    const mobileContent = container.querySelector(".user-vehicles-content");
-    expect(mobileContent?.querySelector("a")).toHaveAttribute("href", "/cuenta/vehiculos/nuevo");
+    const mobile = within(container.querySelector('[data-marco="movil"]') as HTMLElement);
+    expect(mobile.getByRole("link", { name: "Registrar nuevo vehículo" })).toHaveAttribute("href", "/cuenta/vehiculos/nuevo");
+    expect(mobile.getByRole("link", { name: /Registrar primer vehículo/ })).toHaveAttribute("href", "/cuenta/vehiculos/nuevo");
   });
 });
