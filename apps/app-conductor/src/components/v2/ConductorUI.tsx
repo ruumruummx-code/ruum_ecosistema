@@ -1,6 +1,6 @@
 import { Button as BaseButton, buttonVariants, cn } from "@ruum/ui/base";
 import { ConductorIcon, type ConductorIconName } from "../icons";
-import type { ButtonHTMLAttributes } from "react";
+import type { ButtonHTMLAttributes, ReactNode } from "react";
 
 export type ConductorButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "quiet" | "emergency";
 
@@ -43,5 +43,25 @@ export function ConductorButton({
       {!loading && icon !== "none" && <ConductorIcon name={ICONS[icon]} size={16} />}
       {children}
     </BaseButton>
+  );
+}
+
+export function ConductorFeedback({ tono, children }: { tono: "info" | "danger"; children: ReactNode }) {
+  const esError = tono === "danger";
+  return (
+    <div
+      role={esError ? "alert" : "status"}
+      className={cn(
+        "flex gap-2.5 rounded-xl border px-4 py-3 font-body text-sm leading-5",
+        esError
+          ? "border-ui-danger/30 bg-ui-danger-soft text-ui-danger"
+          : "border-ui-brand/30 bg-ui-brand-soft text-ui-brand"
+      )}
+    >
+      <span aria-hidden="true" className="grid size-5 shrink-0 place-items-center rounded-full border border-current text-xs font-bold">
+        {esError ? "!" : "i"}
+      </span>
+      <div className="min-w-0">{children}</div>
+    </div>
   );
 }

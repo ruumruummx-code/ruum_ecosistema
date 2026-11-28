@@ -1,15 +1,14 @@
 "use client";
-
 import { Button as BaseButton } from "@ruum/ui/base";
 import { useState } from "react";
-import { Aviso } from "@ruum/ui";
-import { ConductorButton as Button } from "@/components/v2/ConductorUI";
+import { ConductorButton as Button, ConductorFeedback } from "@/components/v2/ConductorUI";
 import { TEXTOS_CARGANDO } from "@ruum/shared/constants";
 import { traducirErrorOperativo } from "@ruum/shared/utils";
 import { crearLlamadaEnmascarada, enviarMensaje } from "@ruum/api/services";
 import { crearClienteNavegador } from "@/lib/supabase-browser";
 import { CONTACTOS_SOPORTE_CONDUCTOR } from "@/lib/contactos-soporte";
 import { MENSAJES_RAPIDOS_CONTACTO } from "./quick-messages";
+
 
 export type ContactRole = "origen" | "destino" | "soporte";
 
@@ -134,7 +133,7 @@ function ContactActionBar({ trasladoId, role, name, phone }: ContactActionBarPro
 
       {message && (
         <div className="mt-3">
-          <Aviso tono={message.tone}>{message.text}</Aviso>
+          <ConductorFeedback tono={message.tone}>{message.text}</ConductorFeedback>
         </div>
       )}
     </section>
