@@ -30,7 +30,6 @@ export function TrasladosSearch({ onSearch, placeholder = "Buscar traslados…" 
     (newQuery: string) => {
       setQuery(newQuery);
       
-      // Actualizar URL
       const params = new URLSearchParams(searchParams.toString());
       if (newQuery.trim()) {
         params.set("q", newQuery.trim());
@@ -41,7 +40,6 @@ export function TrasladosSearch({ onSearch, placeholder = "Buscar traslados…" 
       const queryString = params.toString();
       window.history.replaceState(null, "", queryString ? `/viajes?${queryString}` : "/viajes");
       
-      // Llamar callback si existe
       onSearch?.(newQuery);
     },
     [searchParams, onSearch]

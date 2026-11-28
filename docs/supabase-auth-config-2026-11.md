@@ -28,8 +28,8 @@
 > [!NOTE]
 > **Resolución de Discrepancia entre Reportes Preliminares:**  
 > La discrepancia identificada entre el reporte preliminar (que citaba 3600s de JWT, 86400s de inactividad o 604800s de refresh) y el reporte F0.5 responde a que los primeros reflejaban los valores por defecto de la instancia antes de la mitigación. Los valores de la columna **"Valor Real Configurado (Fase 0)"** son la **única fuente canónica y final** aplicada en producción y staging, corroborada en los archivos de evidencia:
-> - Producción: [timeouts-prod.json](file:///c:/ruum_ecosistema-main/docs/evidencias/2026-11/timeouts-prod.json)
-> - Staging: [timeouts-staging.json](file:///c:/ruum_ecosistema-main/docs/evidencias/2026-11/timeouts-staging.json)
+> - Producción: [timeouts-prod.json](evidencias/2026-11/timeouts-prod.json)
+> - Staging: [timeouts-staging.json](evidencias/2026-11/timeouts-staging.json)
 
 ---
 
@@ -64,10 +64,10 @@ if (aal.currentLevel !== "aal2") {
 
 ## 3. Evidencias Verificadas en Repositorio
 
-- **HIBP en Producción:** [hibp-prod.json](file:///c:/ruum_ecosistema-main/docs/evidencias/2026-11/hibp-prod.json)
-- **HIBP en Staging:** [hibp-staging.json](file:///c:/ruum_ecosistema-main/docs/evidencias/2026-11/hibp-staging.json)
-- **Timeouts de Sesión en Producción:** [timeouts-prod.json](file:///c:/ruum_ecosistema-main/docs/evidencias/2026-11/timeouts-prod.json)
-- **Timeouts de Sesión en Staging:** [timeouts-staging.json](file:///c:/ruum_ecosistema-main/docs/evidencias/2026-11/timeouts-staging.json)
+- **HIBP en Producción:** [hibp-prod.json](evidencias/2026-11/hibp-prod.json)
+- **HIBP en Staging:** [hibp-staging.json](evidencias/2026-11/hibp-staging.json)
+- **Timeouts de Sesión en Producción:** [timeouts-prod.json](evidencias/2026-11/timeouts-prod.json)
+- **Timeouts de Sesión en Staging:** [timeouts-staging.json](evidencias/2026-11/timeouts-staging.json)
 
 ---
 

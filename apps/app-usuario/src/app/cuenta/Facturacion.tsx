@@ -353,7 +353,6 @@ export function Facturacion({ usuario, empresa, facturasIniciales }: Facturacion
     setModalEditarAbierto(true);
   }
 
-  // Guardar datos fiscales
   async function handleGuardarDatosFiscales(e: React.FormEvent) {
     e.preventDefault();
     setGuardandoFiscal(true);
@@ -397,7 +396,6 @@ export function Facturacion({ usuario, empresa, facturasIniciales }: Facturacion
     }, 1500);
   }
 
-  // Abrir modal de constancia fiscal
   function abrirModalConstancia() {
     setConstanciaSeleccionada(null);
     setExitoConstancia(false);
@@ -427,7 +425,6 @@ export function Facturacion({ usuario, empresa, facturasIniciales }: Facturacion
     }, 600);
   }
 
-  // Acción solicitar factura pendiente
   async function handleSolicitarFactura(id: string) {
     if (solicitandoFactura) return;
     setSolicitandoFactura(id);

@@ -48,10 +48,10 @@ El **Arquitecto de Plataforma (AP)** asume la gobernanza formal de la arquitectu
 
 | Ticket F1 | Nombre de la Tarea | Owner | Insumo Canónico de Fase 0 | Fecha Límite |
 |---|---|:---:|---|:---:|
-| **RUUM-SEC-009** | F1.1: REVOKE Masivo de EXECUTE (91 funciones) | **BS** | [grants-reales-2026-11.md](file:///c:/ruum_ecosistema-main/docs/grants-reales-2026-11.md) | 2026-12-04 |
-| **RUUM-SEC-010** | F1.2: Enforcement AAL2 Admin en Middleware | **FS** | [supabase-auth-config-2026-11.md](file:///c:/ruum_ecosistema-main/docs/supabase-auth-config-2026-11.md) | 2026-12-07 |
-| **RUUM-SEC-011** | F1.3: Migración de Endpoints Sensibles a RLS/API | **AP** | [inventario-endpoints-service-role.md](file:///c:/ruum_ecosistema-main/docs/inventario-endpoints-service-role.md) | 2026-12-11 |
-| **RUUM-SEC-012** | F1.4: Sanitización de Esquema y Drift Local | **BS + DO** | [supabase-drift-2026-11.md](file:///c:/ruum_ecosistema-main/docs/supabase-drift-2026-11.md) | 2026-12-14 |
+| **RUUM-SEC-009** | F1.1: REVOKE Masivo de EXECUTE (91 funciones) | **BS** | [grants-reales-2026-11.md](grants-reales-2026-11.md) | 2026-12-04 |
+| **RUUM-SEC-010** | F1.2: Enforcement AAL2 Admin en Middleware | **FS** | [supabase-auth-config-2026-11.md](supabase-auth-config-2026-11.md) | 2026-12-07 |
+| **RUUM-SEC-011** | F1.3: Migración de Endpoints Sensibles a RLS/API | **AP** | [inventario-endpoints-service-role.md](inventario-endpoints-service-role.md) | 2026-12-11 |
+| **RUUM-SEC-012** | F1.4: Sanitización de Esquema y Drift Local | **BS + DO** | [supabase-drift-2026-11.md](supabase-drift-2026-11.md) | 2026-12-14 |
 
 ---
 

@@ -122,8 +122,8 @@ No hay una aprobación condicional para producción mientras persistan AU-01 o A
 
 - [Smoke público y resultados](evidence/auditoria-usuario-2026-11-19/smoke-publico.json), [login móvil](evidence/auditoria-usuario-2026-11-19/login-390.png), [login escritorio](evidence/auditoria-usuario-2026-11-19/login-1440.png), [accesibilidad pública](evidence/auditoria-usuario-2026-11-19/accesibilidad-publica.json).
 - [Privilegios SQL](evidence/auditoria-usuario-2026-11-19/permisos-rpc.json), [resumen advisors](evidence/auditoria-usuario-2026-11-19/advisors-resumen.json), [versiones migradas](evidence/auditoria-usuario-2026-11-19/migraciones-remotas.json).
-- [Pruebas shared](evidence/auditoria-usuario-2026-11-19/shared-tests.log), [pruebas API](evidence/auditoria-usuario-2026-11-19/api-tests.log), [repetición de fallos](evidence/auditoria-usuario-2026-11-19/retest-fallos.log), [48 pruebas SQL](evidence/auditoria-usuario-2026-11-19/sql-tests.log).
-- [Build](evidence/auditoria-usuario-2026-11-19/build.log), [auditoría de dependencias](evidence/auditoria-usuario-2026-11-19/dependencias.json), [consultas remotas reproducibles](evidence/auditoria-usuario-2026-11-19/comprobaciones-solo-lectura.sql).
+- Pruebas shared (`shared-tests.log`), pruebas API (`api-tests.log`), repetición de fallos (`retest-fallos.log`), 48 pruebas SQL (`sql-tests.log`).
+- Build (`build.log`), [auditoría de dependencias](evidence/auditoria-usuario-2026-11-19/dependencias.json), [consultas remotas reproducibles](evidence/auditoria-usuario-2026-11-19/comprobaciones-solo-lectura.sql).
 
 ## Resultados finales de ejecución
 
@@ -136,6 +136,6 @@ No hay una aprobación condicional para producción mientras persistan AU-01 o A
 | SQL local | 48 pruebas aprobadas en 2 archivos; no se recreó la base desde cero |
 | Publicación o remediación | Ninguna. Solo se añadieron informe y evidencia; no se modificó el código de la app, dependencias ni producción |
 
-[Log de la suite final](evidence/auditoria-usuario-2026-11-19/suite-final.log) y [resultado JSON](evidence/auditoria-usuario-2026-11-19/suite-final.json).
+[Resultado JSON de la suite final](evidence/auditoria-usuario-2026-11-19/suite-final.json). Los archivos `.log` citados arriba no se versionaron en el repositorio.
 
 **Decisión final: NO GO.** Los controles de publicación y UI observados funcionan en la muestra, pero AU-01 y AU-02 permiten operaciones documentales privilegiadas sin autorización efectiva. Se exige corregirlas y verificar sus regresiones antes de aprobar producción.

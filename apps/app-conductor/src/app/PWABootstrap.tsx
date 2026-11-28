@@ -22,7 +22,6 @@ export function PWABootstrap() {
     if ("serviceWorker" in navigator) {
       const registerSW = async () => {
         try {
-          // Registrar el Service Worker
           const registration = await navigator.serviceWorker.register("/sw.js", {
             scope: "/",
           });
@@ -38,7 +37,6 @@ export function PWABootstrap() {
               installingWorker.onstatechange = () => {
                 if (installingWorker.state === "installed") {
                   logger.info("service_worker_update_available");
-                  // Mostrar notificación al usuario
                   showUpdateNotification();
                 }
               };

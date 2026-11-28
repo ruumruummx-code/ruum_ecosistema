@@ -51,7 +51,7 @@ export function TripOpportunityDetails({
   },[trasladoId,router]);
 
 
-  // 2. Suscripción Realtime a cambios en este traslado (Detección de asignación concurrente)
+  // Suscripción Realtime a cambios en este traslado (Detección de asignación concurrente)
   useEffect(() => {
     if (!trasladoId || !tieneSupabaseConfigurado()) return;
 
@@ -113,7 +113,7 @@ export function TripOpportunityDetails({
     void verificarAsignacion();
   }, [pasaporte.conductor_id, pasaporte.estado, trasladoId, router]);
 
-  // 3. Cálculo real de aproximación GPS
+  // Cálculo real de aproximación GPS
   useEffect(() => {
     let cancelado = false;
     async function obtenerGPS() {

@@ -24,9 +24,9 @@
 - **Runbook:** Revisar `CSP_DEUDA_P2.md`, `scripts/assert-csp.mjs`
 
 ### 4) Health Down
-- **Uptime/sintético:** workflow externo [`Uptime app-conductor`](../../../../.github/workflows/conductor-healthcheck.yml), cada 5m y manual. Consulta `CONDUCTOR_HEALTHCHECK_URL` (default `https://concer.ruumruum-moviliax.online/api/health`), timeout de 10s y un reintento.
-- **Condición:** HTTP 2xx, JSON válido, `status=ok` y `checks.supabase.status=ok`; un segundo fallo termina el workflow con error.
-- **Acción:** configurar notificaciones de fallo del workflow para el on-call; abrir el enlace al run, hacer recheck manual y seguir el runbook.
+- **Uptime/sintético:** script `apps/app-conductor/scripts/healthcheck.mjs`, pensado para un monitor externo cada 5m (el repositorio no incluye todavía el workflow programado). Consulta `CONDUCTOR_HEALTHCHECK_URL` (default `https://concer.ruumruum-moviliax.online/api/health`), timeout de 10s y un reintento.
+- **Condición:** HTTP 2xx, JSON válido, `status=ok` y `checks.supabase.status=ok`; un segundo fallo termina el script con error.
+- **Acción:** configurar notificaciones de fallo del monitor para el on-call; hacer recheck manual y seguir el runbook.
 - **Runbook:** [`docs/ops/RUNBOOK_HEALTH.md`](RUNBOOK_HEALTH.md).
 
 ### 5) Offline Sync Stuck
@@ -51,7 +51,7 @@
   ```
 
   Alertar cuando `fallos_5m >= 1`; elevar a page cuando `fallos_5m >= 3`. Si el RPC de telemetría no persiste el evento, activar la misma regla en Vercel Logs buscando el JSON `event` exacto; el log se emite antes de intentar persistirlo.
-- **Acción:** usar [`docs/runbooks/CONDUCTOR-ROLE-FAIL-OPEN.md`](../../../docs/runbooks/CONDUCTOR-ROLE-FAIL-OPEN.md). Mantener alerta activa hasta 30 minutos sin fallos y completar las comprobaciones de autorización/RLS.
+- **Acción:** revisar disponibilidad de Supabase Auth y del RPC de rol. Mantener alerta activa hasta 30 minutos sin fallos y completar las comprobaciones de autorización/RLS.
 - **Owner:** Seguridad + backend de identidad.
 
 ## Configuración código

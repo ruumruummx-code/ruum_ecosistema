@@ -29,7 +29,7 @@ Cuando un usuario intentaba solicitar un traslado legítimo para un automóvil a
 Se alineó la lógica en todas las capas respetando el principio de seguridad en profundidad y la intención de negocio:
 
 ### 2.1 Modificación en Base de Datos (Migración `20261104000005`)
-En el archivo [20261104000005_flujo6_tarifa_snapshot_rescate_mecanico.sql](file:///c:/ruum_ecosistema-main/supabase/migrations/20261104000005_flujo6_tarifa_snapshot_rescate_mecanico.sql), la guarda de validación del vehículo fue actualizada a:
+En el archivo [20261104000005_flujo6_tarifa_snapshot_rescate_mecanico.sql](../../../../supabase/migrations/20261104000005_flujo6_tarifa_snapshot_rescate_mecanico.sql), la guarda de validación del vehículo fue actualizada a:
 
 ```sql
 -- Validación de vehículo: documentación vigente siempre requerida;
@@ -53,10 +53,10 @@ end if;
 
 Para reflejar el costo operativo adicional derivado de maniobras especializadas, carga en grúa/plataforma y riesgos adicionales:
 
-1. **Fórmula Server-Side** ([tarifa-snapshot.ts](file:///c:/ruum_ecosistema-main/apps/app-usuario/src/lib/tarifa-snapshot.ts)):
+1. **Fórmula Server-Side** ([tarifa-snapshot.ts](tarifa-snapshot.ts)):
    - Se aplica un factor multiplicador `factorCondicion = 1.25` cuando `inputs.condicion === "rescate_mecanico"`.
    - Para cualquier otra condición (`seminueva`, `optima`, `buena`), el factor es `1.0`.
 
 2. **Evidencia y Cobertura de Pruebas**:
-   - Probado unitariamente en [tarifa-snapshot.test.ts](file:///c:/ruum_ecosistema-main/apps/app-usuario/src/lib/tarifa-snapshot.test.ts) (`aplica sobretasa de 1.25x en rescate_mecanico`).
+   - Probado unitariamente en [tarifa-snapshot.test.ts](tarifa-snapshot.test.ts) (`aplica sobretasa de 1.25x en rescate_mecanico`).
    - Verificado con cotizaciones idénticas donde la condición estándar resulta en $\$1,595.00$ y rescate mecánico escala a $\$1,993.75$ exactos.

@@ -24,12 +24,11 @@ Supabase Auth + Postgres/RLS + Storage privado + RPC
   reglas y seguridad; `@ruum/ui` aporta componentes. Mantener el acceso a
   Supabase dentro de `@ruum/api`, conforme a `pnpm check:fronteras`.
 - `src/middleware.ts` aplica CSP con nonce, valida la sesión con Supabase Auth
-  y protege rutas. La verificación del rol puede fallar abierta por continuidad
-  operativa; RLS y las políticas/RPC de Supabase siguen siendo el control de
-  autorización para datos y mutaciones. Ante
-  `conductor_role_verification_failed`, seguir
-  [`SENTRY_ALERTS.md`](ops/SENTRY_ALERTS.md) y
-  [`CONDUCTOR-ROLE-FAIL-OPEN.md`](../../../docs/runbooks/CONDUCTOR-ROLE-FAIL-OPEN.md).
+  y protege rutas. Si el rol no puede verificarse tras dos reintentos, la
+  petición se deniega con HTTP 503 (fail-closed); RLS y las políticas/RPC de
+  Supabase siguen siendo el control de autorización para datos y mutaciones.
+  Ante `conductor_role_verification_failed`, seguir
+  [`SENTRY_ALERTS.md`](ops/SENTRY_ALERTS.md).
 - El bucket `evidencia` es privado. Persistir paths, nunca signed URLs; generar
   URLs temporales para lectura. La cola local de evidencia permite reintentar
   durante una sesión cargada, pero el shell Android carga el sitio remoto y

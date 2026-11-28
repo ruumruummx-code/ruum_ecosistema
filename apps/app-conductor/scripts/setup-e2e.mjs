@@ -70,7 +70,6 @@ async function main() {
     "  4. Service Role Key de Supabase (disponible en Project Settings > API)\n"
   );
 
-  // Obtener input del usuario
   const conductorEmail = await question(
     "📧 PLAYWRIGHT_E2E_CONDUCTOR_EMAIL [conductor-e2e@ruumruum.test]: "
   );
@@ -109,12 +108,10 @@ async function main() {
     if (regex.test(updatedEnv)) {
       updatedEnv = updatedEnv.replace(regex, replacement);
     } else {
-      // Si no existe, agregarla
       updatedEnv += `\n${replacement}`;
     }
   }
 
-  // Guardar .env.local
   await fs.writeFile(envLocalPath, updatedEnv);
   console.log(`\n✅ Variables guardadas en: ${envLocalPath}`);
 
@@ -144,7 +141,6 @@ async function main() {
     }
   }
 
-  // Mostrar siguientes pasos
   console.log("📋 Siguientes pasos:\n");
   console.log("1. Asegúrate que el servidor de desarrollo está corriendo:");
   console.log("   $ pnpm dev\n");
