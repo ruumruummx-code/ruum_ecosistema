@@ -5,7 +5,7 @@
 **Ticket:** `CLOSE-06` (Verificación y alta de `TARIFA_SNAPSHOT_SECRET` en Vercel prod)  
 **Proyecto Vercel:** `ruum-app-usuario`  
 **Entorno Verificado:** `Production` & `Preview`  
-**Archivo de Evidencia:** [vercel-tarifa-snapshot.json](file:///c:/ruum_ecosistema-main/docs/evidencias/2026-11/vercel-tarifa-snapshot.json)
+**Archivo de Evidencia:** [vercel-tarifa-snapshot.json](evidencias/2026-11/vercel-tarifa-snapshot.json)
 
 ---
 

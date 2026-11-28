@@ -17,6 +17,7 @@ export type ResultadoRutaCP = {
 };
 
 // Cache en memoria para pares únicos de CP (origen -> destino)
+<<<<<<< HEAD
 const cacheRutasCPPares = new Map<string, ResultadoRutaCP>();
 const promesasEnVueloRutas = new Map<string, Promise<ResultadoRutaCP | null>>();
 
@@ -32,6 +33,8 @@ function limpiarCacheRutasCPPares(): void {
   cacheRutasCPPares.clear();
   promesasEnVueloRutas.clear();
 }
+=======
+>>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77
 
 /**
  * Obtiene las coordenadas [lng, lat] para un código postal mexicano.
@@ -88,7 +91,6 @@ export async function coordenadaPostalMasiva(cp: string, token: string): Promise
     }
 
     const coordenadas = punto as [number, number];
-    // Guardar en cache en memoria
     cacheCoordenadasCP.set(normalizado, coordenadas);
     return coordenadas;
   })();
@@ -101,6 +103,7 @@ export async function coordenadaPostalMasiva(cp: string, token: string): Promise
   }
 }
 
+<<<<<<< HEAD
 /**
  * Obtiene la ruta entre un par único de CP (origen y destino) con cache en memoria y deduplicación.
  * Reduce drásticamente las llamadas a la API de Directions de Mapbox cuando varios traslados
@@ -154,3 +157,5 @@ async function obtenerRutaEntreCPParesMasiva(
     promesasEnVueloRutas.delete(clavePar);
   }
 }
+=======
+>>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77

@@ -68,7 +68,7 @@ export function createMockSupabaseClient(options: MockSupabaseOptions = {}): Sup
       })
     },
     from: vi.fn().mockImplementation((tableName: string) => createQueryBuilder(tableName)),
-    rpc: vi.fn().mockImplementation((fnName: string, args: any) => {
+    rpc: vi.fn().mockImplementation((fnName: string) => {
       const data = rpcData[fnName] !== undefined ? rpcData[fnName] : null;
       const error = rpcErrors[fnName] ?? null;
       return Promise.resolve({ data, error });

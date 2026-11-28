@@ -1,6 +1,6 @@
 /** @vitest-environment jsdom */
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import type { Database } from "@ruum/shared/types";
 import { VerificacionDocumentos } from "./VerificacionDocumentos";
 import {

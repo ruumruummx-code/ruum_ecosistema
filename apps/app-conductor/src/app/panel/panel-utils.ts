@@ -1,6 +1,4 @@
 import type { Database } from "@ruum/shared/types";
-import { getTripPresentation } from "../../lib/trip-presentation";
-import type { ContactRole } from "../viajes/[id]/ContactActionBar";
 
 export type PasaporteRow = Database["public"]["Views"]["pasaporte_digital"]["Row"];
 export type DocumentoConductorRow = Database["public"]["Tables"]["documentos_conductor"]["Row"];
@@ -21,6 +19,7 @@ export function folioViaje(viaje: PasaporteRow) {
   return viaje.traslado_id ? viaje.traslado_id.slice(0, 8).toUpperCase() : "Sin folio";
 }
 
+<<<<<<< HEAD
 function destinoOperativo(viaje: PasaporteRow) {
   if (!viaje.estado) return "Seguimiento operativo";
 
@@ -96,3 +95,5 @@ function esViajePorCerrar(viaje: PasaporteRow) {
       ["llegada_a_destino", "evidencia_final_en_proceso", "evidencia_final_completada", "entrega_confirmada"].includes(viaje.estado)
   );
 }
+=======
+>>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77

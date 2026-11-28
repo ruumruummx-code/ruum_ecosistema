@@ -42,7 +42,6 @@ type OpcionProblema = {
 };
 
 const MAX_EVIDENCIA_BYTES = 10 * 1024 * 1024;
-const BUCKET_EVIDENCIA = "evidencia";
 
 const OPCIONES: OpcionProblema[] = [
   {

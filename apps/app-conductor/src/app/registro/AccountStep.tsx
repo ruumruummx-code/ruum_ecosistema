@@ -63,15 +63,12 @@ export function AccountStep({
     const valorNuevo = input.value;
     const cursorPos = input.selectionStart ?? 0;
     
-    // Calcular nueva posición del cursor
     const nuevaPosicion = calcularCursorTelefono(valorAnteriorRef.current, valorNuevo, cursorPos);
     
-    // Actualizar valor solo con dígitos
     const soloNumeros = soloDigitos(valorNuevo);
     setTelefono(soloNumeros);
     limpiarErrorCampo("telefono");
     
-    // Guardar valor para próxima comparación
     valorAnteriorRef.current = valorNuevo;
     
     // Aplicar formato y restaurar cursor

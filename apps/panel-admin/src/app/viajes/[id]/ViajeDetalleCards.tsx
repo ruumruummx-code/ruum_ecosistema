@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { Aviso, PassportCard } from "@ruum/ui";
 import { ETIQUETA_TIPO_VEHICULO } from "@ruum/shared/constants";
 import { resumenClasificacionVehiculo } from "@ruum/shared/catalogos";
@@ -37,7 +36,7 @@ export function ViajeDetalleCards({
     <>
       {trazabilidadMasiva && (
         <div className="mt-6">
-          <PassportCard>
+          <PassportCard guilloche={false}>
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Origen corporativo</p>
@@ -76,7 +75,7 @@ export function ViajeDetalleCards({
 
       <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-2">
         {/* Bloque 1 — Resumen */}
-        <PassportCard>
+        <PassportCard guilloche={false}>
           <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Resumen</p>
           <dl className="mt-3 space-y-2 font-body text-sm">
             <div className="flex justify-between">
@@ -95,7 +94,7 @@ export function ViajeDetalleCards({
         </PassportCard>
 
         {/* Bloque 2 — Finanzas */}
-        <PassportCard>
+        <PassportCard guilloche={false}>
           <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Finanzas</p>
           {finanzas ? (
             <dl className="mt-3 space-y-2 font-body text-sm">
@@ -130,7 +129,7 @@ export function ViajeDetalleCards({
         </PassportCard>
 
         {/* Bloque 3 — Vehículo */}
-        <PassportCard>
+        <PassportCard guilloche={false}>
           <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Vehículo</p>
           <dl className="mt-3 space-y-2 font-body text-sm">
             <div className="flex justify-between">
@@ -155,7 +154,7 @@ export function ViajeDetalleCards({
         </PassportCard>
 
         {/* Bloque 4 — Evidencia */}
-        <PassportCard>
+        <PassportCard guilloche={false}>
           <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Evidencia</p>
           <dl className="mt-3 space-y-2 font-body text-sm">
             <div className="flex justify-between">
@@ -175,7 +174,7 @@ export function ViajeDetalleCards({
         </PassportCard>
 
         {/* Bloque 5 — Pagos */}
-        <PassportCard>
+        <PassportCard guilloche={false}>
           <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Pagos</p>
           <dl className="mt-3 space-y-2 font-body text-sm">
             <div className="flex justify-between">
@@ -192,7 +191,7 @@ export function ViajeDetalleCards({
             </div>
           </dl>
           <p className="mt-3 font-body text-xs text-ui-fg-muted">
-            Pago al conductor, gastos y margen estimado: pendiente (ver &quot;Pagos&quot; en la barra lateral, próximamente).
+            El pago al conductor, los gastos y el margen se detallan en el bloque Finanzas y en la sección Pagos.
           </p>
         </PassportCard>
       </div>

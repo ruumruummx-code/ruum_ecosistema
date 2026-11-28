@@ -78,11 +78,14 @@ async function obtenerSecretoInstalacion() {
 let cachedKey: CryptoKey | null = null;
 let cachedSecret: string | null = null;
 
+<<<<<<< HEAD
 function resetCachedKeyForTesting() {
   cachedKey = null;
   cachedSecret = null;
 }
 
+=======
+>>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77
 async function llaveAes() {
   const secreto = await obtenerSecretoInstalacion();
   if (cachedKey && cachedSecret === secreto) {

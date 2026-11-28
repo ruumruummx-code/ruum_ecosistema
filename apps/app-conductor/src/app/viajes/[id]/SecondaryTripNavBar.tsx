@@ -15,7 +15,6 @@ import type { GastoRegistro, GastoTipoDb } from "./gastos/gastos-types";
 type PasaporteRow = Database["public"]["Views"]["pasaporte_digital"]["Row"];
 export type { GastoTipoDb } from "./gastos/gastos-types";
 
-const BUCKET_EVIDENCIA = "evidencia";
 const MAX_COMPROBANTE_BYTES = 10 * 1024 * 1024; // 10 MB
 
 async function subirComprobanteGasto(

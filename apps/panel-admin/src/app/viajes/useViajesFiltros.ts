@@ -13,7 +13,6 @@ import {
   PESTANAS,
   ESTADOS_TERMINALES,
   FILTROS_INICIALES,
-  ETIQUETA_FILTRO_KPI,
   esFiltroKpi,
   esAccionOperativa,
   esEstadoTraslado,
@@ -29,7 +28,6 @@ import {
 
 export function useViajesFiltros({
   traslados,
-  pestana,
   setPestana,
   trazabilidadPorTraslado,
   limpiarParamsFiltroUrl

@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import type { Database } from "@ruum/shared/types";
-import { assertAdminAnyPermission, assertAdminPermission } from "../services/permisos-admin";
+import { assertAdminPermission } from "../services/permisos-admin";
 import { esquemaUuid, rpcValidado } from "../services/_rpc-validado";
 
 type Cliente = SupabaseClient<Database>;

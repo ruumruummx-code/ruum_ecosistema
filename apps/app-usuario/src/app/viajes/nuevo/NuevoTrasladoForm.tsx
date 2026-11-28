@@ -1,7 +1,7 @@
 "use client";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Button, Aviso, useDialogAccesible } from "@ruum/ui";
+import { Aviso, useDialogAccesible } from "@ruum/ui";
 import { NavegacionUsuario } from "../../NavegacionUsuario";
 import { useNuevoTraslado } from "./hooks/useNuevoTraslado";
 

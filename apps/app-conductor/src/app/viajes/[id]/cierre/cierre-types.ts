@@ -25,6 +25,7 @@ export interface GastoData {
   registrado_en: string;
 }
 
+<<<<<<< HEAD
 function labelGasto(tipo: GastoData["tipo"]): string {
   switch (tipo) {
     case "combustible":
@@ -41,3 +42,5 @@ function labelGasto(tipo: GastoData["tipo"]): string {
       return "Otro";
   }
 }
+=======
+>>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77

@@ -5,7 +5,6 @@ import {
   validarVentana72Horas,
   calcularPenalizacionCancelacionF10,
   TransicionInvalidaFlujo10Error,
-  HORAS_VENTANA_POST_CIERRE,
 } from "./flujo10-transiciones-policy";
 
 describe("flujo10-transiciones-policy", () => {

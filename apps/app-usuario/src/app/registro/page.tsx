@@ -399,7 +399,6 @@ export default function PaginaRegistro() {
   const hayConfirmacion = confirmarPassword.length > 0;
   const coincidePassword = password === confirmarPassword;
   const correoValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizarCorreoRegistro(email));
-  const accesoCompleto = correoValido && passwordCumpleRequisitos(password) && checkLongitud && hayConfirmacion && coincidePassword && aceptaTerminos;
   const errorCorreo = (editados.email || errorCampo?.campo === "email") && !correoValido;
 
   return (

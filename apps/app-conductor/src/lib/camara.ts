@@ -63,10 +63,6 @@ export async function capturarFoto(): Promise<FotoCapturada | null> {
   return obtenerFoto(CameraSource.Camera);
 }
 
-export async function seleccionarFotoGaleria(): Promise<FotoCapturada | null> {
-  return obtenerFoto(CameraSource.Photos);
-}
-
 /**
  * M3 — Detección de borrosidad / oscuridad antes de encolar (90s flow).
  * Calcula varianza de Laplaciano sobre una versión 100×100 en escala de grises.

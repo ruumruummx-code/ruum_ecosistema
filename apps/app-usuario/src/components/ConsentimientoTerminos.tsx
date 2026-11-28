@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Aviso, Field, useDialogAccesible } from "@ruum/ui";
+import { Aviso, useDialogAccesible } from "@ruum/ui";
 import { VERSION_TERMINOS_VIGENTE } from "@ruum/shared/constants";
 import { registrarConsentimientoUsuario } from "@ruum/api/services";
 import { crearClienteNavegador } from "../lib/supabase-browser";

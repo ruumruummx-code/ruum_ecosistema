@@ -1,12 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@ruum/shared/types";
-import { assertAdminAnyPermission, assertAdminPermission } from "../services/permisos-admin";
+import { assertAdminPermission } from "../services/permisos-admin";
 
 type Cliente = SupabaseClient<Database>;
-type TrasladoRow = Database["public"]["Tables"]["traslados"]["Row"];
-type VehiculoRow = Database["public"]["Tables"]["vehiculos"]["Row"];
-type UsuarioRow = Database["public"]["Tables"]["usuarios"]["Row"];
-type EstadoTraslado = Database["public"]["Enums"]["estado_traslado"];
 
 export interface FilaTrasladoMasivoNormalizada {
   referencia_externa?: string;

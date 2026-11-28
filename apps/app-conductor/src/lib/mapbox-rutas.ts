@@ -1,7 +1,5 @@
-import { obtenerRutaDirectionsMapbox, codificarPolyline } from "@ruum/shared/utils";
 
 const tokenMapbox = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
-const ESTILO_MAPA = "mapbox/streets-v12";
 
 export function tieneMapboxConfigurado(): boolean {
   return Boolean(tokenMapbox);
@@ -12,6 +10,7 @@ export interface PuntoMapa {
   lng: number;
 }
 
+<<<<<<< HEAD
 /**
  * Mapa estático (Mapbox Static Images API) en vez de mapbox-gl: sin WebGL de
  * por medio, más liviano y más confiable dentro del WebView de Capacitor.
@@ -79,3 +78,5 @@ async function construirUrlMapaRutaConduccion(
 
   return `https://api.mapbox.com/styles/v1/${ESTILO_MAPA}/static/${overlays.join(",")}/auto/${ancho}x${alto}@2x?padding=40&access_token=${encodeURIComponent(tokenMapbox)}`;
 }
+=======
+>>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77

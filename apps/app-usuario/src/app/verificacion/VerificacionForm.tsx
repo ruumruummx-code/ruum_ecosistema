@@ -10,7 +10,6 @@ import {
   subirFotoPerfil,
   actualizarPerfilUsuario,
   iniciarVerificacionDiditUsuario,
-  obtenerEstadoVerificacionDiditUsuario,
   obtenerUsuarioActual,
   type PerfilUsuarioActualizable
 } from "@ruum/api/services";
@@ -293,7 +292,6 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
   }
 
   async function comprimirImagenCliente(archivo: File, maxMB: number): Promise<File | null> {
-    // Solo imágenes
     if (!archivo.type.startsWith("image/")) return null;
     try {
       const bitmap = await createImageBitmap(archivo);

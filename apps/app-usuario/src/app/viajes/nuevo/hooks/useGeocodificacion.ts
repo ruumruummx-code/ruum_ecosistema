@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react";
+import { useCallback } from "react";
 import { calcularRutaMapbox, calcularRutaMapboxConParadas, geocodificarDireccion } from "@/lib/mapbox";
 
 export function useGeocodificacion() {

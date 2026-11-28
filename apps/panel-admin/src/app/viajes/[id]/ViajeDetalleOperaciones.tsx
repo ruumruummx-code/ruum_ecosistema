@@ -65,7 +65,7 @@ export function ViajeDetalleOperaciones({
     <>
       {/* Acciones administrativas */}
       <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-2">
-        <PassportCard>
+        <PassportCard guilloche={false}>
           <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Asignar / cambiar conductor</p>
           <div className="mt-3 flex gap-2">
             <select
@@ -89,7 +89,7 @@ export function ViajeDetalleOperaciones({
           </div>
         </PassportCard>
 
-        <PassportCard>
+        <PassportCard guilloche={false}>
           <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Cambiar estatus</p>
           {pasaporte.estado === "disputa_abierta" && (
             <p className="mt-2 text-sm">
@@ -128,7 +128,7 @@ export function ViajeDetalleOperaciones({
 
       {/* Clasificación del vehículo para tarifa (RT-12) */}
       <div className="mt-6">
-        <PassportCard>
+        <PassportCard guilloche={false}>
           <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Clasificación de tarifa del vehículo</p>
           <p className="mt-1 font-body text-xs text-ui-fg-muted">
             Actual: {pasaporte.vehiculo_categoria_tarifa ?? "sin asignar"} · {pasaporte.vehiculo_gama ?? "sin asignar"} ·{" "}
@@ -184,7 +184,7 @@ export function ViajeDetalleOperaciones({
 
       {/* Aplicación de política tarifaria autorizada */}
       <div className="mt-6">
-        <PassportCard>
+        <PassportCard guilloche={false}>
           <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Tarifa normativa</p>
           <p className="mt-1 font-body text-xs text-ui-fg-muted">
             El precio sale de la política vigente en Tarifas. Operación no captura montos libres; sólo aplica el cálculo autorizado y auditable.
@@ -215,7 +215,7 @@ export function ViajeDetalleOperaciones({
 
       {/* Traslado fallido */}
       <div className="mt-6">
-        <PassportCard>
+        <PassportCard guilloche={false}>
           <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Traslado fallido</p>
           <p className="mt-1 font-body text-xs text-ui-fg-muted">
             Usa esta acción cuando el traslado no puede continuar. Se calcula cargo, reagendamiento y descuento con la regla PRD §4.11.

@@ -1,6 +1,5 @@
 import { ETIQUETA_TIPO_VEHICULO, GLOSARIO_OPERATIVO, type EstadoEconomicoExplicito } from "@ruum/shared/constants";
 import type { Database } from "@ruum/shared/types";
-import type { Coordenadas } from "../../lib/ubicacion";
 
 export type PasaporteRow = Database["public"]["Views"]["pasaporte_digital"]["Row"];
 export type EstadoTraslado = Database["public"]["Enums"]["estado_traslado"];
@@ -48,6 +47,7 @@ const VISTAS: { id: VistaTraslados; etiqueta: string }[] = [
   { id: "historial", etiqueta: "Historial" }
 ];
 
+<<<<<<< HEAD
 const GRUPOS_MIS_Traslados: { id: GrupoMisTraslados; etiqueta: string }[] = [
   { id: "en-curso", etiqueta: "En curso" },
   { id: "proximos", etiqueta: "Próximos" },
@@ -60,6 +60,8 @@ const FILTROS_FECHA: { id: FiltroFecha; etiqueta: string }[] = [
   { id: "semana", etiqueta: "Esta semana" }
 ];
 
+=======
+>>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77
 const ESTADOS_FINALIZADOS = new Set<EstadoTraslado>([
   "servicio_cerrado",
   "servicio_cancelado",
@@ -114,6 +116,7 @@ function formatearFecha(fecha: string) {
   }).format(new Date(fecha));
 }
 
+<<<<<<< HEAD
 function formatearDiaCalendario(fecha: Date) {
   return formatearFecha(fecha.toISOString());
 }
@@ -126,6 +129,8 @@ function formatearDiaSelector(fecha: Date) {
   }).format(fecha);
 }
 
+=======
+>>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77
 export function claveDia(fecha: string | Date) {
   const partes = new Intl.DateTimeFormat("en-CA", {
     year: "numeric",
@@ -137,6 +142,7 @@ export function claveDia(fecha: string | Date) {
   return `${valor.year}-${valor.month}-${valor.day}`;
 }
 
+<<<<<<< HEAD
 function formatearHora(fecha: string) {
   return new Intl.DateTimeFormat("es-MX", {
     hour: "2-digit",
@@ -145,16 +151,21 @@ function formatearHora(fecha: string) {
   }).format(new Date(fecha));
 }
 
+=======
+>>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77
 export function formatearDistancia(km: number | null) {
   if (km == null || !Number.isFinite(km)) return "Por confirmar";
   return `${new Intl.NumberFormat("es-MX", { maximumFractionDigits: km < 10 ? 1 : 0 }).format(km)} km`;
 }
 
+<<<<<<< HEAD
 function formatearDistanciaAproximadaAlOrigen(km: number | null) {
   if (km == null || !Number.isFinite(km)) return "Activa ubicación";
   return `Aproximadamente a ${formatearDistancia(km)} de ti`;
 }
 
+=======
+>>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77
 export function formatearDuracion(horas: number | null) {
   if (horas == null || !Number.isFinite(horas)) return "Por confirmar";
   const totalMin = Math.max(1, Math.round(horas * 60));
@@ -163,6 +174,7 @@ export function formatearDuracion(horas: number | null) {
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }
 
+<<<<<<< HEAD
 function distanciaKmEntre(a: Coordenadas, b: { lat: number | null; lng: number | null }) {
   if (b.lat == null || b.lng == null) return null;
   const radioTierraKm = 6371;
@@ -185,6 +197,8 @@ function formatearActualizacion(fecha: Date | null) {
   }).format(fecha);
 }
 
+=======
+>>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77
 function partesFechaMexico(fecha: string | Date) {
   const partes = new Intl.DateTimeFormat("en-CA", {
     year: "numeric",
@@ -210,6 +224,7 @@ function inicioSemanaDomingo(fecha = new Date()) {
   return fechaMexico;
 }
 
+<<<<<<< HEAD
 function estaSemanaActual(fechaIso: string, referencia = new Date()) {
   const inicio = inicioSemanaDomingo(referencia);
   const fin = new Date(inicio);
@@ -219,6 +234,9 @@ function estaSemanaActual(fechaIso: string, referencia = new Date()) {
 }
 
 function diasSemanaActual(referencia = new Date()) {
+=======
+export function diasSemanaActual(referencia = new Date()) {
+>>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77
   const inicio = inicioSemanaDomingo(referencia);
   return Array.from({ length: 7 }, (_, i) => {
     const dia = new Date(inicio);
@@ -243,6 +261,7 @@ export function normalizarVista(valor: string | null): VistaTraslados {
   return VISTAS.some((vista) => vista.id === valor) ? (valor as VistaTraslados) : "disponibles";
 }
 
+<<<<<<< HEAD
 function normalizarGrupo(valor: string | null): GrupoMisTraslados {
   return GRUPOS_MIS_Traslados.some((grupo) => grupo.id === valor) ? (valor as GrupoMisTraslados) : "en-curso";
 }
@@ -251,6 +270,8 @@ function normalizarFecha(valor: string | null): FiltroFecha {
   return FILTROS_FECHA.some((fecha) => fecha.id === valor) ? (valor as FiltroFecha) : "todos";
 }
 
+=======
+>>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77
 export function clasificarMisTraslados(viaje: PasaporteRow): GrupoMisTraslados | null {
   if (!viaje.estado) return null;
   const estado = viaje.estado as EstadoTraslado;
@@ -260,6 +281,7 @@ export function clasificarMisTraslados(viaje: PasaporteRow): GrupoMisTraslados |
   return "en-curso";
 }
 
+<<<<<<< HEAD
 function filtrarPorFecha(Traslados: PasaporteRow[], detalles: Record<string, DetalleOperativo>, filtro: FiltroFecha) {
   if (filtro === "todos") return Traslados;
   return Traslados.filter((viaje) => {
@@ -274,6 +296,8 @@ function filtrarPorEstado(Traslados: PasaporteRow[], estado: string) {
   return Traslados.filter((viaje) => viaje.estado === estado);
 }
 
+=======
+>>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77
 export function crearCalendario(
   disponibles: PasaporteRow[],
   aceptados: PasaporteRow[],

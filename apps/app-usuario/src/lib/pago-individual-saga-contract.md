@@ -83,8 +83,8 @@ La ejecución de la compensación y reconciliación durable de la saga de F6 est
 
 | Dimensión | Especificación Canónica |
 | :--- | :--- |
-| **Componente de Base de Datos** | Función RPC `public.reconciliar_saga_traslados_individuales(p_limite integer default 50)` ([migración 20261104000005](file:///c:/ruum_ecosistema-main/supabase/migrations/20261104000005_flujo6_tarifa_snapshot_rescate_mecanico.sql)). |
-| **Consumidor API / Endpoint** | `GET /api/internal/viajes/reconcile` ([route.ts](file:///c:/ruum_ecosistema-main/apps/app-usuario/src/app/api/internal/viajes/reconcile/route.ts)) protegido mediante `VIAJES_RECONCILIADOR_SECRET`. |
+| **Componente de Base de Datos** | Función RPC `public.reconciliar_saga_traslados_individuales(p_limite integer default 50)` ([migración 20261104000005](../../../../supabase/migrations/20261104000005_flujo6_tarifa_snapshot_rescate_mecanico.sql)). |
+| **Consumidor API / Endpoint** | `GET /api/internal/viajes/reconcile` ([route.ts](../app/api/internal/viajes/reconcile/route.ts)) protegido mediante `VIAJES_RECONCILIADOR_SECRET`. |
 | **Dueño Operativo** | Equipo de Operaciones & Pasarela de Pagos RUUM (Tech Lead Backend & Finanzas). |
 | **Frecuencia de Ejecución** | Cada 5 minutos (vía Vercel Cron o pg_cron `ruum-reconciliar-saga-f6`). |
 | **Tamaño de Lote (Batching)** | 50 traslados por ejecución (ajustable de 1 a 200). |
@@ -97,7 +97,7 @@ Para cada traslado reclamado con bloqueo `SKIP LOCKED`:
 2. **Compensación por Abandono o Rechazo**: Si no existe pago o el pago terminó en fallo tras agotar la vigencia de 15 min, el traslado se transiciona a `servicio_cancelado` registrando en auditoría el evento `compensacion_saga_pago_fallido` con motivo `pago_fallido_compensacion`.
 
 ### 4.3 Reconciliación Durable ante Caídas de Webhook (CB-2 / CA-10)
-- **Cliente**: El hook [usePagoTraslado.ts](file:///c:/ruum_ecosistema-main/apps/app-usuario/src/app/viajes/nuevo/hooks/usePagoTraslado.ts) implementa el estado intermedio `pagoEnProcesoConfirmacion = true`. No bloquea la pantalla con un error falso; permite al usuario reintentar la verificación manualmente o consultar su pasaporte digital sin trabar la navegación.
+- **Cliente**: El hook [usePagoTraslado.ts](../app/viajes/nuevo/hooks/usePagoTraslado.ts) implementa el estado intermedio `pagoEnProcesoConfirmacion = true`. No bloquea la pantalla con un error falso; permite al usuario reintentar la verificación manualmente o consultar su pasaporte digital sin trabar la navegación.
 - **Servidor / Worker**: Tarea periódica de reconciliación que consulta los `PaymentIntents` en estado `processing` o `succeeded` que no tengan un pago reflejado en la tabla `pagos` de Supabase tras 5 minutos, reconciliando de forma durable e idempotente.
 
 ### 4.4 Idempotencia Estricta
@@ -110,6 +110,6 @@ Para evitar doble cargo:
 ## 5. Higiene de Interfaz y Expectativas (CA-7 / T8)
 
 En cumplimiento estricto con el alcance del MVP:
-- El componente [PasoPago.tsx](file:///c:/ruum_ecosistema-main/apps/app-usuario/src/app/viajes/nuevo/components/PasoPago.tsx) solo mantiene habilitada la pestaña **Tarjeta**.
+- El componente [PasoPago.tsx](../app/viajes/nuevo/components/PasoPago.tsx) solo mantiene habilitada la pestaña **Tarjeta**.
 - Las opciones **OXXO** y **Google Pay** se muestran deshabilitadas (`disabled`, `aria-disabled="true"`, cursor no permitido) acompañadas de un badge explícito **"Próximamente"**.
 - Esto previene falsas expectativas, frustración de usuario y solicitudes fallidas.

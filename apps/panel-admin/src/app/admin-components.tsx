@@ -21,7 +21,6 @@ import {
 
 const unir = cn;
 
-
 /** Variantes del panel → variantes de @ruum/ui/base. */
 const botonVariante = {
   primary: "primary",
@@ -54,6 +53,7 @@ export function AdminButton({ variant = "primary", loading = false, disabled, cl
   );
 }
 
+<<<<<<< HEAD
 type AdminIconButtonProps = Omit<AdminButtonProps, "children"> & {
   "aria-label": string;
   icon: ReactNode;
@@ -68,6 +68,8 @@ function AdminIconButton({ icon, className, variant = "quiet", ...props }: Admin
     </AdminButton>
   );
 }
+=======
+>>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77
 
 type CampoBaseProps = {
   label: string;
@@ -313,6 +315,7 @@ export function AdminLoadingState({ label = "Cargando información" }: { label?:
   );
 }
 
+<<<<<<< HEAD
 function AdminLastUpdated({ value, label = "Última actualización" }: { value?: string | Date | null; label?: string }) {
   if (!value) return <span className="text-xs text-ui-fg-muted">{label}: sin fecha</span>;
   const fecha = value instanceof Date ? value : new Date(value);
@@ -322,3 +325,5 @@ function AdminLastUpdated({ value, label = "Última actualización" }: { value?:
     </time>
   );
 }
+=======
+>>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77

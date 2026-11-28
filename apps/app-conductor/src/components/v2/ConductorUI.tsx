@@ -1,6 +1,6 @@
-import { Badge, Button as BaseButton, buttonVariants, cn } from "@ruum/ui/base";
+import { Button as BaseButton, buttonVariants, cn } from "@ruum/ui/base";
 import { ConductorIcon, type ConductorIconName } from "../icons";
-import type { ButtonHTMLAttributes, ReactNode } from "react";
+import type { ButtonHTMLAttributes } from "react";
 
 export type ConductorButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "quiet" | "emergency";
 export type ConductorStatus = "assigned" | "pending" | "active" | "success" | "error" | "neutral";
@@ -47,6 +47,7 @@ export function ConductorButton({
   );
 }
 
+<<<<<<< HEAD
 function ConductorStatusBadge({
   status,
   label,
@@ -95,3 +96,5 @@ function ConductorFeedback({
   );
 }
 
+=======
+>>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77

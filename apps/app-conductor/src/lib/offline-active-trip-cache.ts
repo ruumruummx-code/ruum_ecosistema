@@ -188,6 +188,7 @@ export async function leerCacheViajeActivo(): Promise<OfflineActiveTripCache | n
   return cache;
 }
 
+<<<<<<< HEAD
 async function actualizarUltimaUbicacionCache(ubicacion: Coordenadas) {
   const cache = await leerCacheViajeActivo();
   if (!cache) return;
@@ -200,10 +201,15 @@ async function actualizarUltimaUbicacionCache(ubicacion: Coordenadas) {
   });
 }
 
+=======
+>>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77
 export async function limpiarCacheViajeActivo() {
   await eliminarJsonLocalSeguro(CLAVE_CACHE_VIAJE_ACTIVO);
   if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("ruum:offline-cache-updated"));
 }
 
+<<<<<<< HEAD
 const OFFLINE_ACTIVE_TRIP_CACHE_KEY = CLAVE_CACHE_VIAJE_ACTIVO;
 
+=======
+>>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77

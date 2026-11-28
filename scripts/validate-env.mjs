@@ -107,11 +107,12 @@ if (hostedBuild && ["app-usuario", "panel-admin", "workspace"].includes(app)) {
     }
   }
 }
+// Desarrollo local (`pnpm dev` + `pnpm env:local`) usa el Supabase local por HTTP; producción exige HTTPS.
 const isCi = Boolean(process.env.CI || process.env.GITHUB_ACTIONS);
 for (const name of required.filter((n) => n.includes("SUPABASE_URL"))) {
   const value = process.env[name];
   if (value && !/^https:\/\//.test(value) &&
-      !((localProduction || isCi) && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/|$)/.test(value)))
+      !((!prod || localProduction || isCi) && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/|$)/.test(value)))
     invalid.push(`${name} debe usar https://`);
 }
 if (hostedBuild) {

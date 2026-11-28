@@ -21,8 +21,11 @@ export function withTimeout<T>(promise: Promise<T>, ms: number, label = "operati
   ]);
 }
 
+<<<<<<< HEAD
 function withAbortTimeout<T>(fn: (signal: AbortSignal) => Promise<T>, ms: number, label = "operation"): Promise<T> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(new TimeoutError(`${label} timed out after ${ms}ms`)), ms);
   return fn(controller.signal).finally(() => clearTimeout(timer));
 }
+=======
+>>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77

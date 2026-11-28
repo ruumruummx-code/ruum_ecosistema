@@ -13,7 +13,7 @@ De conformidad con los acuerdos de arquitectura establecidos en los tickets **RU
 > [!IMPORTANT]
 > Ningún flujo operativo particular (incluyendo el Flujo 6 de Solicitud Individual) tiene permitido implementar tablas secundarias de términos, llamadas `INSERT` directas no auditadas a la base de datos o esquemas alternativos de consentimientos legales.
 
-El Flujo 6 consume de forma exclusiva el escritor canónico establecido en el paquete de servicios transversal [`@ruum/api/services`](file:///c:/ruum_ecosistema-main/packages/api/src/services/):
+El Flujo 6 consume de forma exclusiva el escritor canónico establecido en el paquete de servicios transversal [`@ruum/api/services`](../../../../packages/api/src/services/):
 
 ```typescript
 import { registrarConsentimientoUsuario } from "@ruum/api/services";
@@ -23,7 +23,7 @@ import { registrarConsentimientoUsuario } from "@ruum/api/services";
 
 ## 2. Parámetros del Contrato Canónico
 
-Cuando el usuario acepta los términos y políticas en el paso final del wizard (`aceptaPoliticas: true`), el endpoint [POST /api/viajes](file:///c:/ruum_ecosistema-main/apps/app-usuario/src/app/api/viajes/route.ts) invoca el servicio canónico con las siguientes invariantes:
+Cuando el usuario acepta los términos y políticas en el paso final del wizard (`aceptaPoliticas: true`), el endpoint [POST /api/viajes](../app/api/viajes/route.ts) invoca el servicio canónico con las siguientes invariantes:
 
 | Parámetro | Valor Canónico | Descripción |
 | :--- | :--- | :--- |

@@ -28,7 +28,6 @@ function IconoBaja() {
 
 export function SuspenderConductor({
   conductor,
-  onCompletado,
   compacto = false
 }: {
   conductor: ConductorRow;
@@ -134,7 +133,6 @@ export function SuspenderConductor({
 
 export function ReactivarConductor({
   conductorId,
-  onCompletado,
   compacto = false
 }: {
   conductorId: string;
@@ -219,8 +217,7 @@ export function ReactivarConductor({
 }
 
 export function DarBajaConductor({
-  conductor,
-  onCompletado
+  conductor
 }: {
   conductor: ConductorRow;
   onCompletado: () => void;

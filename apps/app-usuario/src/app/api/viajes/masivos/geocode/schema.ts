@@ -17,4 +17,7 @@ export const esquemaGeocodeMasivo = z.object({
     .max(MAX_PARES_GEOCODE, `Máximo ${MAX_PARES_GEOCODE} pares por solicitud.`),
 });
 
+<<<<<<< HEAD
 const esquemaGeocode = esquemaGeocodeMasivo;
+=======
+>>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77

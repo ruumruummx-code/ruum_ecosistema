@@ -93,6 +93,7 @@ export function formatoCurpMask(valor: string) {
   return valor.replace(/[^a-zA-Z0-9]/g, "").toLocaleUpperCase("es-MX").slice(0, 18);
 }
 
+<<<<<<< HEAD
 /**
  * Valida formato CURP completo (18 caracteres alfanuméricos)
  */
@@ -101,6 +102,8 @@ function esCurpValida(valor: string): boolean {
   return curpLimpio.length === 18 && /^[A-Z0-9]{18}$/.test(curpLimpio);
 }
 
+=======
+>>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77
 export function formatoLicenciaMask(valor: string) {
   const licencia = soloAlfanumericoMayusculas(valor);
   if (licencia.length <= 4) return licencia;

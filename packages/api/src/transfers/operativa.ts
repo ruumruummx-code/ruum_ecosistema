@@ -3,15 +3,13 @@ import type { Database, FotoEvidencia } from "@ruum/shared/types";
 import { transicionValida } from "@ruum/shared/states";
 import { evidenciaCompleta } from "@ruum/shared/rules";
 import { clasificarTrasladoFallido } from "@ruum/shared/rules";
-import { assertAdminAnyPermission, assertAdminPermission } from "../services/permisos-admin";
-import { registrarEvento } from "../services/auditoria";
+import { assertAdminPermission } from "../services/permisos-admin";
 import { withIdempotentRetry } from "../operations/infrastructure/retry";
 
 type Cliente = SupabaseClient<Database>;
 type EvidenciaRow = Database["public"]["Tables"]["evidencia_fotos"]["Row"];
 type TipoEvidencia = Database["public"]["Enums"]["tipo_evidencia"];
 type EstadoTraslado = Database["public"]["Enums"]["estado_traslado"];
-type TrasladoRow = Database["public"]["Tables"]["traslados"]["Row"];
 type CausaFallido = Database["public"]["Enums"]["causa_fallido"];
 
 function aFotoEvidencia(fila: EvidenciaRow): FotoEvidencia {
@@ -112,7 +110,46 @@ export async function asignarConductorAdmin(
     p_traslado_id: trasladoId,
     p_conductor_id: conductorId
   });
-  if (error) throw error;
+  if (error) throw mensajeErrorAsignacion(error);
+}
+
+const MOTIVOS_NO_ELEGIBLE: Record<string, string> = {
+  conductor_no_encontrado: "no se encontró el conductor",
+  estado_conductor_no_operativo: "el conductor no está activo",
+  expediente_no_aprobado: "su expediente aún no está aprobado",
+  documentos_no_vigentes: "sus documentos no están vigentes",
+  suspension_activa: "tiene una suspensión activa",
+  nivel_concer_insuficiente: "su nivel CONCER no alcanza el requerido por este vehículo",
+  conductor_con_traslado_activo: "ya tiene otro traslado en curso",
+  conductor_no_disponible: "no está disponible",
+  preferencia_no_foraneos: "no acepta traslados foráneos",
+  preferencia_no_locales: "no acepta traslados locales",
+  preferencia_no_nocturnos: "no acepta traslados nocturnos",
+  traslado_no_disponible: "el traslado ya no espera conductor",
+  traslado_no_encontrado: "no se encontró el traslado"
+};
+
+/**
+ * Convierte el error crudo de `admin_asigna_conductor` en un mensaje legible para
+ * Torre. PostgREST devuelve un objeto (no `Error`), así que sin esta traducción la
+ * pantalla solo mostraba "No pudimos asignar el conductor." sin decir por qué.
+ */
+export function mensajeErrorAsignacion(error: unknown): Error {
+  const mensaje = typeof error === "string"
+    ? error
+    : typeof error === "object" && error !== null && "message" in error
+      ? String((error as { message: unknown }).message ?? "")
+      : "";
+  const noElegible = /Conductor no elegible:\s*(.*)$/i.exec(mensaje);
+  if (noElegible) {
+    const motivos = noElegible[1].split(",").map(m => m.trim()).filter(Boolean)
+      .map(m => MOTIVOS_NO_ELEGIBLE[m] ?? m.replace(/_/g, " "));
+    return new Error(motivos.length
+      ? `No se puede asignar este conductor: ${motivos.join("; ")}.`
+      : "No se puede asignar este conductor: no cumple los requisitos de elegibilidad.");
+  }
+  if (mensaje) return new Error(mensaje);
+  return new Error("No pudimos asignar el conductor.");
 }
 
 /**

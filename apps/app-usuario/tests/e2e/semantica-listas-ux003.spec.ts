@@ -29,7 +29,6 @@ for (const width of [390, 1440]) for (const route of ['/mis-viajes', '/cuenta'])
   const id = width + '-' + route.slice(1);
   await page.screenshot({ path: path.join(dir, id + '.png'), fullPage: true });
   fs.writeFileSync(path.join(dir, id + '.json'), JSON.stringify({ phase, width, route, violations: axe.violations, incomplete: axe.incomplete, lists, reading }, null, 2));
-  console.log(phase, width, route, axe.violations.map(v => ({ id: v.id, nodes: v.nodes.length })));
   if (phase === 'after') {
    expect(axe.violations).toEqual([]);
    if (width === 390) expect(lists.length).toBeGreaterThan(0);

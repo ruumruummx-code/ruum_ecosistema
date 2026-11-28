@@ -2,7 +2,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, within } from "@testing-library/react";
 import { UserSidebar } from "./UserSidebar";
-import { NAVEGACION_USUARIO } from "./user-navigation.config";
 
 let mockPathname = "/";
 let mockSearchParams = new URLSearchParams();

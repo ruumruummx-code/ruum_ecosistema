@@ -8,7 +8,6 @@ import { guardarPreferenciasConductor, obtenerConfiguracionConductor } from "@ru
 import { traducirErrorOperativo } from "@ruum/shared/utils";
 import type { Database } from "@ruum/shared/types";
 import { crearClienteNavegador } from "@/lib/supabase-browser";
-import { CuentaHeader } from "../CuentaHeader";
 import { cargarConductorCuenta, type ConductorCuenta } from "../cuenta-utils";
 import { Card, Tabs, TabsList, TabsTrigger, TabsContent } from "@ruum/ui/base";
 import type { ReactNode } from "react";

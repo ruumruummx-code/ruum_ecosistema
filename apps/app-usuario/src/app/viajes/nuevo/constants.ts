@@ -9,6 +9,7 @@ export const PASOS = [
   "Pago"
 ] as const;
 
+<<<<<<< HEAD
 /** Subtítulos cortos del encabezado ("Paso X de 5 · …"). */
 const SUBTITULOS_PASO = [
   "",
@@ -28,6 +29,9 @@ const DESCRIPCIONES_PASO = [
 ] as const;
 
 const CAMPOS_PASO_VEHICULO_ESENCIAL = new Set(["marca", "modelo", "anio", "condicion", "transmision"]);
+=======
+export const CAMPOS_PASO_VEHICULO_ESENCIAL = new Set(["marca", "modelo", "anio", "condicion", "transmision"]);
+>>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77
 export const CAMPOS_PASO_VEHICULO_DETALLE = new Set(["vehiculoSeleccionadoId", "color", "placas", "vin", "estadoGeneral", "tieneTarjeta", "tieneVerificacion", "tienePlacas", "puedeCircular"]);
 export const CAMPOS_PASO_VEHICULO = new Set([...CAMPOS_PASO_VEHICULO_ESENCIAL, ...CAMPOS_PASO_VEHICULO_DETALLE]);
 export const CAMPOS_PASO_RUTA = new Set([

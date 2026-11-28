@@ -254,7 +254,6 @@ export async function confirmarEvidenciaCompleta(
     throw new Error(`Registro ${tipo} del vehículo incompleto: faltan ${resultado.angulosFaltantes.join(", ")}`);
   }
 
-  const estadoEsperado: EstadoTraslado = tipo === "inicial" ? "evidencia_inicial_en_proceso" : "evidencia_final_en_proceso";
   const estadosFinalizados: EstadoTraslado[] = tipo === "inicial"
     ? ["evidencia_inicial_completada", "vehiculo_recibido", "traslado_en_curso"]
     : ["evidencia_final_completada", "entrega_confirmada", "servicio_cerrado"];

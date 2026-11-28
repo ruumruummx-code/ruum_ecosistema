@@ -25,6 +25,7 @@ export interface InspeccionEvidencia {
   notas: string;
 }
 
+<<<<<<< HEAD
 type CampoInspeccion = keyof InspeccionEvidencia;
 
 const CAMPOS_INSPECCION: Array<{ campo: CampoInspeccion; etiqueta: string; obligatorio: boolean }> = [
@@ -71,6 +72,8 @@ const OPCIONES_SI_NO = [
   { valor: "si", etiqueta: "Sí" },
   { valor: "no", etiqueta: "No" }
 ];
+=======
+>>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77
 
 const ETIQUETA_ANGULO: Record<AnguloEvidencia, string> = {
   frente: "Frente",
@@ -82,6 +85,7 @@ const ETIQUETA_ANGULO: Record<AnguloEvidencia, string> = {
   adicional: "Adicional"
 };
 
+<<<<<<< HEAD
 function listaEvidenciaObligatoria(tipo: TipoEvidencia): EvidenceRequirement[] {
   const prefijo = tipo === "inicial" ? "antes de moverlo" : "antes de entregar";
   return [
@@ -139,6 +143,8 @@ function listaEvidenciaObligatoria(tipo: TipoEvidencia): EvidenceRequirement[] {
   ];
 }
 
+=======
+>>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77
 export function fotoSrc(foto?: FotoEvidencia) {
   if (!foto) return null;
   if (foto.local_path) return foto.local_path;

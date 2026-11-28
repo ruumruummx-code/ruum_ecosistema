@@ -46,7 +46,6 @@ export const CampoCodigoPostal = memo(function CampoCodigoPostal({
     : [];
 
   const consultandoId = id ? `${id}-consultando` : undefined;
-  const avisoId = id ? `${id}-aviso` : undefined;
   return (
     <div className="grid gap-2">
       <Field

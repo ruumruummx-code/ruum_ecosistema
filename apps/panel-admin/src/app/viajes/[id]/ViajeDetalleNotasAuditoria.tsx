@@ -36,7 +36,7 @@ export function ViajeDetalleNotasAuditoria({
     <>
       {/* Bloque 7 — Notas internas */}
       <div className="mt-6">
-        <PassportCard>
+        <PassportCard guilloche={false}>
           <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Notas internas</p>
           <div className="mt-3 flex items-end gap-2">
             <div className="flex-1">
@@ -70,7 +70,7 @@ export function ViajeDetalleNotasAuditoria({
 
       {/* Bloque 6 — Línea de tiempo */}
       <div className="mt-6">
-        <PassportCard>
+        <PassportCard guilloche={false}>
           <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Línea de tiempo</p>
           <h2 className="mt-1 font-display text-lg font-semibold">Registro de auditoría</h2>
           <div className="mt-4 space-y-0">

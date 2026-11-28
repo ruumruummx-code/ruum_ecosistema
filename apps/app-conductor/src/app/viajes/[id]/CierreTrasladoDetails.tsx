@@ -14,7 +14,7 @@ import Link from "next/link";
 import type { Database } from "@ruum/shared/types";
 import { traducirErrorOperativo } from "@ruum/shared/utils";
 import { crearClienteNavegador } from "@/lib/supabase-browser";
-import { avanzarEstadoTraslado, extraerRutaComprobante } from "@ruum/api/services";
+import { avanzarEstadoTraslado } from "@ruum/api/services";
 import { listarInspeccionesTraslado } from "@ruum/api/drivers";
 import { TripFormFrame } from "./TripFormFrame";
 import { SignaturePad } from "./cierre/SignaturePad";
@@ -26,7 +26,6 @@ import type { PasaporteRow, InspeccionData } from "./cierre/cierre-types";
 
 export function CierreTrasladoDetails({
   pasaporte,
-  volver,
 }: {
   pasaporte: PasaporteRow;
   volver: string;
@@ -59,7 +58,6 @@ export function CierreTrasladoDetails({
   const [modalConfirmacionAbierto, setModalConfirmacionAbierto] = useState(false);
 
   // Trazabilidad de comprobante_ruta si aplica gasto al cierre con extraerRutaComprobante
-  const _comprobanteRutaSanitizada = (ruta?: string | null) => (ruta ? extraerRutaComprobante(null, ruta).ruta : null);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [step, setStep] = useState(0);

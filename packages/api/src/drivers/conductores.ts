@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database, EstadoDocumentoConductor } from "@ruum/shared/types";
+import type { Database } from "@ruum/shared/types";
 import { consecuenciaCancelacionConductor, consecuenciaNoPresentacion } from "@ruum/shared/rules";
-import { assertAdminAnyPermission, assertAdminPermission } from "../services/permisos-admin";
+import { assertAdminPermission } from "../services/permisos-admin";
 import { registrarEvento } from "../services/auditoria";
 import { obtenerAdminIdParaAuditoria } from "../identity/admins";
 import { cambiarAccesoAuthAdmin } from "../identity/usuarios";
@@ -9,7 +9,6 @@ import { esRpcPaginacionNoDisponible } from "../operations/infrastructure/supaba
 
 type Cliente = SupabaseClient<Database>;
 type ConductorRow = Database["public"]["Tables"]["conductores"]["Row"];
-type UsuarioRow = Database["public"]["Tables"]["usuarios"]["Row"];
 type EstadoConductor = Database["public"]["Enums"]["estado_conductor"];
 
 export async function listarConductoresAdmin(

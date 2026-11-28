@@ -6,7 +6,7 @@ import { listarPagosAdmin, type DatosPagosAdmin } from "@ruum/api/services";
 import type { Database } from "@ruum/shared/types";
 import { crearClienteNavegador, puedeUsarDatosDemo, tieneSupabaseConfigurado } from "../../lib/supabase-browser";
 import { AdminPageHeader, AdminFiltroActivo, limpiarParamsFiltroUrl } from "../admin-ui";
-import { AdminLoadingState, AdminEmptyState, AdminErrorState, AdminTabs, AdminBadge } from "../admin-components";
+import { AdminLoadingState, AdminErrorState, AdminTabs, AdminBadge } from "../admin-components";
 
 type Pago = Database["public"]["Tables"]["pagos"]["Row"];
 type Payout = Database["public"]["Tables"]["payouts_conductor"]["Row"];

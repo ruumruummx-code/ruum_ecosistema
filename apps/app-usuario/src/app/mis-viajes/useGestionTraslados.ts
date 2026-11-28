@@ -11,7 +11,6 @@ import {
   perteneceAHoy,
   perteneceASemanaCalendario,
   perteneceAMes,
-  obtenerDiaCalendario,
   ZONA_HORARIA_CANONICA,
 } from "../../lib/zona-horaria-traslados";
 

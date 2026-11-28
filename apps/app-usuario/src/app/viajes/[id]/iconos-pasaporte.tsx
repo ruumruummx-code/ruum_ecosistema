@@ -7,6 +7,7 @@ export function IconoEscudoGnp({ className ="size-3.5" }: { className?: string }
   );
 }
 
+<<<<<<< HEAD
 function IconoPinTab({ className ="size-4" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -53,6 +54,8 @@ function IconoChatAccion({ className ="size-4" }: { className?: string }) {
   );
 }
 
+=======
+>>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77
 export function IconoTelefonoAccion({ className ="size-4" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -61,6 +64,7 @@ export function IconoTelefonoAccion({ className ="size-4" }: { className?: strin
   );
 }
 
+<<<<<<< HEAD
 function IconoSosAccion({ className ="size-4" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -70,3 +74,5 @@ function IconoSosAccion({ className ="size-4" }: { className?: string }) {
   );
 }
 
+=======
+>>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77

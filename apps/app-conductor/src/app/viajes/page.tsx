@@ -350,14 +350,12 @@ export default function PaginaTraslados() {
     return Array.from(set);
   }, [rawListToRender]);
 
-  // Obtener query de búsqueda de URL
   const searchQuery = searchParams.get("q") ?? "";
 
   // Lista filtrada y ordenada
   const listToRender = useMemo(() => {
     let result = [...rawListToRender];
 
-    // Filtrar por ciudad
     if (ciudadFiltro !== "todas") {
       result = result.filter((item) => item.viaje.origen_ciudad === ciudadFiltro);
     }

@@ -196,7 +196,6 @@ export function enmascarar(texto) {
   return `${t.substring(0, 3)}...[REDACTED]...${t.substring(t.length - 3)}`;
 }
 
-// Determina si un archivo debe inspeccionarse
 export function debeInspeccionarArchivo(nombreArchivo) {
   if (ARCHIVOS_EXCLUIDOS.has(nombreArchivo)) return false;
 
@@ -439,7 +438,6 @@ export function scanDir(dir, options = {}) {
       }
 
       if (stats.isDirectory()) {
-        // Excluir carpetas ignoradas
         if (DIRS_EXCLUIDOS.has(entry) || entry.startsWith(".next")) continue;
         if (excludeFixtures && entry === "fixtures") continue;
         hallazgos = hallazgos.concat(scanDir(fullPath, options));

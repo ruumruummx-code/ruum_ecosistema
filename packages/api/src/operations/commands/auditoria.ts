@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@ruum/shared/types";
 import { withIdempotentRetry } from "../infrastructure/retry";
-import { assertAdminAnyPermission, assertAdminPermission } from "../../services/permisos-admin";
+import { assertAdminPermission } from "../../services/permisos-admin";
 
 type Cliente = SupabaseClient<Database>;
 

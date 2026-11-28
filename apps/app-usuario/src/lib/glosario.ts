@@ -38,6 +38,7 @@ export const TERMINOLOGIA_USUARIO: Record<string, string> = {
   cierre_operativo_con_incidencia_abierta: "Finalizado con reporte"
 };
 
+<<<<<<< HEAD
 /**
  * Traduce términos técnicos y mensajes internos a lenguaje comprensible para el usuario.
  */
@@ -63,3 +64,5 @@ const AYUDAS_CAMPOS = {
   tarifa: "Tarifa fija y transparente calculada por distancia, tipo de vehículo y condiciones de la ruta. Sin costos ocultos.",
   seguro: "Cada traslado cuenta con cobertura de póliza de responsabilidad civil y daños en tránsito gestionada por aseguradora autorizada."
 } as const;
+=======
+>>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77

@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import type { Database } from "@ruum/shared/types";
 import type { DatosEmpresasAdmin } from "@ruum/api/services";
 

@@ -28,7 +28,7 @@ export default function PaginaUsuariosAdmin() {
   const [cargando, setCargando] = useState(true);
   const [busqueda, setBusqueda] = useState("");
   const [pagina, setPagina] = useState(1);
-  const [tamanoPagina, setTamanoPagina] = useState(25);
+  const [tamanoPagina] = useState(25);
   const [totalResultados, setTotalResultados] = useState(0);
   const [totalPaginas, setTotalPaginas] = useState(0);
   const [mostrarInvitar, setMostrarInvitar] = useState(false);

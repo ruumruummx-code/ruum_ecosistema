@@ -6,7 +6,6 @@ import {
   soloDigitos,
   telefonoLocalMx,
   telefonoMx,
-  nombreCompleto,
   domicilioCompleto,
   referenciasDomicilio,
   formatearDistancia,
