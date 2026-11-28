@@ -4,7 +4,6 @@ import { Button, cn } from "@ruum/ui/base";
 
 /**
  * Barra fija con botón de regreso, título y subtítulo opcional.
- * Sustituye a `MobileHeader` de la entrada raíz de `@ruum/ui`.
  */
 export function EncabezadoRegreso({
   titulo,

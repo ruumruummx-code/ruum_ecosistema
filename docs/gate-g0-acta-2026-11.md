@@ -14,14 +14,14 @@ El Comité revisó el estado de remediación en código, suites de pruebas autom
 
 | Sub-Ticket | Tarea | Owner | Estado de Cierre | Categoría de Cierre |
 | :--- | :--- | :---: | :---: | :--- |
-| **RUUM-SEC-001** | F0.0: Inventario de endpoints service_role | **AP** | ✅ Cerrado | **Limpio** — 46 endpoints inventariados en [inventario-endpoints-service-role.md](file:///c:/ruum_ecosistema-main/docs/inventario-endpoints-service-role.md) y [fase-0-owners.md](file:///c:/ruum_ecosistema-main/docs/fase-0-owners.md). |
-| **RUUM-SEC-002** | F0.4: Grants reales y drift check | **BS** | ⚠️ Cerrado | **Con Deuda Documentada** — Clasificación canónica de 91 funciones terminada; `db diff --linked` diferido a [RUUM-SEC-002b](file:///c:/ruum_ecosistema-main/docs/tickets/RUUM-SEC-002b.md) (DO, 2026-12-14). |
-| **RUUM-SEC-003** | F0.3: Blindaje de tarifa-snapshot (fail-closed) | **FS** | ✅ Cerrado | **Limpio** — Fallback eliminado, server-only activo, 12 tests pasando y variable verificada en Vercel ([vercel-env-2026-11.md](file:///c:/ruum_ecosistema-main/docs/vercel-env-2026-11.md)). |
-| **RUUM-SEC-004** | F0.5: HIBP, MFA Admin y Timeouts en Supabase | **DO** | ⚠️ Cerrado | **Con Deuda Documentada** — HIBP y timeouts aplicados; enforcement obligatorio de MFA para admins diferido a F1.2 ([RUUM-SEC-010](file:///c:/ruum_ecosistema-main/docs/supabase-auth-config-2026-11.md)). |
-| **RUUM-SEC-005** | F0.1: Bloqueo RBAC sensible en middleware | **FS** | ✅ Cerrado | **Limpio** — 6 endpoints de app-usuario aislados (401/403) con suite de 7 tests pasando en [middleware-sensitive-endpoints.test.ts](file:///c:/ruum_ecosistema-main/apps/app-usuario/src/middleware-sensitive-endpoints.test.ts). |
-| **RUUM-SEC-006** | F0.2: Endurecimiento de proxy Mapbox /api/ruta | **FS** | 🔄 Cerrado | **Observaciones Resueltas** — Exige sesión (401), rate limit 10 req/min por usuario y decisión de mantener proxy temporal con caché en [decision-proxy-mapbox.md](file:///c:/ruum_ecosistema-main/docs/decision-proxy-mapbox.md). |
-| **RUUM-SEC-007** | F0.6: Desactivar WebView debugging en Android | **FS** | ⚠️ Cerrado | **Con Deuda Documentada** — Flag desactivada y assets sincronizados; hallazgo de pipeline móvil escalado a Fase 3 ([RUUM-SEC-014b](file:///c:/ruum_ecosistema-main/docs/tickets/RUUM-SEC-014b.md)). |
-| **RUUM-SEC-008** | F0.7: Resolver ceguera CSP en panel-admin | **FS** | ✅ Cerrado | **Limpio** — Endpoint `/api/csp-report` creado con rate limit distribuido y 7 tests unitarios pasando en [route.test.ts](file:///c:/ruum_ecosistema-main/apps/panel-admin/src/app/api/csp-report/route.test.ts). |
+| **RUUM-SEC-001** | F0.0: Inventario de endpoints service_role | **AP** | ✅ Cerrado | **Limpio** — 46 endpoints inventariados en [inventario-endpoints-service-role.md](inventario-endpoints-service-role.md) y [fase-0-owners.md](fase-0-owners.md). |
+| **RUUM-SEC-002** | F0.4: Grants reales y drift check | **BS** | ⚠️ Cerrado | **Con Deuda Documentada** — Clasificación canónica de 91 funciones terminada; `db diff --linked` diferido a [RUUM-SEC-002b](tickets/RUUM-SEC-002b.md) (DO, 2026-12-14). |
+| **RUUM-SEC-003** | F0.3: Blindaje de tarifa-snapshot (fail-closed) | **FS** | ✅ Cerrado | **Limpio** — Fallback eliminado, server-only activo, 12 tests pasando y variable verificada en Vercel ([vercel-env-2026-11.md](vercel-env-2026-11.md)). |
+| **RUUM-SEC-004** | F0.5: HIBP, MFA Admin y Timeouts en Supabase | **DO** | ⚠️ Cerrado | **Con Deuda Documentada** — HIBP y timeouts aplicados; enforcement obligatorio de MFA para admins diferido a F1.2 ([RUUM-SEC-010](supabase-auth-config-2026-11.md)). |
+| **RUUM-SEC-005** | F0.1: Bloqueo RBAC sensible en middleware | **FS** | ✅ Cerrado | **Limpio** — 6 endpoints de app-usuario aislados (401/403) con suite de 7 tests pasando en [middleware-sensitive-endpoints.test.ts](../apps/app-usuario/src/middleware-sensitive-endpoints.test.ts). |
+| **RUUM-SEC-006** | F0.2: Endurecimiento de proxy Mapbox /api/ruta | **FS** | 🔄 Cerrado | **Observaciones Resueltas** — Exige sesión (401), rate limit 10 req/min por usuario y decisión de mantener proxy temporal con caché en [decision-proxy-mapbox.md](decision-proxy-mapbox.md). |
+| **RUUM-SEC-007** | F0.6: Desactivar WebView debugging en Android | **FS** | ⚠️ Cerrado | **Con Deuda Documentada** — Flag desactivada y assets sincronizados; hallazgo de pipeline móvil escalado a Fase 3 ([RUUM-SEC-014b](tickets/RUUM-SEC-014b.md)). |
+| **RUUM-SEC-008** | F0.7: Resolver ceguera CSP en panel-admin | **FS** | ✅ Cerrado | **Limpio** — Endpoint `/api/csp-report` creado con rate limit distribuido y 7 tests unitarios pasando en [route.test.ts](../apps/panel-admin/src/app/api/csp-report/route.test.ts). |
 
 ---
 
@@ -29,19 +29,19 @@ El Comité revisó el estado de remediación en código, suites de pruebas autom
 
 El Comité validó la autenticidad e integridad de los artefactos técnicos de evidencia archivados en el monorepo:
 1. **Protección contra Contraseñas Filtradas (HIBP):**
-   - Producción (`asmzetwwwugaoowiukdv`): [hibp-prod.json](file:///c:/ruum_ecosistema-main/docs/evidencias/2026-11/hibp-prod.json) (`status: PASS`, sin warnings).
-   - Staging (`ytqhzrbmiczzwzzuzgbq`): [hibp-staging.json](file:///c:/ruum_ecosistema-main/docs/evidencias/2026-11/hibp-staging.json) (`status: PASS`).
+   - Producción (`asmzetwwwugaoowiukdv`): [hibp-prod.json](evidencias/2026-11/hibp-prod.json) (`status: PASS`, sin warnings).
+   - Staging (`ytqhzrbmiczzwzzuzgbq`): [hibp-staging.json](evidencias/2026-11/hibp-staging.json) (`status: PASS`).
 2. **Timeouts Reales de Sesión en Supabase Cloud:**
-   - Producción: [timeouts-prod.json](file:///c:/ruum_ecosistema-main/docs/evidencias/2026-11/timeouts-prod.json) (`jwt_exp: 1800s`, `refresh_reuse: 10s`, `inactivity: 28800s`, `timebox: 86400s`).
-   - Staging: [timeouts-staging.json](file:///c:/ruum_ecosistema-main/docs/evidencias/2026-11/timeouts-staging.json).
+   - Producción: [timeouts-prod.json](evidencias/2026-11/timeouts-prod.json) (`jwt_exp: 1800s`, `refresh_reuse: 10s`, `inactivity: 28800s`, `timebox: 86400s`).
+   - Staging: [timeouts-staging.json](evidencias/2026-11/timeouts-staging.json).
 3. **Aprovisionamiento Criptográfico en Vercel Prod:**
-   - [vercel-tarifa-snapshot.json](file:///c:/ruum_ecosistema-main/docs/evidencias/2026-11/vercel-tarifa-snapshot.json) y [vercel-env-2026-11.md](file:///c:/ruum_ecosistema-main/docs/vercel-env-2026-11.md) (`TARIFA_SNAPSHOT_SECRET` configurada con 64 caracteres en entornos Production y Preview).
+   - [vercel-tarifa-snapshot.json](evidencias/2026-11/vercel-tarifa-snapshot.json) y [vercel-env-2026-11.md](vercel-env-2026-11.md) (`TARIFA_SNAPSHOT_SECRET` configurada con 64 caracteres en entornos Production y Preview).
 
 ---
 
 ## 3. Clasificación Canónica de Lotes para F1.1 (RUUM-SEC-009)
 
-Se certifica formalmente la matriz de **91 funciones SECURITY DEFINER** establecida en [grants-reales-2026-11.md](file:///c:/ruum_ecosistema-main/docs/grants-reales-2026-11.md) como la **única fuente de verdad** para la ejecución del REVOKE masivo de permisos en Fase 1:
+Se certifica formalmente la matriz de **91 funciones SECURITY DEFINER** establecida en [grants-reales-2026-11.md](grants-reales-2026-11.md) como la **única fuente de verdad** para la ejecución del REVOKE masivo de permisos en Fase 1:
 
 | Lote | Alcance Funcional | Cantidad | Destino Final del Grant | Acción en F1.1 |
 |:---:|---|:---:|---|---|
@@ -69,23 +69,23 @@ El Comité aprueba la transición de fase aceptando expresamente las siguientes 
 1. **Ticket RUUM-SEC-002b:** Drift check exhaustivo con `db diff --linked` autenticado.  
    - **Owner:** DO (DevOps/SRE)  
    - **Fecha Límite:** 2026-12-14 (Bloquea a `RUUM-SEC-012` / F1.4).  
-   - **Ficha Técnica:** [RUUM-SEC-002b.md](file:///c:/ruum_ecosistema-main/docs/tickets/RUUM-SEC-002b.md).
+   - **Ficha Técnica:** [RUUM-SEC-002b.md](tickets/RUUM-SEC-002b.md).
 2. **Ticket RUUM-SEC-003-Vercel:** Verificación continua de variables de entorno y pre-build CI.  
    - **Owner:** DO (DevOps/SRE)  
-   - **Fecha Límite:** 2026-11-27 (Verificado y cerrado en [vercel-env-2026-11.md](file:///c:/ruum_ecosistema-main/docs/vercel-env-2026-11.md)).
+   - **Fecha Límite:** 2026-11-27 (Verificado y cerrado en [vercel-env-2026-11.md](vercel-env-2026-11.md)).
 3. **Documento de Gobernanza de Owners:**  
    - **Owner:** AP (Arquitecto de Plataforma)  
-   - **Fecha:** 2026-11-24 (Formalizado y mergeado en [fase-0-owners.md](file:///c:/ruum_ecosistema-main/docs/fase-0-owners.md)).
+   - **Fecha:** 2026-11-24 (Formalizado y mergeado en [fase-0-owners.md](fase-0-owners.md)).
 4. **Ticket RUUM-SEC-014b:** Pipeline de release móvil Android, firma automatizada y Keystores en CI/CD.  
    - **Owner:** FS + DO  
    - **Fase de Ejecución:** Fase 3 (Mobile Hardening & Distribution).  
-   - **Ficha Técnica:** [RUUM-SEC-014b.md](file:///c:/ruum_ecosistema-main/docs/tickets/RUUM-SEC-014b.md).
+   - **Ficha Técnica:** [RUUM-SEC-014b.md](tickets/RUUM-SEC-014b.md).
 
 ---
 
 ## 6. Hallazgos que Trascienden el Epic (Seguridad Móvil)
 
-El Comité tomó conocimiento formal del informe de escalamiento [escalamiento-comite-android-release-pipeline.md](file:///c:/ruum_ecosistema-main/docs/escalamiento-comite-android-release-pipeline.md):
+El Comité tomó conocimiento formal del informe de escalamiento [escalamiento-comite-android-release-pipeline.md](escalamiento-comite-android-release-pipeline.md):
 - **Diagnóstico:** Si bien la bandera `webContentsDebuggingEnabled: false` fue eliminada de los activos móviles compilados, las aplicaciones Android carecen de un release pipeline determinista en GitHub Actions y de gestión centralizada de llaves de firma de producción (`release.keystore`).
 - **Resolución:** Se prohíbe la distribución externa de binarios compilados en máquinas locales y se incorpora formalmente el ticket `RUUM-SEC-014b` a la planificación de la Fase 3.
 
@@ -94,11 +94,11 @@ El Comité tomó conocimiento formal del informe de escalamiento [escalamiento-c
 ## 7. Insumos Canónicos Entregados para el Arranque de la Fase 1
 
 La Fase 1 cuenta con insumos completos, auditados y libres de ambigüedad para su inicio el lunes 2026-11-30:
-1. **Para F1.1 (REVOKE de 91 funciones):** Lista priorizada por lotes y scripts SQL base en [grants-reales-2026-11.md](file:///c:/ruum_ecosistema-main/docs/grants-reales-2026-11.md) (Owner: BS).
-2. **Para F1.2 (Enforcement MFA y RBAC en Middleware):** Especificación de validación AAL2 y endpoints en [supabase-auth-config-2026-11.md](file:///c:/ruum_ecosistema-main/docs/supabase-auth-config-2026-11.md) (Owner: FS).
-3. **Para F1.3 (Migración de Endpoints Sensibles):** Catálogo de 46 endpoints y contratos tipados en [inventario-endpoints-service-role.md](file:///c:/ruum_ecosistema-main/docs/inventario-endpoints-service-role.md) (Owner: AP).
-4. **Para F1.4 (Sanitización de Esquema Local):** Línea base de drifts en [supabase-drift-2026-11.md](file:///c:/ruum_ecosistema-main/docs/supabase-drift-2026-11.md) (Owners: BS + DO).
-5. **Decisión de Producto Mapbox:** Racional de conservación temporal del proxy `/api/ruta` con caching en [decision-proxy-mapbox.md](file:///c:/ruum_ecosistema-main/docs/decision-proxy-mapbox.md).
+1. **Para F1.1 (REVOKE de 91 funciones):** Lista priorizada por lotes y scripts SQL base en [grants-reales-2026-11.md](grants-reales-2026-11.md) (Owner: BS).
+2. **Para F1.2 (Enforcement MFA y RBAC en Middleware):** Especificación de validación AAL2 y endpoints en [supabase-auth-config-2026-11.md](supabase-auth-config-2026-11.md) (Owner: FS).
+3. **Para F1.3 (Migración de Endpoints Sensibles):** Catálogo de 46 endpoints y contratos tipados en [inventario-endpoints-service-role.md](inventario-endpoints-service-role.md) (Owner: AP).
+4. **Para F1.4 (Sanitización de Esquema Local):** Línea base de drifts en [supabase-drift-2026-11.md](supabase-drift-2026-11.md) (Owners: BS + DO).
+5. **Decisión de Producto Mapbox:** Racional de conservación temporal del proxy `/api/ruta` con caching en [decision-proxy-mapbox.md](decision-proxy-mapbox.md).
 
 ---
 

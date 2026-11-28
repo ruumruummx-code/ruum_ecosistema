@@ -73,7 +73,6 @@ export async function coordenadaPostalMasiva(cp: string, token: string): Promise
     }
 
     const coordenadas = punto as [number, number];
-    // Guardar en cache en memoria
     cacheCoordenadasCP.set(normalizado, coordenadas);
     return coordenadas;
   })();
