@@ -15,6 +15,9 @@ export function PWABootstrap() {
     if (process.env.NODE_ENV !== "production") return;
     if (typeof window !== "undefined" && (window.navigator.webdriver || window.location.hostname === "localhost")) return;
 
+    let cancelado = false;
+    let checkForUpdates: ReturnType<typeof setInterval> | undefined;
+
     // Verificar si el navegador soporta Service Workers
     if ("serviceWorker" in navigator) {
       const registerSW = async () => {
@@ -23,6 +26,7 @@ export function PWABootstrap() {
           const registration = await navigator.serviceWorker.register("/sw.js", {
             scope: "/",
           });
+          if (cancelado) return;
           
           logger.info("service_worker_registered", { scope: registration.scope });
           
@@ -42,12 +46,9 @@ export function PWABootstrap() {
           };
           
           // Verificar si hay una nueva versión periódicamente
-          const checkForUpdates = setInterval(() => {
+          checkForUpdates = setInterval(() => {
             registration.update();
           }, 24 * 60 * 60 * 1000); // Cada 24 horas
-          
-          // Limpiar al desmontar
-          return () => clearInterval(checkForUpdates);
         } catch (error) {
           logger.error("service_worker_registration_failed", { error }, "unexpected_exception");
         }
@@ -55,6 +56,12 @@ export function PWABootstrap() {
       
       registerSW();
     }
+
+    // El registro es asíncrono, así que el intervalo se limpia desde aquí y no desde registerSW.
+    return () => {
+      cancelado = true;
+      if (checkForUpdates !== undefined) clearInterval(checkForUpdates);
+    };
   }, []);
   
   return null;
