@@ -281,7 +281,7 @@ export function obtenerTokenCsrfCliente(): string | null {
  * Asegura que exista un token CSRF válido en el cliente. Si no se encuentra
  * en document.cookie, consulta `/api/csrf` para emitirlo.
  */
-export async function asegurarTokenCsrfCliente(): Promise<string | null> {
+async function asegurarTokenCsrfCliente(): Promise<string | null> {
   const token = obtenerTokenCsrfCliente();
   if (token) return token;
 

@@ -389,7 +389,7 @@ export function VistaExpediente({
   );
 }
 
-export function TablaLugares({
+function TablaLugares({
   titulo,
   lugares
 }: {
@@ -446,7 +446,7 @@ export function TablaLugares({
   );
 }
 
-export function Checklist({ items }: { items: Array<[string, boolean]> }) {
+function Checklist({ items }: { items: Array<[string, boolean]> }) {
   return (
     <ul className="flex flex-wrap gap-1.5">
       {items.map(([label, ok]) => (
@@ -458,7 +458,7 @@ export function Checklist({ items }: { items: Array<[string, boolean]> }) {
   );
 }
 
-export function ListaVersiones({
+function ListaVersiones({
   titulo,
   versiones
 }: {

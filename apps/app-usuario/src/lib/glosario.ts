@@ -41,7 +41,7 @@ export const TERMINOLOGIA_USUARIO: Record<string, string> = {
 /**
  * Traduce términos técnicos y mensajes internos a lenguaje comprensible para el usuario.
  */
-export function normalizarTerminoUsuario(texto: string | null | undefined): string {
+function normalizarTerminoUsuario(texto: string | null | undefined): string {
   if (!texto) return "";
   let resultado = texto;
   for (const [clave, reemplazo] of Object.entries(TERMINOLOGIA_USUARIO)) {
@@ -53,7 +53,7 @@ export function normalizarTerminoUsuario(texto: string | null | undefined): stri
 /**
  * Ayudas contextuales para campos densos del formulario y vistas de usuario.
  */
-export const AYUDAS_CAMPOS = {
+const AYUDAS_CAMPOS = {
   vin: "El VIN o número de serie tiene 17 caracteres alfanuméricos. Puedes consultarlo en tu tarjeta de circulación o en la esquina inferior del parabrisas.",
   placas: "Formato oficial de placas (ej. ABC-123-A). Si es auto nuevo sin placas, escribe 'PERMISO'.",
   transmision: "Selecciona si el vehículo es estándar (manual), automático o 100% eléctrico.",

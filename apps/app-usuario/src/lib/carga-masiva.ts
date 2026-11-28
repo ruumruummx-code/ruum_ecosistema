@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { ANTICIPACION_MINIMA_HORAS } from "@ruum/shared/validacion";
 
-export const MAX_FILAS_MASIVAS = 100;
-export const esquemaFilaMasiva = z.object({
+const MAX_FILAS_MASIVAS = 100;
+const esquemaFilaMasiva = z.object({
   origenCodigoPostal: z.string().regex(/^\d{5}$/, "CP de 5 dígitos requerido"),
   destinoCodigoPostal: z.string().regex(/^\d{5}$/, "CP de 5 dígitos requerido"),
   marca: z.string().trim().min(1, "Marca requerida").max(80),
@@ -22,7 +22,7 @@ export interface FilaValidada {
   errores: Record<string, string>;
   estado: "correcto" | "error";
 }
-export function normalizarTransmisionMasiva(valor: string) {
+function normalizarTransmisionMasiva(valor: string) {
   return valor.trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 }
 export function validarFila(datos: Record<string, string>, indice: number): FilaValidada {

@@ -12,7 +12,7 @@ import {
 import { crearClienteNavegador } from "@/lib/supabase-browser";
 import type { UsuarioRow } from "./UsuarioDetalleTipos";
 
-export function Campo({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+function Campo({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (
     <label className="flex flex-col gap-1">
       <span className="font-body text-xs font-medium text-ui-fg-muted">{label}</span>

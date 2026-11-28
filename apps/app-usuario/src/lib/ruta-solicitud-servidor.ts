@@ -16,9 +16,9 @@ export interface PinesCliente {
 }
 
 /** Hasta esta distancia el pin del usuario se acepta sin preguntar. */
-export const PIN_TOLERANCIA_M = 300;
+const PIN_TOLERANCIA_M = 300;
 /** Más allá de esta distancia pin y dirección son incoherentes: no se acepta ni confirmando. */
-export const PIN_MAXIMO_CONFIRMABLE_M = 5_000;
+const PIN_MAXIMO_CONFIRMABLE_M = 5_000;
 
 const GEOCODE_CACHE_TTL_SEG = 7 * 24 * 3600;
 
@@ -41,7 +41,7 @@ export class UbicacionDivergenteError extends Error {
   }
 }
 
-export function distanciaMetros(a: Punto, b: Punto): number {
+function distanciaMetros(a: Punto, b: Punto): number {
   const R = 6_371_000;
   const rad = (g: number) => (g * Math.PI) / 180;
   const dLat = rad(b.lat - a.lat);

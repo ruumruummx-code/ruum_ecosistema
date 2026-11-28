@@ -20,7 +20,7 @@ export interface TarifaGateFields {
   fechaHoraProgramada: string;
 }
 
-export function extraerCamposTarifa(datos: Partial<DatosFormulario>): TarifaGateFields {
+function extraerCamposTarifa(datos: Partial<DatosFormulario>): TarifaGateFields {
   return {
     origenCodigoPostal: (datos.origenCodigoPostal ?? "").trim(),
     destinoCodigoPostal: (datos.destinoCodigoPostal ?? "").trim(),

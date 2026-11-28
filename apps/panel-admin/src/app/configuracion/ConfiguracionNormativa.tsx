@@ -54,7 +54,7 @@ function OpcionesChecklist({ label, opciones, seleccionadas, onChange }: { label
   );
 }
 
-export function ResumenNormativo({ claveConfig, valor }: { claveConfig: string; valor: unknown }) {
+function ResumenNormativo({ claveConfig, valor }: { claveConfig: string; valor: unknown }) {
   const config = objeto(valor);
   if (claveConfig === "metodos_pago") {
     return <p className="font-body text-sm font-semibold text-ui-fg">{lista(config.habilitados).length} métodos activos · Pasarela {texto(config.proveedor_pasarela, "sin proveedor")}</p>;

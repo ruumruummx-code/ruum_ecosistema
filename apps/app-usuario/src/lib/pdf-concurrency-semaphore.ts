@@ -29,7 +29,7 @@ export class SemaforoPdfOcupadoError extends Error {
 }
 
 /** Lanzado cuando la generación de PDF supera el timeout máximo configurado. */
-export class SemaforoPdfTimeoutError extends Error {
+class SemaforoPdfTimeoutError extends Error {
   readonly timeoutMs: number;
 
   constructor(timeoutMs: number) {

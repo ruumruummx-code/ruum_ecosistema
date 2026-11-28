@@ -6,7 +6,7 @@ export function formatearMoneda(valor: number): string {
   }).format(valor);
 }
 
-export function limpiarTelefono(tel?: string | null): string {
+function limpiarTelefono(tel?: string | null): string {
   if (!tel) return "";
   const digits = tel.replace(/\D/g, "");
   return digits.length === 10 ? `52${digits}` : digits;

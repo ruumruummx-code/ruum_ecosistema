@@ -48,7 +48,7 @@ export async function obtenerEstadoTrackingNativo() {
   return BackgroundTracking.getStatus();
 }
 
-export async function actualizarEstadoTrackingNativo(tripState: string) {
+async function actualizarEstadoTrackingNativo(tripState: string) {
   return BackgroundTracking.updateTripState({ tripState });
 }
 

@@ -23,7 +23,7 @@ export interface ContextoTrazaDistribuida {
 /**
  * Genera una cadena hexadecimal criptográficamente aleatoria de `bytes` bytes.
  */
-export function generarHexAleatorio(bytes: number): string {
+function generarHexAleatorio(bytes: number): string {
   const buffer = new Uint8Array(bytes);
   globalThis.crypto.getRandomValues(buffer);
   return Array.from(buffer, (b) => b.toString(16).padStart(2, "0")).join("");

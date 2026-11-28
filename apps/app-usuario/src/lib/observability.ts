@@ -22,11 +22,11 @@ import {
 
 export {
   sanitizeDetails,
-  dispararAlertaCriticaSentry,
-  esErrorCriticoAlerta,
-  REGLAS_ALERTA_SENTRY,
-  resolverConfigSentryUsuario,
-  verificarSentryDsnProduccion
+  
+  
+  
+  
+  
 };
 export type { OperationalSeverity };
 

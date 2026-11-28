@@ -19,9 +19,9 @@ import {
 } from "@ruum/api/rate-limit";
 
 export type { RateLimitStore, RateLimitResult };
-export { MemoryRateLimitStore, RedisRateLimitStore, getRedisClient, __resetRateLimitStateForTest };
+;
 
-export const rateLimitStore: RateLimitStore = defaultMemoryStore;
+const rateLimitStore: RateLimitStore = defaultMemoryStore;
 
 export interface RateLimitOptions {
   max: number;

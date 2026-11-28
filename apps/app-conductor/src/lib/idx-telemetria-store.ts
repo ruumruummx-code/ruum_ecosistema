@@ -46,7 +46,7 @@ function esIndexedDBDisponible(): boolean {
   return typeof indexedDB !== "undefined";
 }
 
-export class IndexedDBTelemetryQueueStorage {
+class IndexedDBTelemetryQueueStorage {
   async read(): Promise<PuntoTelemetriaLocal[]> {
     if (!esIndexedDBDisponible()) return [];
     const db = await abrirBaseDeDatos();
@@ -101,7 +101,7 @@ export class IndexedDBTelemetryQueueStorage {
   }
 }
 
-export function reiniciarBaseDeDatosParaTesting() {
+function reiniciarBaseDeDatosParaTesting() {
   dbPromise = null;
 }
 
@@ -111,4 +111,4 @@ export function reiniciarBaseDeDatosParaTesting() {
  */
 export const indexedDBTelemetryStorage = new IndexedDBTelemetryQueueStorage();
 
-export { DB_NAME, STORE_NAME, esIndexedDBDisponible };
+export {   esIndexedDBDisponible };

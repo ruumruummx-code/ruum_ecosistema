@@ -21,14 +21,14 @@ const cacheRutasCPPares = new Map<string, ResultadoRutaCP>();
 const promesasEnVueloRutas = new Map<string, Promise<ResultadoRutaCP | null>>();
 
 /** Limpia el cache en memoria (útil en pruebas) */
-export function limpiarCacheCoordenadasCP(): void {
+function limpiarCacheCoordenadasCP(): void {
   cacheCoordenadasCP.clear();
   promesasEnVueloCP.clear();
   cacheRutasCPPares.clear();
   promesasEnVueloRutas.clear();
 }
 
-export function limpiarCacheRutasCPPares(): void {
+function limpiarCacheRutasCPPares(): void {
   cacheRutasCPPares.clear();
   promesasEnVueloRutas.clear();
 }
@@ -106,7 +106,7 @@ export async function coordenadaPostalMasiva(cp: string, token: string): Promise
  * Reduce drásticamente las llamadas a la API de Directions de Mapbox cuando varios traslados
  * comparten el mismo par de códigos postales.
  */
-export async function obtenerRutaEntreCPParesMasiva(
+async function obtenerRutaEntreCPParesMasiva(
   origenCP: string,
   destinoCP: string,
   origenCoord: [number, number],

@@ -193,7 +193,7 @@ export function DetalleRapidoTraslado({
   );
 }
 
-export function DetalleSeccion({ titulo, children }: { titulo: string; children: ReactNode }) {
+function DetalleSeccion({ titulo, children }: { titulo: string; children: ReactNode }) {
   return (
     <section className="rounded-lg border border-ui-line bg-ui-muted p-4">
       <h3 className="font-body text-sm font-semibold uppercase tracking-wide text-ui-fg-muted">{titulo}</h3>
@@ -202,7 +202,7 @@ export function DetalleSeccion({ titulo, children }: { titulo: string; children:
   );
 }
 
-export function DatoRapido({ etiqueta, valor }: { etiqueta: string; valor: string }) {
+function DatoRapido({ etiqueta, valor }: { etiqueta: string; valor: string }) {
   return (
     <div className="grid gap-0.5">
       <dt className="font-body text-xs font-semibold uppercase tracking-wide text-ui-fg-muted">{etiqueta}</dt>
@@ -220,7 +220,7 @@ export function CampoFiltro({ etiqueta, children }: { etiqueta: string; children
   );
 }
 
-export function FiltroToggle({ activo, onClick, children }: { activo: boolean; onClick: () => void; children: ReactNode }) {
+function FiltroToggle({ activo, onClick, children }: { activo: boolean; onClick: () => void; children: ReactNode }) {
   return (
     <button
       type="button"

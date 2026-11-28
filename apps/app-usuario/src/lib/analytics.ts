@@ -64,7 +64,7 @@ export interface EventoTraslado {
   };
 }
 
-export function telemetriaPermitida(): boolean {
+function telemetriaPermitida(): boolean {
   if (typeof window === "undefined") return false;
   try {
     if (window.localStorage.getItem("ruum:telemetria-desactivada") === "true") return false;

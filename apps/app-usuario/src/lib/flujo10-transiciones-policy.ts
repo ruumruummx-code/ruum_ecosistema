@@ -35,7 +35,7 @@ export class TransicionInvalidaFlujo10Error extends Error {
 /**
  * Matriz canónica de estados válidos para cada acción del usuario en Flujo 10 (CB-2 / T4, T5 / CA-4).
  */
-export const ESTADOS_VALIDOS_POR_ACCION: Record<AccionFlujo10, readonly EstadoTraslado[]> = {
+const ESTADOS_VALIDOS_POR_ACCION: Record<AccionFlujo10, readonly EstadoTraslado[]> = {
   aceptar_cotizacion: [
     "cotizacion_generada",
     "cotizacion_aceptada", // Idempotente
@@ -85,15 +85,15 @@ export const ESTADOS_VALIDOS_POR_ACCION: Record<AccionFlujo10, readonly EstadoTr
 /**
  * Zona horaria canónica para operaciones y plazos de Flujo 10 (CB-3 / T8 / CA-6).
  */
-export const ZONA_HORARIA_CANONICA_F10 = "America/Mexico_City";
+const ZONA_HORARIA_CANONICA_F10 = "America/Mexico_City";
 
 /**
  * Límite contractual de 72 horas para calificación y disputas, con margen de gracia técnico (CB-3 / T8 / CA-6).
  * Margen de gracia: 15 minutos (0.25 horas / 900,000 ms) para absorber desviaciones de reloj o latencia de red.
  */
 export const HORAS_VENTANA_POST_CIERRE = 72;
-export const MARGEN_GRACIA_MINUTOS = 15;
-export const MARGEN_GRACIA_HORAS = MARGEN_GRACIA_MINUTOS / 60; // 0.25 h
+const MARGEN_GRACIA_MINUTOS = 15;
+const MARGEN_GRACIA_HORAS = MARGEN_GRACIA_MINUTOS / 60; // 0.25 h
 
 export interface ResultadoValidacionVentana72h {
   permitido: boolean;
@@ -253,7 +253,7 @@ export interface EvidenciaFallaMecanica {
 /**
  * Valida la suficiencia probatoria para exonerar una cancelación por falla mecánica (CB-3).
  */
-export function validarAcreditacionFallaMecanica(
+function validarAcreditacionFallaMecanica(
   evidencia?: EvidenciaFallaMecanica
 ): { valida: boolean; motivo?: string } {
   if (!evidencia) {

@@ -23,10 +23,10 @@ import {
 
 // Re-export everything for backward compatibility
 export {
-  CSP_ORIGINS,
-  CSP_PRESETS,
-  PERMISSIONS_POLICY,
-  HSTS_HEADER,
+  
+  
+  
+  
   IMAGES_REMOTE_PATTERNS,
   IMAGE_FORMATS,
 } from "../../../../packages/shared/src/seguridad/index";
@@ -52,7 +52,7 @@ export function buildCspUsuario(nonce: string, isProd: boolean, _isStaging: bool
  * Se conserva exportada para tests y para consumidores que necesiten
  * inspeccionar la política, pero el middleware es la única que la emite.
  */
-export function buildCspEstatico(isProd: boolean): string {
+function buildCspEstatico(isProd: boolean): string {
   return buildCsp({ nonce: null, isProd, extras: CSP_PRESETS.usuario });
 }
 

@@ -7,7 +7,7 @@ export class RutaNoDisponibleError extends Error {
   constructor() { super("No pudimos confirmar la ruta. Intenta cotizar nuevamente."); }
 }
 
-export const RUTA_CACHE_TTL_SEG = 86_400; // 24 horas
+const RUTA_CACHE_TTL_SEG = 86_400; // 24 horas
 
 export interface CoordenadaPunto {
   lat: number;
@@ -24,7 +24,7 @@ export interface ResultadoRutaRecalculada {
  * Genera una clave determinista en Redis basada en coordenadas redondeadas a 5 decimales
  * (~1.1 metros de resolución), suficiente para deduplicar consultas sobre las mismas calles.
  */
-export function generarClaveCacheRuta(
+function generarClaveCacheRuta(
   origen: CoordenadaPunto,
   destino: CoordenadaPunto,
   paradas: CoordenadaPunto[] = []
@@ -42,7 +42,7 @@ export function generarClaveCacheRuta(
  * RUUM-USR-F6-001 (CA-10 / T11): Consulta y persistencia de rutas frecuentes en Redis
  * para mitigar latencia y costo de llamadas a Mapbox.
  */
-export async function consultarRutaEnCache(
+async function consultarRutaEnCache(
   cacheKey: string
 ): Promise<{ distanciaKm: number; tiempoEstimadoHoras: number } | null> {
   const redis = getRedis();
@@ -64,7 +64,7 @@ export async function consultarRutaEnCache(
   return null;
 }
 
-export async function guardarRutaEnCache(
+async function guardarRutaEnCache(
   cacheKey: string,
   datos: { distanciaKm: number; tiempoEstimadoHoras: number },
   ttlSeg: number = RUTA_CACHE_TTL_SEG

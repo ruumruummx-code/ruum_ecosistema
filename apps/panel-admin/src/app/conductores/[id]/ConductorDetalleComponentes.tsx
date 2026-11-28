@@ -192,7 +192,7 @@ export function IconoBaja() {
   );
 }
 
-export function ConsentimientoItem({ consentimiento }: { consentimiento: DetalleSolicitudConductorAdmin["consentimientos"][number] }) {
+function ConsentimientoItem({ consentimiento }: { consentimiento: DetalleSolicitudConductorAdmin["consentimientos"][number] }) {
   const [copiado, setCopiado] = useState(false);
 
   async function copiarHash() {

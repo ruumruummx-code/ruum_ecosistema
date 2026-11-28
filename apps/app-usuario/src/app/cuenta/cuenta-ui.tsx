@@ -12,14 +12,8 @@ import { iniciales } from "./cuenta-utils";
 import { BotonReintentarSesion } from "../ReintentarSesion";
 import { NavegacionUsuario } from "../NavegacionUsuario";
 
-export { iniciales } from "./cuenta-utils";
-export {
-  enmascararRfc,
-  enmascararVin,
-  enmascararTelefono,
-  enmascararCreditoEmpresarial,
-  enmascararDireccionResumen,
-} from "@ruum/api/services";
+;
+;
 import { MarcoPantalla } from "@ruum/ui/base";
 
 export type Usuario = Database["public"]["Tables"]["usuarios"]["Row"];
@@ -202,7 +196,7 @@ export function Campo({ etiqueta, valor }: { etiqueta: string; valor?: string | 
   );
 }
 
-export function Seccion({
+function Seccion({
   titulo,
   descripcion,
   children

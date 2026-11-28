@@ -6,7 +6,7 @@ import { obtenerHeadersCsrfAsync, obtenerTokenCsrfCliente } from "@/lib/csrf";
 import { crearClienteNavegador } from "@/lib/supabase-browser";
 
 export const STORAGE_KEY_CARGA_ACTIVA = "ruum_carga_masiva_activa_id";
-export const STORAGE_KEY_CARGA_MASIVA_PREFIJO = "ruum:carga-masiva";
+const STORAGE_KEY_CARGA_MASIVA_PREFIJO = "ruum:carga-masiva";
 
 /**
  * Realiza fetch con reintentos automáticos y backoff exponencial ante errores de red,

@@ -57,7 +57,7 @@ type Usuario = Database["public"]["Tables"]["usuarios"]["Row"];
 type Vehiculo = Database["public"]["Tables"]["vehiculos"]["Row"];
 
 /** Desde este ancho la pantalla muestra mapa, historial y tips (marco de escritorio). */
-export const QUERY_ESCRITORIO = "(min-width: 1024px)";
+const QUERY_ESCRITORIO = "(min-width: 1024px)";
 
 export interface InicioUsuarioProps {
   usuario: Usuario | null;

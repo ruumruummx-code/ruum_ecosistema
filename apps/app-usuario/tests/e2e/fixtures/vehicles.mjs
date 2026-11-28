@@ -1,6 +1,6 @@
 /** Synthetic vehicle fixtures, isolated by token from the other E2E scenarios. */
 export const VEHICLES_TOKEN = "mock_access_token_vehicles";
-export const VEHICLE_ID = "50000000-0000-4000-8000-000000000001";
+const VEHICLE_ID = "50000000-0000-4000-8000-000000000001";
 const usuario = "00000000-0000-4000-8000-0000000000f1";
 const modelos = [
   ["Chrysler", "Cirrus", 2024, "PEM789", "Mi Cirrus", "sedan", "Blanco"],

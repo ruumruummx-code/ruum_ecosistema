@@ -47,7 +47,7 @@ export function ConductorButton({
   );
 }
 
-export function ConductorStatusBadge({
+function ConductorStatusBadge({
   status,
   label,
   className = ""
@@ -63,7 +63,7 @@ export function ConductorStatusBadge({
   );
 }
 
-export function ConductorOperationalCard({
+function ConductorOperationalCard({
   children,
   className = "",
   as: Element = "article"
@@ -75,7 +75,7 @@ export function ConductorOperationalCard({
   return <Element className={cn("rounded-lg border border-ui-line bg-ui-card p-4 text-ui-fg shadow-ui-sm", className)}>{children}</Element>;
 }
 
-export function ConductorFeedback({
+function ConductorFeedback({
   tone = "info",
   children,
   className = ""

@@ -3,13 +3,13 @@ import type { CargaTrasladosMasivosAdmin, FilaCargaTrasladosMasivosAdmin } from 
 import { AdminPanel } from "../admin-ui";
 import { descargarCsv } from "./MasivosCsvParser";
 
-export function estadoCarga(estado: CargaTrasladosMasivosAdmin["estado"]) {
+function estadoCarga(estado: CargaTrasladosMasivosAdmin["estado"]) {
   if (estado === "procesada") return "border-ui-success/30 bg-ui-success-soft text-ui-success";
   if (estado === "rechazada" || estado === "cancelada") return "border-ui-danger/25 bg-ui-danger-soft text-ui-danger";
   return "border-ui-warning/40 bg-ui-warning-soft text-ui-warning";
 }
 
-export function fecha(fechaIso: string) {
+function fecha(fechaIso: string) {
   return new Intl.DateTimeFormat("es-MX", { dateStyle: "medium", timeStyle: "short" }).format(new Date(fechaIso));
 }
 

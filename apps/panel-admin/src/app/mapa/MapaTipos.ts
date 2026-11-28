@@ -25,7 +25,7 @@ export type SimboloMapa = "origen" | "destino" | "vehiculo" | "incidencia" | "em
 export type EstadoSenalMapa = "confirmada" | "estimada" | "antigua" | "sin_senal" | "sin_ubicacion";
 export type CategoriaPrioridadMapa = "emergencia" | "incidencia_critica" | "sla_vencido" | "sin_senal" | "desviacion" | "en_riesgo" | "normal";
 
-export function tiempoRelativo(iso: string): string {
+function tiempoRelativo(iso: string): string {
   const min = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
   if (min < 1) return "Ahora";
   if (min < 60) return `${min} min`;
@@ -34,7 +34,7 @@ export function tiempoRelativo(iso: string): string {
 
 export const tokenMapbox = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 export const estiloMapbox = process.env.NEXT_PUBLIC_MAPBOX_STYLE_URL || "mapbox://styles/mapbox/streets-v12";
-export const UMBRAL_UBICACION_ANTIGUA_MIN = 30;
+const UMBRAL_UBICACION_ANTIGUA_MIN = 30;
 export const UMBRAL_SIN_SENAL_MIN = 60;
 export const FRECUENCIA_GPS_ESPERADA_SEG = 30;
 export const ORDEN_PRIORIDAD_MAPA: CategoriaPrioridadMapa[] = ["emergencia", "incidencia_critica", "sla_vencido", "sin_senal", "desviacion", "en_riesgo", "normal"];
@@ -56,7 +56,7 @@ export const DESCRIPCION_PRIORIDAD_MAPA: Record<CategoriaPrioridadMapa, string> 
   en_riesgo: "Ubicación antigua o punto estimado desactualizado.",
   normal: "Traslados sin alerta prioritaria."
 };
-export const COLOR_MAPA = {
+const COLOR_MAPA = {
   origen: "var(--ui-success)",
   destino: "var(--ui-brand)",
   incidencia: "var(--ui-danger)",
@@ -119,7 +119,7 @@ export function crearPin(simbolo: SimboloMapa, color: string, borde: string, eti
   return pin;
 }
 
-export function aplicarSimboloMapa(figura: HTMLSpanElement, simbolo: SimboloMapa, color: string) {
+function aplicarSimboloMapa(figura: HTMLSpanElement, simbolo: SimboloMapa, color: string) {
   if (simbolo === "origen") {
     Object.assign(figura.style, { borderRadius: "9999px", background: color });
     figura.textContent = "";
@@ -193,7 +193,7 @@ export function claseTarjetaPrioridadMapa(prioridad: CategoriaPrioridadMapa) {
   return "border-ui-success/25 bg-ui-success-soft";
 }
 
-export function escaparHtml(valor: string) {
+function escaparHtml(valor: string) {
   return valor
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
@@ -202,7 +202,7 @@ export function escaparHtml(valor: string) {
     .replaceAll("'", "&#39;");
 }
 
-export function progresoEstimado(traslado: TrasladoMapa) {
+function progresoEstimado(traslado: TrasladoMapa) {
   if (traslado.estado === "traslado_en_curso") return "50% estimado por etapa";
   if (traslado.estado === "llegada_a_destino" || traslado.estado === "evidencia_final_en_proceso" || traslado.estado === "evidencia_final_completada") return "85% estimado por etapa";
   if (traslado.estado === "entrega_confirmada" || traslado.estado === "pago_completado") return "100%";
@@ -236,7 +236,7 @@ export function trasladoSinCoordenadas(traslado: TrasladoMapa) {
   return traslado.origen_lat === null || traslado.origen_lng === null || traslado.destino_lat === null || traslado.destino_lng === null;
 }
 
-export function trasladoSinSenal(traslado: TrasladoMapa) {
+function trasladoSinSenal(traslado: TrasladoMapa) {
   return calidadUbicacion(traslado, new Date()).estadoSenal === "sin_senal";
 }
 
@@ -271,18 +271,18 @@ export function calidadUbicacion(traslado: TrasladoMapa, ahora: Date | null) {
   };
 }
 
-export function minutosDesdeActualizacion(iso: string, ahora: Date | null) {
+function minutosDesdeActualizacion(iso: string, ahora: Date | null) {
   const referencia = ahora ?? new Date();
   return Math.max(0, Math.floor((referencia.getTime() - new Date(iso).getTime()) / 60000));
 }
 
-export function textoTiempoUbicacion(minutos: number) {
+function textoTiempoUbicacion(minutos: number) {
   if (minutos < 1) return "Actualizada ahora";
   if (minutos < 60) return `Actualizada hace ${minutos} min`;
   return `Actualizada hace ${Math.floor(minutos / 60)} h`;
 }
 
-export function etiquetaEstadoSenal(estado: EstadoSenalMapa) {
+function etiquetaEstadoSenal(estado: EstadoSenalMapa) {
   if (estado === "estimada") return "Ubicación estimada";
   if (estado === "antigua") return "Ubicación antigua";
   if (estado === "sin_senal") return "Sin señal";
@@ -290,7 +290,7 @@ export function etiquetaEstadoSenal(estado: EstadoSenalMapa) {
   return "Ubicación confirmada";
 }
 
-export function etiquetaEstadoSenalCorta(estado: EstadoSenalMapa) {
+function etiquetaEstadoSenalCorta(estado: EstadoSenalMapa) {
   if (estado === "estimada") return "EST";
   if (estado === "antigua") return "ANT";
   if (estado === "sin_senal") return "SIN";

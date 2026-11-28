@@ -8,7 +8,7 @@ import {
   claseTarjetaPrioridadMapa
 } from "./MapaTipos";
 
-export function SimboloPrioridad({ categoria }: { categoria: CategoriaPrioridadMapa }) {
+function SimboloPrioridad({ categoria }: { categoria: CategoriaPrioridadMapa }) {
   const clase = categoria === "emergencia" || categoria === "incidencia_critica"
     ? "border-ui-danger text-ui-danger"
     : categoria === "normal"

@@ -15,7 +15,7 @@ import {
   sincronizarColaEvidencia
 } from "@/lib/cola-offline";
 
-export function itemColaAFotoEvidencia(item: ItemColaEvidencia): FotoEvidencia {
+function itemColaAFotoEvidencia(item: ItemColaEvidencia): FotoEvidencia {
   return {
     id: item.localId,
     traslado_id: item.trasladoId,

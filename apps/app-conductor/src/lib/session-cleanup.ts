@@ -29,7 +29,7 @@ export type ResultadoLimpiezaSesion = {
   inspectionErrorReason?: string;
 };
 
-export async function inspeccionarPendientesAntesDeSalir(usuarioIdExplicito?: string | null): Promise<InspeccionPendientes> {
+async function inspeccionarPendientesAntesDeSalir(usuarioIdExplicito?: string | null): Promise<InspeccionPendientes> {
   let userId = usuarioIdExplicito;
   if (userId === undefined && tieneSupabaseConfigurado()) {
     try {

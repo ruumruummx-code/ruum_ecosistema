@@ -27,7 +27,7 @@ export interface InspeccionEvidencia {
 
 type CampoInspeccion = keyof InspeccionEvidencia;
 
-export const CAMPOS_INSPECCION: Array<{ campo: CampoInspeccion; etiqueta: string; obligatorio: boolean }> = [
+const CAMPOS_INSPECCION: Array<{ campo: CampoInspeccion; etiqueta: string; obligatorio: boolean }> = [
   { campo: "combustible", etiqueta: "Combustible", obligatorio: true },
   { campo: "kilometraje", etiqueta: "Kilometraje", obligatorio: true },
   { campo: "llavesRecibidas", etiqueta: "Llaves recibidas", obligatorio: true },
@@ -39,21 +39,21 @@ export const CAMPOS_INSPECCION: Array<{ campo: CampoInspeccion; etiqueta: string
   { campo: "notas", etiqueta: "Notas o comentarios", obligatorio: false }
 ];
 
-export const CAMPOS_INSPECCION_OBLIGATORIOS = CAMPOS_INSPECCION.filter((campo) => campo.obligatorio);
+const CAMPOS_INSPECCION_OBLIGATORIOS = CAMPOS_INSPECCION.filter((campo) => campo.obligatorio);
 
-export function campoInspeccionCompleto(inspeccion: InspeccionEvidencia, campo: CampoInspeccion) {
+function campoInspeccionCompleto(inspeccion: InspeccionEvidencia, campo: CampoInspeccion) {
   return inspeccion[campo].trim().length > 0;
 }
 
-export function camposInspeccionFaltantes(inspeccion: InspeccionEvidencia) {
+function camposInspeccionFaltantes(inspeccion: InspeccionEvidencia) {
   return CAMPOS_INSPECCION_OBLIGATORIOS.filter(({ campo }) => !campoInspeccionCompleto(inspeccion, campo));
 }
 
-export function totalCamposInspeccionCompletados(inspeccion: InspeccionEvidencia) {
+function totalCamposInspeccionCompletados(inspeccion: InspeccionEvidencia) {
   return CAMPOS_INSPECCION_OBLIGATORIOS.filter(({ campo }) => campoInspeccionCompleto(inspeccion, campo)).length;
 }
 
-export const INSPECCION_INICIAL: InspeccionEvidencia = {
+const INSPECCION_INICIAL: InspeccionEvidencia = {
   combustible: "",
   kilometraje: "",
   llavesRecibidas: "",
@@ -65,14 +65,14 @@ export const INSPECCION_INICIAL: InspeccionEvidencia = {
   notas: ""
 };
 
-export const OPCIONES_COMBUSTIBLE = ["R", "1/8", "1/4", "3/8", "1/2", "3/4", "1/1"];
-export const OPCIONES_LLAVES = ["1", "2", "3"];
-export const OPCIONES_SI_NO = [
+const OPCIONES_COMBUSTIBLE = ["R", "1/8", "1/4", "3/8", "1/2", "3/4", "1/1"];
+const OPCIONES_LLAVES = ["1", "2", "3"];
+const OPCIONES_SI_NO = [
   { valor: "si", etiqueta: "Sí" },
   { valor: "no", etiqueta: "No" }
 ];
 
-export const ETIQUETA_ANGULO: Record<AnguloEvidencia, string> = {
+const ETIQUETA_ANGULO: Record<AnguloEvidencia, string> = {
   frente: "Frente",
   lado_piloto: "Lado piloto",
   lado_copiloto: "Lado copiloto",
@@ -82,7 +82,7 @@ export const ETIQUETA_ANGULO: Record<AnguloEvidencia, string> = {
   adicional: "Adicional"
 };
 
-export function listaEvidenciaObligatoria(tipo: TipoEvidencia): EvidenceRequirement[] {
+function listaEvidenciaObligatoria(tipo: TipoEvidencia): EvidenceRequirement[] {
   const prefijo = tipo === "inicial" ? "antes de moverlo" : "antes de entregar";
   return [
     {
@@ -148,7 +148,7 @@ export function fotoSrc(foto?: FotoEvidencia) {
 }
 
 // PRD §4.4 - tipo de evidencia según en qué punto del flujo está el viaje.
-export function tipoEvidenciaPorEstado(estado: EstadoTraslado): TipoEvidencia | null {
+function tipoEvidenciaPorEstado(estado: EstadoTraslado): TipoEvidencia | null {
   if (estado === "verificacion_vehiculo_en_proceso" || estado === "evidencia_inicial_en_proceso") return "inicial";
   if (estado === "llegada_a_destino" || estado === "evidencia_final_en_proceso") return "final";
   return null;

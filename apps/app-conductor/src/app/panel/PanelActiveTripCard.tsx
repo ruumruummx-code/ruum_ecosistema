@@ -8,7 +8,7 @@ interface PanelActiveTripCardProps {
   viaje: PasaporteRow;
 }
 
-export const getPasoActualLabel = (estado: string) => {
+const getPasoActualLabel = (estado: string) => {
   switch (estado) {
     case "conductor_asignado":
       return "Asignado - Pendiente";
@@ -36,7 +36,7 @@ export const getPasoActualLabel = (estado: string) => {
   }
 };
 
-export const getPasoActualDescription = (estado: string) => {
+const getPasoActualDescription = (estado: string) => {
   switch (estado) {
     case "conductor_asignado":
       return "Espera a iniciar el traslado";
@@ -64,7 +64,7 @@ export const getPasoActualDescription = (estado: string) => {
   }
 };
 
-export const getContinuarTrasladoHref = (viaje: PasaporteRow) => {
+const getContinuarTrasladoHref = (viaje: PasaporteRow) => {
   if (viaje.estado === "evidencia_inicial_en_proceso" || viaje.estado === "evidencia_final_en_proceso") {
     return `/viajes/${viaje.traslado_id}/evidencia`;
   }

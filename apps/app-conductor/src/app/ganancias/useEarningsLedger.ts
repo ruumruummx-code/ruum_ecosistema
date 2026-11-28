@@ -43,7 +43,7 @@ export function estatusPayout(payout: Parameters<typeof estadoLiquidacion>[0]): 
   return estadoLiquidacion(payout);
 }
 
-export function estatusViaje(
+function estatusViaje(
   traslado: TrasladoConductorGanancia,
   payoutEnlazado?: Payout | null
 ): EstadoEconomicoExplicito {
@@ -115,7 +115,7 @@ export function formatearMoneda(valor: number | null | undefined) {
   return new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 2 }).format(valor);
 }
 
-export function toDateSafe(fechaIso: string | null | undefined): Date | null {
+function toDateSafe(fechaIso: string | null | undefined): Date | null {
   if (!fechaIso) return null;
   const d = new Date(fechaIso.length === 10 ? `${fechaIso}T12:00:00-06:00` : fechaIso);
   return isNaN(d.getTime()) ? null : d;
@@ -190,7 +190,7 @@ export function formatearRango(periodo: PeriodoActivo, inicio: Date, fin: Date) 
   return fmtAnio.format(inicio);
 }
 
-export function estaEnRango(fecha: Date | null, inicio: Date, fin: Date) {
+function estaEnRango(fecha: Date | null, inicio: Date, fin: Date) {
   if (!fecha) return false;
   return fecha.getTime() >= inicio.getTime() && fecha.getTime() <= fin.getTime();
 }

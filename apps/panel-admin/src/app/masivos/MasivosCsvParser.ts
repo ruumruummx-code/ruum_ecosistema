@@ -23,7 +23,7 @@ export type RevisionArchivo = {
   errores: string[];
 };
 
-export const COLUMNAS_REQUERIDAS = [
+const COLUMNAS_REQUERIDAS = [
   "vehiculo_marca",
   "vehiculo_modelo",
   "vehiculo_anio",
@@ -38,7 +38,7 @@ export const COLUMNAS_REQUERIDAS = [
   "destino_numero"
 ] as const;
 
-export const COLUMNAS_PLANTILLA = [
+const COLUMNAS_PLANTILLA = [
   "referencia_externa",
   "centro_costo",
   "orden_compra",
@@ -71,7 +71,7 @@ export const COLUMNAS_PLANTILLA = [
   "instrucciones_especiales"
 ] as const;
 
-export const COLUMNAS_TECNICAS_OPCIONALES = [
+const COLUMNAS_TECNICAS_OPCIONALES = [
   "origen_lat",
   "origen_lng",
   "destino_lat",
@@ -116,13 +116,13 @@ export const EJEMPLO_CSV = [
   ].join(",")
 ].join("\n");
 
-export const CAMPOS_PERMITIDOS = new Set<string>([...COLUMNAS_PLANTILLA, ...COLUMNAS_TECNICAS_OPCIONALES]);
+const CAMPOS_PERMITIDOS = new Set<string>([...COLUMNAS_PLANTILLA, ...COLUMNAS_TECNICAS_OPCIONALES]);
 
-export function normalizarEncabezado(valor: string) {
+function normalizarEncabezado(valor: string) {
   return valor.trim().toLowerCase().replace(/\s+/g, "_");
 }
 
-export function separarCsv(linea: string, delimitador: string) {
+function separarCsv(linea: string, delimitador: string) {
   const celdas: string[] = [];
   let actual = "";
   let entreComillas = false;
@@ -174,16 +174,16 @@ export function revisarCsv(contenido: string): RevisionArchivo {
   return { filas, errores };
 }
 
-export function limpiar(valor: string | undefined) {
+function limpiar(valor: string | undefined) {
   return valor?.trim() ?? "";
 }
 
-export function numeroTexto(valor: string | undefined) {
+function numeroTexto(valor: string | undefined) {
   const limpio = limpiar(valor);
   return limpio && !Number.isNaN(Number(limpio)) ? limpio : "";
 }
 
-export function telefonoMx(valor: string | undefined) {
+function telefonoMx(valor: string | undefined) {
   const limpio = limpiar(valor);
   if (!limpio) return "";
   const digitos = limpio.replace(/\D/g, "");
@@ -192,7 +192,7 @@ export function telefonoMx(valor: string | undefined) {
   return limpio.startsWith("+") ? limpio : `+${digitos}`;
 }
 
-export function construirDireccion(
+function construirDireccion(
   calle: string,
   numero: string,
   colonia: string,
@@ -203,11 +203,11 @@ export function construirDireccion(
   return [calle, numero, colonia, cp, ciudad, estado, "México"].map((valor) => valor.trim()).filter(Boolean).join(", ");
 }
 
-export function normalizarCategoria(categoria: string | null) {
+function normalizarCategoria(categoria: string | null) {
   return categoria ?? "ligero_a";
 }
 
-export function normalizarGama(gama: string | null) {
+function normalizarGama(gama: string | null) {
   return gama ?? "entrada";
 }
 

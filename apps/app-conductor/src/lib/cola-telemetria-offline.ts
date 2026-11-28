@@ -31,7 +31,7 @@ export interface TelemetryQueueStorage {
   clear(): Promise<void>;
 }
 
-export class SecureTelemetryQueueStorage implements TelemetryQueueStorage {
+class SecureTelemetryQueueStorage implements TelemetryQueueStorage {
   async read() {
     return normalizar(await leerJsonLocalSeguro<PuntoTelemetriaLocal[]>(CLAVE_COLA_TELEMETRIA));
   }
@@ -45,7 +45,7 @@ export class SecureTelemetryQueueStorage implements TelemetryQueueStorage {
   }
 }
 
-export class InMemoryTelemetryQueueStorage implements TelemetryQueueStorage {
+class InMemoryTelemetryQueueStorage implements TelemetryQueueStorage {
   constructor(private items: PuntoTelemetriaLocal[] = []) {}
 
   async read() {
@@ -67,7 +67,7 @@ export class InMemoryTelemetryQueueStorage implements TelemetryQueueStorage {
  * si falla o está vacío, consulta IndexedDB. Garantiza que ningún punto de telemetría
  * se pierda aunque el almacenamiento principal falle (H03 y H04).
  */
-export class DualTelemetryQueueStorage implements TelemetryQueueStorage {
+class DualTelemetryQueueStorage implements TelemetryQueueStorage {
   constructor(
     private principal: TelemetryQueueStorage,
     private fallback: TelemetryQueueStorage = indexedDBTelemetryStorage
@@ -187,7 +187,7 @@ function serializar<T>(operacion: () => Promise<T>): Promise<T> {
  const siguiente = operacionPendiente.then(operacion, operacion);
  operacionPendiente = siguiente.catch(() => undefined); return siguiente;
 }
-export function configurarStorageTelemetria(storage: TelemetryQueueStorage) {
+function configurarStorageTelemetria(storage: TelemetryQueueStorage) {
   storageTelemetria = storage;
 }
 
@@ -274,7 +274,7 @@ export async function contarColaTelemetria(
   return usuarioId ? cola.filter((item) => item.usuarioId === usuarioId).length : cola.length;
 }
 
-export async function contarColaTelemetriaDeUsuario(usuarioId: string): Promise<number> {
+async function contarColaTelemetriaDeUsuario(usuarioId: string): Promise<number> {
   return contarColaTelemetria({ usuarioId });
 }
 
@@ -348,7 +348,7 @@ async function sincronizarColaTelemetriaInterno(
   return sincronizados;
 }
 
-export async function limpiarColaTelemetriaDeUsuario(usuarioId: string): Promise<void> {
+async function limpiarColaTelemetriaDeUsuario(usuarioId: string): Promise<void> {
   const cola = normalizar(await storageTelemetria.read());
   const restante = cola.filter((item) => item.usuarioId !== usuarioId);
   await storageTelemetria.write(restante);
@@ -374,7 +374,7 @@ export async function limpiarColaTelemetria(usuarioIdExplicito?: string | null):
   await limpiarColaTelemetriaCompleta();
 }
 
-export const OFFLINE_TELEMETRY_QUEUE_KEY = CLAVE_COLA_TELEMETRIA;
+const OFFLINE_TELEMETRY_QUEUE_KEY = CLAVE_COLA_TELEMETRIA;
 
 export function encolarPuntoTelemetria(...args: Parameters<typeof encolarPuntoTelemetriaInterno>) {
   return serializar(() => encolarPuntoTelemetriaInterno(...args));

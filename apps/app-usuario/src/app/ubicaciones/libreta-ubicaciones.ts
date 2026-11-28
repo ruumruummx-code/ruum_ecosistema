@@ -39,7 +39,7 @@ export function libretaVacia(): LibretaUbicaciones {
 }
 const objeto = (v: unknown): v is Record<string, unknown> =>
   Boolean(v) && typeof v === "object" && !Array.isArray(v);
-export function idUbicacionValido(id: unknown): id is string {
+function idUbicacionValido(id: unknown): id is string {
   return (
     typeof id === "string" &&
     id.length > 0 &&

@@ -20,7 +20,7 @@ type ActionPerformed = {
 };
 
 const DEVICE_KEY = "ruum_push_device_id";
-export const PUSH_APERTURAS_PENDIENTES_KEY = "ruum_push_aperturas_pendientes";
+const PUSH_APERTURAS_PENDIENTES_KEY = "ruum_push_aperturas_pendientes";
 
 export interface AperturaPushPendiente {
   notificacionId: string;
@@ -29,7 +29,7 @@ export interface AperturaPushPendiente {
   creadoEn: string;
 }
 
-export async function encolarAperturaPush(notificacionId: string, deviceId: string): Promise<void> {
+async function encolarAperturaPush(notificacionId: string, deviceId: string): Promise<void> {
   const cola = (await leerJsonLocalSeguro<AperturaPushPendiente[]>(PUSH_APERTURAS_PENDIENTES_KEY)) || [];
   cola.push({
     notificacionId,
@@ -40,7 +40,7 @@ export async function encolarAperturaPush(notificacionId: string, deviceId: stri
   await guardarJsonLocalSeguro(PUSH_APERTURAS_PENDIENTES_KEY, cola);
 }
 
-export async function sincronizarAperturasPushPendientes(): Promise<number> {
+async function sincronizarAperturasPushPendientes(): Promise<number> {
   const cola = await leerJsonLocalSeguro<AperturaPushPendiente[]>(PUSH_APERTURAS_PENDIENTES_KEY);
   if (!cola || cola.length === 0) return 0;
 
@@ -77,7 +77,7 @@ export async function sincronizarAperturasPushPendientes(): Promise<number> {
   return sincronizados;
 }
 
-export async function registrarAperturaPushSegura(notificacionId: string): Promise<void> {
+async function registrarAperturaPushSegura(notificacionId: string): Promise<void> {
   const deviceId = await uuidLocal();
   try {
     const cliente = crearClienteNavegador();
@@ -96,7 +96,7 @@ async function uuidLocal(): Promise<string> {
   return nuevo;
 }
 
-export async function obtenerDeviceIdPush(): Promise<string | null> {
+async function obtenerDeviceIdPush(): Promise<string | null> {
   if (typeof window === "undefined") return null;
   return await leerJsonLocalSeguro<string>(DEVICE_KEY) ?? null;
 }

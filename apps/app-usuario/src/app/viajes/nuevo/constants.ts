@@ -10,7 +10,7 @@ export const PASOS = [
 ] as const;
 
 /** Subtítulos cortos del encabezado ("Paso X de 5 · …"). */
-export const SUBTITULOS_PASO = [
+const SUBTITULOS_PASO = [
   "",
   "Datos del vehículo",
   "Origen y destino",
@@ -19,7 +19,7 @@ export const SUBTITULOS_PASO = [
 ] as const;
 
 /** Descripción visible de cada paso. */
-export const DESCRIPCIONES_PASO = [
+const DESCRIPCIONES_PASO = [
   "Ingresa los datos básicos para obtener una estimación inmediata del costo.",
   "Proporciona los datos completos del vehículo y la documentación mínima requerida.",
   "Define los domicilios de origen y destino, y los contactos de entrega y recepción.",
@@ -27,7 +27,7 @@ export const DESCRIPCIONES_PASO = [
   "Completa el pago de forma segura. La transacción se procesa a través de Stripe."
 ] as const;
 
-export const CAMPOS_PASO_VEHICULO_ESENCIAL = new Set(["marca", "modelo", "anio", "condicion", "transmision"]);
+const CAMPOS_PASO_VEHICULO_ESENCIAL = new Set(["marca", "modelo", "anio", "condicion", "transmision"]);
 export const CAMPOS_PASO_VEHICULO_DETALLE = new Set(["vehiculoSeleccionadoId", "color", "placas", "vin", "estadoGeneral", "tieneTarjeta", "tieneVerificacion", "tienePlacas", "puedeCircular"]);
 export const CAMPOS_PASO_VEHICULO = new Set([...CAMPOS_PASO_VEHICULO_ESENCIAL, ...CAMPOS_PASO_VEHICULO_DETALLE]);
 export const CAMPOS_PASO_RUTA = new Set([
@@ -86,7 +86,7 @@ export const CONDICIONES_VEHICULO: Array<{ valor: CondicionVehiculo; etiqueta: s
 // Valores iniciales del formulario: definición canónica en la capa de
 // estado (`src/state/valores-iniciales.ts`). Se re-exportan aquí para no
 // romper importadores existentes (tests y componentes de la ruta).
-export { USUARIO_PENDIENTE, VALORES_INICIALES } from "@/state/valores-iniciales";
+export {  VALORES_INICIALES } from "@/state/valores-iniciales";
 
 export type PrefijoDomicilio = "origen" | "destino";
 export type SubpasoRuta = "origen" | "destino_contactos";
@@ -105,7 +105,7 @@ export function nombreCompleto(nombre: string, apellido: string) {
   return [nombre.trim(), apellido.trim()].filter(Boolean).join(" ");
 }
 
-export const PATRON_MENSAJE_DE_NEGOCIO = /vehículo|precio cotizado|usuario autenticado|sesión/i;
+const PATRON_MENSAJE_DE_NEGOCIO = /vehículo|precio cotizado|usuario autenticado|sesión/i;
 
 /** Rechazo con un motivo que el usuario puede entender y corregir. */
 export class ErrorNegocioTraslado extends Error {

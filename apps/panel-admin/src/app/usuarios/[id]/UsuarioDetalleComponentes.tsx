@@ -62,12 +62,12 @@ export function ValorVacio({ texto = "Sin dato" }: { texto?: string }) {
   return <span className="font-normal text-ui-fg-muted">{texto}</span>;
 }
 
-export function BadgeVerificacion({ estado }: { estado: string }) {
+function BadgeVerificacion({ estado }: { estado: string }) {
   const tone = estado === "verificado" ? "success" : estado === "rechazado" ? "danger" : "warning";
   return <AdminBadge tone={tone}>{ETIQUETA_VERIFICACION[estado] ?? aTitleCase(estado.replaceAll("_", " "))}</AdminBadge>;
 }
 
-export function BadgeCuenta({ estado }: { estado: string }) {
+function BadgeCuenta({ estado }: { estado: string }) {
   const tone = estado === "activa" ? "success" : "danger";
   return <AdminBadge tone={tone}>{ETIQUETA_ESTADO_CUENTA[estado] ?? aTitleCase(estado.replaceAll("_", " "))}</AdminBadge>;
 }
@@ -90,7 +90,7 @@ export function MinimizacionItem({ estado, tono, titulo, detalle }: { estado: st
   );
 }
 
-export function ResumenStickyDato({ etiqueta, valor }: { etiqueta: string; valor: string | null | undefined }) {
+function ResumenStickyDato({ etiqueta, valor }: { etiqueta: string; valor: string | null | undefined }) {
   return (
     <div className="rounded-lg border border-ui-line bg-ui-muted px-3 py-2">
       <p className="font-body text-xs font-medium text-ui-fg-muted">{etiqueta}</p>

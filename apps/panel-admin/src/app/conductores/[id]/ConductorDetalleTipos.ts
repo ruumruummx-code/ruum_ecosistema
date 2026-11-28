@@ -139,7 +139,7 @@ export function estadoVigencia(dias: number | null) {
   };
 }
 
-export function limpiarTelefono(valor: string | null) {
+function limpiarTelefono(valor: string | null) {
   if (!valor) return "";
   return valor.replace(/\D/g, "");
 }

@@ -14,7 +14,7 @@ import { recordOperationalEvent } from "./observability";
 // PERF-004 — timeouts para sync offline
 const TIMEOUT_UPLOAD_MS = 15_000;
 const TIMEOUT_UPSERT_MS = 10_000;
-export const CONCURRENCIA_SYNC_EVIDENCIA = 1;
+const CONCURRENCIA_SYNC_EVIDENCIA = 1;
 import {
   eliminarJsonLocalSeguro,
   guardarJsonLocalSeguro,
@@ -63,7 +63,7 @@ export interface EvidenceQueueStorage {
   clear(): Promise<void>;
 }
 
-export class CapacitorPreferencesEvidenceStorage implements EvidenceQueueStorage {
+class CapacitorPreferencesEvidenceStorage implements EvidenceQueueStorage {
   async read(): Promise<ItemColaEvidencia[]> {
     try {
       const data = await leerJsonLocalSeguro<ItemColaEvidencia[]>(CLAVE_COLA);
@@ -228,7 +228,7 @@ export async function leerColaEvidenciaDeTraslado(trasladoId: string): Promise<I
   return cola.filter((item) => item.trasladoId === trasladoId);
 }
 
-export async function limpiarColaEvidenciaDeUsuario(usuarioId: string): Promise<void> {
+async function limpiarColaEvidenciaDeUsuario(usuarioId: string): Promise<void> {
   const colaCompleta = await leerColaEvidenciaCompleta();
   const aBorrar = colaCompleta.filter((item) => item.usuarioId === usuarioId);
   const restante = colaCompleta.filter((item) => item.usuarioId !== usuarioId);
@@ -601,7 +601,7 @@ async function sincronizarColaEvidenciaInterna(
  * Conserva timeouts y errores; no repite el traslado completo por cada foto.
  * Uso: sincronizarColaEvidenciaBulk(cliente, { trasladoId })
  */
-export async function sincronizarColaEvidenciaBulk(
+async function sincronizarColaEvidenciaBulk(
   cliente: SupabaseClient<Database>, opciones: { trasladoId?: string; ignoreBackoff?: boolean } = {}
 ): Promise<number> {
   // Una sola pasada. Antes cada tarea volvía a sincronizar todo el traslado.
@@ -617,5 +617,5 @@ async function conLockNavegador<T>(fn: () => Promise<T>): Promise<T> {
 }
 export function encolarEvidencia(...args: Parameters<typeof encolarEvidenciaInterna>) { return serializar(() => conLockNavegador(() => encolarEvidenciaInterna(...args))); }
 export function sincronizarColaEvidencia(...args: Parameters<typeof sincronizarColaEvidenciaInterna>) { return serializar(() => conLockNavegador(() => sincronizarColaEvidenciaInterna(...args))); }
-export function quitarDeColaEvidencia(...args: Parameters<typeof quitarDeColaEvidenciaInterna>) { return serializar(() => conLockNavegador(() => quitarDeColaEvidenciaInterna(...args))); }
+function quitarDeColaEvidencia(...args: Parameters<typeof quitarDeColaEvidenciaInterna>) { return serializar(() => conLockNavegador(() => quitarDeColaEvidenciaInterna(...args))); }
 export async function hashBlob(blob: Blob): Promise<string> { return Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", await blob.arrayBuffer()))).map((n) => n.toString(16).padStart(2,"0")).join(""); }

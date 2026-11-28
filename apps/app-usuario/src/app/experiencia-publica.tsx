@@ -10,7 +10,7 @@ const textoFuncionalPublico = "text-text-tertiary";
 const focoPublico = "focus:border-[var(--ruum-teal-deep)] focus:ring-[var(--ruum-teal)]/25";
 const focoAcentoPublico = "focus-visible:ring-focus focus-visible:ring-offset-surface";
 
-export function PantallaPublica({ children, className = "" }: { children: ReactNode; className?: string }) {
+function PantallaPublica({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
     <main className={`user-v2-scope user-v2-page user-v2-secondary-screen ruum-auth-shell ruum-public-shell min-h-dvh ${fondoPublico} px-4 text-text-primary sm:px-6 ${className}`}>
       <div className={`ruum-public-shell__content relative mx-auto min-h-dvh w-full max-w-md overflow-hidden ${fondoPublicoTransparente} shadow-[var(--ruum-shadow-4)]`}>
@@ -42,10 +42,10 @@ export function LogoRuum({
   );
 }
 
-export const campoOscuro =
+const campoOscuro =
   `w-full rounded-lg border ${bordePublico} ${campoPublico} px-3.5 py-2.5 font-body text-sm text-text-primary outline-none transition placeholder:text-text-tertiary ${focoPublico}`;
 
-export const etiquetaOscura = `font-body text-xs font-medium ${textoSecundarioPublico}`;
+const etiquetaOscura = `font-body text-xs font-medium ${textoSecundarioPublico}`;
 export const botonAzul =
   `ruum-public-primary-button inline-flex min-h-11 w-full cursor-pointer items-center justify-center rounded-lg px-5 py-3 font-display text-sm font-bold text-[var(--ruum-navy)] outline-none transition duration-200 hover:-translate-y-0.5 hover:brightness-95 focus-visible:ring-2 ${focoAcentoPublico} focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-45`;
 export const botonContorno =
@@ -63,7 +63,7 @@ export const botonContorno =
  * si dos campos comparten etiqueta en la misma página. `useId` garantiza
  * unicidad; la etiqueta solo se usa para el `data-ruum-label` de los tests.
  */
-export const CampoOscuro = forwardRef<
+const CampoOscuro = forwardRef<
   HTMLInputElement,
   React.InputHTMLAttributes<HTMLInputElement> & {
     etiqueta: string;

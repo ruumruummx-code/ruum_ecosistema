@@ -6,7 +6,7 @@ import { Preferences } from "@capacitor/preferences";
  * cookie ligera (para evitar cascada de redirects en SSR) y estado en memoria
  * (para evitar bucles /onboarding <-> /login si falla el almacenamiento).
  */
-export const COOKIE_ONBOARDING_CONDUCTOR = "ruum_conductor_onboarding_visto";
+const COOKIE_ONBOARDING_CONDUCTOR = "ruum_conductor_onboarding_visto";
 const CLAVE_ONBOARDING = COOKIE_ONBOARDING_CONDUCTOR;
 let vistoEnMemoria = false;
 

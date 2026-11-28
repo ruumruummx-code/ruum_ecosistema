@@ -28,7 +28,7 @@ export interface ToastNotificacion {
   tipo: "error" | "exito" | "info";
 }
 
-export function mapearPendienteACargaReciente(p: {
+function mapearPendienteACargaReciente(p: {
   id: string;
   totalMXN: number;
   cantidad_traslados: number;
@@ -185,7 +185,7 @@ export function descargarResumenLote(carga: CargaRecienteItem) {
   URL.revokeObjectURL(url);
 }
 
-export function descargarReporteLote(carga: CargaRecienteItem, filas?: FilaMasiva[]) {
+function descargarReporteLote(carga: CargaRecienteItem, filas?: FilaMasiva[]) {
   if (filas && filas.length > 0) {
     descargarReporteDetallado(filas, carga.archivo);
   } else {

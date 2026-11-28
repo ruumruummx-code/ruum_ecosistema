@@ -64,7 +64,7 @@ export function claveLocalUsuario(usuarioId: string | null | undefined): string 
 }
 
 /** Clave específica por opción aislada por usuario (compartida con variante móvil) */
-export function claveOpcionUsuario(clave: string, usuarioId: string | null | undefined): string {
+function claveOpcionUsuario(clave: string, usuarioId: string | null | undefined): string {
   return usuarioId ? `ruum:pref:${clave}:${usuarioId}` : `ruum:pref:${clave}`;
 }
 

@@ -16,7 +16,7 @@ function periodRange(now: Date, period: EarningsPeriod, previous: boolean) {
 
 /** Operational completion survives disputes and claims opened after closure.
  * Financial eligibility remains separate from the completed-transfer counter. */
-export function isCompletedTransfer(trip: TrasladoConductorGanancia): boolean {
+function isCompletedTransfer(trip: TrasladoConductorGanancia): boolean {
   if (trip.estado === "servicio_cancelado" || trip.estado === "traslado_fallido") return false;
   return Boolean(trip.cerrado_en) || trip.estado_operativo === "closed" || trip.estado === "servicio_cerrado";
 }

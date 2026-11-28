@@ -12,7 +12,7 @@ type ConductorRow = Database["public"]["Tables"]["conductores"]["Row"];
 type EstadoTraslado = Database["public"]["Enums"]["estado_traslado"];
 type CausaFallido = Database["public"]["Enums"]["causa_fallido"];
 
-export const CAUSAS_FALLIDO: { valor: CausaFallido; etiqueta: string }[] = [
+const CAUSAS_FALLIDO: { valor: CausaFallido; etiqueta: string }[] = [
   { valor: "imputable_cliente", etiqueta: "Imputable al cliente" },
   { valor: "operativo", etiqueta: "Operativo" },
   { valor: "fuerza_mayor", etiqueta: "Fuerza mayor" },

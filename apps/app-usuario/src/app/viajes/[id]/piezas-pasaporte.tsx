@@ -13,7 +13,7 @@ import type {
 /** Piezas de presentación del Pasaporte Digital. Extraídas de
  * `viajes/[id]/page.tsx` (god-component) sin cambios de lógica ni estilos. */
 
-export const LINEA_TIEMPO: { estado: EstadoTraslado; etiqueta: string }[] = [
+const LINEA_TIEMPO: { estado: EstadoTraslado; etiqueta: string }[] = [
   { estado: "solicitud_creada", etiqueta: "Solicitud creada" },
   { estado: "cotizacion_generada", etiqueta: "Tarifa asignada" },
   { estado: "pago_completado", etiqueta: "Pago realizado" },
@@ -27,7 +27,7 @@ export const LINEA_TIEMPO: { estado: EstadoTraslado; etiqueta: string }[] = [
   { estado: "servicio_cerrado", etiqueta: "Traslado finalizado" }
 ];
 
-export const ORDEN_ESTADOS: EstadoTraslado[] = [
+const ORDEN_ESTADOS: EstadoTraslado[] = [
   "usuario_pendiente_verificacion",
   "usuario_verificado",
   "solicitud_creada",
@@ -58,7 +58,7 @@ export const ORDEN_ESTADOS: EstadoTraslado[] = [
   "servicio_cerrado"
 ];
 
-export const ETIQUETA_ANGULO: Record<FotoEvidenciaVisual["angulo"], string> = {
+const ETIQUETA_ANGULO: Record<FotoEvidenciaVisual["angulo"], string> = {
   frente: "Frente",
   lado_piloto: "Lado piloto",
   lado_copiloto: "Lado copiloto",

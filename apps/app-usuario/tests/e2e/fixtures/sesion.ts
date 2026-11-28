@@ -17,9 +17,9 @@ import type { Page } from "@playwright/test";
 export const ACCESS_TOKEN_E2E = "mock_access_token";
 /** Token de la MISMA cuenta con `estado_verificacion: "pendiente"`. */
 export const ACCESS_TOKEN_PENDIENTE_E2E = "mock_access_token_pendiente";
-export const REFRESH_TOKEN_E2E = "mock_refresh_token";
+const REFRESH_TOKEN_E2E = "mock_refresh_token";
 export const USUARIO_ID_E2E = "00000000-0000-4000-8000-00000000e001";
-export const CORREO_E2E = "usuario@ejemplo.com";
+const CORREO_E2E = "usuario@ejemplo.com";
 
 /**
  * Variante de cuenta que se quiere simular. `verificada` es la única desde la
@@ -30,7 +30,7 @@ export const CORREO_E2E = "usuario@ejemplo.com";
  */
 export type VarianteSesion = "verificada" | "pendiente";
 
-export function tokenParaVariante(variante: VarianteSesion): string {
+function tokenParaVariante(variante: VarianteSesion): string {
   return variante === "pendiente" ? ACCESS_TOKEN_PENDIENTE_E2E : ACCESS_TOKEN_E2E;
 }
 

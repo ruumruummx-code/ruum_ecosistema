@@ -17,7 +17,7 @@ type ConfiguracionRolAdmin = {
   rutasPermitidas: string[];
 };
 
-export const ROL_ADMIN_DEFAULT: RolAdminOperativo = "operador";
+const ROL_ADMIN_DEFAULT: RolAdminOperativo = "operador";
 
 export const CONFIG_ROL_ADMIN: Record<RolAdminOperativo, ConfiguracionRolAdmin> = {
   operador: {
@@ -59,7 +59,7 @@ export const CONFIG_ROL_ADMIN: Record<RolAdminOperativo, ConfiguracionRolAdmin> 
 
 // Mapa ruta → capacidad requerida (middleware capability check)
 // Las rutas se evalúan de más específica a menos específica.
-export const RUTA_A_CAPACIDAD: Record<string, PermisoAdmin> = {
+const RUTA_A_CAPACIDAD: Record<string, PermisoAdmin> = {
   "/auditoria": "auditoria:leer",
   "/aprobaciones": "aprobaciones:aprobar",
   "/capacidades": "capacidades:administrar",
@@ -82,7 +82,7 @@ export const RUTA_A_CAPACIDAD: Record<string, PermisoAdmin> = {
   "/alertas-sla": "Traslados:leer",
 };
 
-export const MAPA_API_A_RUTA_BASE: Record<string, string> = {
+const MAPA_API_A_RUTA_BASE: Record<string, string> = {
   "/api/auditoria": "/auditoria",
   "/api/admin-auth/invitar-admin": "/capacidades",
   "/api/admin-auth/invitar-conductor": "/conductores",
@@ -108,7 +108,7 @@ export function normalizarRolAdmin(valor: unknown): RolAdminOperativo {
     : ROL_ADMIN_DEFAULT;
 }
 
-export function rutaBaseAdmin(href: string) {
+function rutaBaseAdmin(href: string) {
   return href.split("?")[0] ?? href;
 }
 

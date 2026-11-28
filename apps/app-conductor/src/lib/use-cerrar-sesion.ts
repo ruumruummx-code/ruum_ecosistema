@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { limpiarSesionIntegral, type ResultadoLimpiezaSesion } from "./session-cleanup";
 
-export function mensajePendientesLogout(resultado: ResultadoLimpiezaSesion) {
+function mensajePendientesLogout(resultado: ResultadoLimpiezaSesion) {
   if (resultado.inspectionError && resultado.pendingEvidence === 0 && resultado.pendingTelemetry === 0) {
     return "No se cerró la sesión: no fue posible verificar el estado del tracking de forma segura. Reintenta la conexión o contacta a soporte.";
   }

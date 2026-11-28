@@ -42,7 +42,7 @@ import {
   CerrarCuenta
 } from "./UsuarioDetalleAcciones";
 
-export function ActividadReciente({ usuarioId }: { usuarioId: string }) {
+function ActividadReciente({ usuarioId }: { usuarioId: string }) {
   const [actividad, setActividad] = useState<Array<{ etiqueta: string; valor: string | null }>>([]);
   const [cargando, setCargando] = useState(true);
 

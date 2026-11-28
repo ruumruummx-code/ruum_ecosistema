@@ -228,7 +228,7 @@ export function actualizarEstadoFiltro(
   setPestana(encontrada?.id ?? "todos");
 }
 
-export function horasDesdeIso(fechaIso: string | null | undefined) {
+function horasDesdeIso(fechaIso: string | null | undefined) {
   if (!fechaIso) return null;
   return (Date.now() - new Date(fechaIso).getTime()) / (1000 * 60 * 60);
 }
@@ -348,7 +348,7 @@ export function folioCorto(v: PasaporteRow) {
   return v.traslado_id ? v.traslado_id.slice(0, 8).toUpperCase() : "SIN FOLIO";
 }
 
-export function construirResultadosAccionMasiva(
+function construirResultadosAccionMasiva(
   traslados: PasaporteRow[],
   accion: AccionMasivaId
 ): ResultadoAccionMasiva[] {
@@ -412,7 +412,7 @@ export function construirResultadosAccionMasiva(
   });
 }
 
-export function resolverEstadoAccion(resultados: ResultadoAccionMasiva[]): EstadoAccionMasiva {
+function resolverEstadoAccion(resultados: ResultadoAccionMasiva[]): EstadoAccionMasiva {
   if (resultados.length === 0) return "pendiente";
   const aplicados = resultados.filter((item) => item.estado === "aplicado").length;
   if (aplicados === resultados.length) return "exitoso";
@@ -453,7 +453,7 @@ export function exportarTrasladosCsv(traslados: PasaporteRow[]) {
   descargarArchivo(`traslados-operativos-${new Date().toISOString().slice(0, 10)}.csv`, "text/csv;charset=utf-8;", csv);
 }
 
-export function exportarEvidencia(traslados: PasaporteRow[]) {
+function exportarEvidencia(traslados: PasaporteRow[]) {
   const manifiesto = {
     generado_en: new Date().toISOString(),
     total: traslados.length,
@@ -468,7 +468,7 @@ export function exportarEvidencia(traslados: PasaporteRow[]) {
   descargarArchivo(`manifiesto-evidencia-${new Date().toISOString().slice(0, 10)}.json`, "application/json", JSON.stringify(manifiesto, null, 2));
 }
 
-export function valorCsv(valor: string | number | null | undefined) {
+function valorCsv(valor: string | number | null | undefined) {
   const texto = String(valor ?? "");
   return `"${texto.replace(/"/g, '""')}"`;
 }

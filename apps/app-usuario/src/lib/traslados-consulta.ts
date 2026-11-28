@@ -127,7 +127,7 @@ function estadosDe(categoria: CategoriaPestana) {
 }
 
 /** Traduce una pestaña a filtro de servidor con las mismas reglas que clasificarEstadoTraslado. */
-export function filtroCategoria(tab: string | undefined): FiltroCategoriaPasaporte {
+function filtroCategoria(tab: string | undefined): FiltroCategoriaPasaporte {
   if (!tab || tab === "todos" || !CATEGORIAS.includes(tab as CategoriaPestana)) return { modo: "todos" };
   if (tab === "en_revision") return { modo: "revision", estadosConocidos: Object.keys(MAPEO_ESTADOS_CANONICOS) };
   if (tab === "finalizados") return { modo: "cerrados", estados: estadosDe("finalizados") };
@@ -178,7 +178,7 @@ export function sanitizarNombreConductor(nombre: string | null | undefined): str
   return `${primer} ${inicial}.`;
 }
 
-export function folioCorto(trasladoId: string | null | undefined): string {
+function folioCorto(trasladoId: string | null | undefined): string {
   return trasladoId ? `#RR-${trasladoId.slice(0, 4).toUpperCase()}` : "#RR-—";
 }
 

@@ -27,7 +27,7 @@ export const ESTADO_CLASE: Record<string, string> = {
   pendiente_verificacion: "border-ui-line-strong bg-ui-muted text-ui-fg-muted"
 };
 
-export const ETIQUETA_ESTADO: Record<string, string> = {
+const ETIQUETA_ESTADO: Record<string, string> = {
   activo: "Activo",
   suspendido_7d: "Suspendido (7d)",
   suspendido_14d: "Suspendido (14d)",
@@ -38,14 +38,14 @@ export const ETIQUETA_ESTADO: Record<string, string> = {
   pendiente_verificacion: "Pendiente"
 };
 
-export const ETIQUETA_DOCUMENTO: Record<string, string> = {
+const ETIQUETA_DOCUMENTO: Record<string, string> = {
   licencia_frente: "Licencia · frente",
   licencia_reverso: "Licencia · reverso",
   identificacion_oficial: "Identificación oficial",
   documento_operativo: "Documento operativo adicional"
 };
 
-export const ESTADO_DOCUMENTO: Record<string, { texto: string; clase: string }> = {
+const ESTADO_DOCUMENTO: Record<string, { texto: string; clase: string }> = {
   en_revision: { texto: "En revisión", clase: "border-ui-brand/30 bg-ui-brand-soft text-ui-brand-soft-fg" },
   aprobado: { texto: "Aprobado", clase: "border-ui-success/30 bg-ui-success-soft text-ui-success" },
   rechazado: { texto: "Rechazado", clase: "border-ui-danger/25 bg-ui-danger-soft text-ui-danger" },

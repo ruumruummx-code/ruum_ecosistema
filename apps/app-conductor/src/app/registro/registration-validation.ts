@@ -5,7 +5,7 @@ export function objetoJson(valor: unknown): Record<string, unknown> {
   return valor && typeof valor === "object" && !Array.isArray(valor) ? valor as Record<string, unknown> : {};
 }
 
-export function fusionarJsonExpediente(origen: Json, remoto: Json | null | undefined): Json {
+function fusionarJsonExpediente(origen: Json, remoto: Json | null | undefined): Json {
   if (origen == null) return remoto ?? null;
   if (remoto == null) return origen;
   if (typeof origen !== "object" || Array.isArray(origen)) return origen;
@@ -36,7 +36,7 @@ export function soloDigitos(valor: string, max = 10) {
   return valor.replace(/\D/g, "").slice(0, max);
 }
 
-export function soloAlfanumericoMayusculas(valor: string, max = 12) {
+function soloAlfanumericoMayusculas(valor: string, max = 12) {
   return valor.replace(/[^a-zA-Z0-9]/g, "").toLocaleUpperCase("es-MX").slice(0, max);
 }
 
@@ -61,7 +61,7 @@ export function formatoTelefonoNacional(valor: string) {
  * Formato para input mask - se aplica mientras el usuario escribe
  * Mantiene el cursor en la posición correcta
  */
-export function formatoTelefonoMask(valor: string) {
+function formatoTelefonoMask(valor: string) {
   return formatoTelefonoNacional(valor);
 }
 
@@ -96,7 +96,7 @@ export function formatoCurpMask(valor: string) {
 /**
  * Valida formato CURP completo (18 caracteres alfanuméricos)
  */
-export function esCurpValida(valor: string): boolean {
+function esCurpValida(valor: string): boolean {
   const curpLimpio = valor.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
   return curpLimpio.length === 18 && /^[A-Z0-9]{18}$/.test(curpLimpio);
 }
@@ -108,7 +108,7 @@ export function formatoLicenciaMask(valor: string) {
   return `${licencia.slice(0, 4)} ${licencia.slice(4, 8)} ${licencia.slice(8, 12)}`;
 }
 
-export function formatoFechaIsoParcial(valor: string) {
+function formatoFechaIsoParcial(valor: string) {
   const digitos = valor.replace(/\D/g, "").slice(0, 8);
   if (digitos.length <= 4) return digitos;
   if (digitos.length <= 6) return `${digitos.slice(0, 4)}-${digitos.slice(4)}`;

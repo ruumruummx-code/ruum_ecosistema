@@ -5,7 +5,7 @@ import { crearClienteNavegador } from "@/lib/supabase-browser";
 import { solicitarAprobacionAdmin } from "@ruum/api/services";
 import { textoEstado, type ConductorRow } from "./ConductorActivoComponentes";
 
-export function IconoPausa() {
+function IconoPausa() {
   return (
     <svg aria-hidden="true" className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M8 5v14" />
@@ -14,7 +14,7 @@ export function IconoPausa() {
   );
 }
 
-export function IconoBaja() {
+function IconoBaja() {
   return (
     <svg aria-hidden="true" className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M3 6h18" />

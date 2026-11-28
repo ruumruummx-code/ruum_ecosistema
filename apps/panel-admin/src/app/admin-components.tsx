@@ -59,7 +59,7 @@ type AdminIconButtonProps = Omit<AdminButtonProps, "children"> & {
   icon: ReactNode;
 };
 
-export function AdminIconButton({ icon, className, variant = "quiet", ...props }: AdminIconButtonProps) {
+function AdminIconButton({ icon, className, variant = "quiet", ...props }: AdminIconButtonProps) {
   return (
     <AdminButton {...props} variant={variant} className={unir("size-11 px-0", className)}>
       <span aria-hidden="true" className="flex items-center justify-center">
@@ -313,7 +313,7 @@ export function AdminLoadingState({ label = "Cargando información" }: { label?:
   );
 }
 
-export function AdminLastUpdated({ value, label = "Última actualización" }: { value?: string | Date | null; label?: string }) {
+function AdminLastUpdated({ value, label = "Última actualización" }: { value?: string | Date | null; label?: string }) {
   if (!value) return <span className="text-xs text-ui-fg-muted">{label}: sin fecha</span>;
   const fecha = value instanceof Date ? value : new Date(value);
   return (

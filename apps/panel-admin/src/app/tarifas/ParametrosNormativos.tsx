@@ -28,7 +28,7 @@ import {
 } from "./TarifasTipos";
 import { CampoBorrador, DatoSim } from "./TarifasComponentes";
 
-export function TarifasBaseFijas({
+function TarifasBaseFijas({
   datos,
   borrador,
   onCambiar
@@ -84,7 +84,7 @@ export function TarifasBaseFijas({
   );
 }
 
-export function GrupoFactor({
+function GrupoFactor({
   titulo,
   filas,
   onCambiar
@@ -111,7 +111,7 @@ export function GrupoFactor({
   );
 }
 
-export function ComparadorVersiones({ datos, borrador }: { datos: ConfiguracionTarifas; borrador: BorradorTarifas }) {
+function ComparadorVersiones({ datos, borrador }: { datos: ConfiguracionTarifas; borrador: BorradorTarifas }) {
   const cambios = cambiosVersion(datos, borrador);
   function descargarResumen() {
     const resumen = {
@@ -169,7 +169,7 @@ export function ComparadorVersiones({ datos, borrador }: { datos: ConfiguracionT
   );
 }
 
-export function ImpactoTarifario({ datos, borrador }: { datos: ConfiguracionTarifas; borrador: BorradorTarifas }) {
+function ImpactoTarifario({ datos, borrador }: { datos: ConfiguracionTarifas; borrador: BorradorTarifas }) {
   const propuesta = configuracionDesdeBorrador(datos, borrador);
   const escenarios = [
     { nombre: "Traslado individual", categoria: "ligero_a", gama: "entrada", condicion: "seminueva", horario: "diurno", dia: "entre_semana", distanciaKm: 18, tiempoHoras: 0.8 },

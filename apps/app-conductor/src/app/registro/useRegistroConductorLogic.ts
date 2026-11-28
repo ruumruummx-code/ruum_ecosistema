@@ -43,9 +43,9 @@ import { useRegistrationTelemetry } from "./useRegistrationTelemetry";
 
 const VERSION_APP_REGISTRO = "1.0.0";
 const RETRASO_GUARDADO_REMOTO_MS = 900;
-export const CODIGO_OTP_LONGITUD = 6;
+const CODIGO_OTP_LONGITUD = 6;
 const ESPERA_REENVIO_OTP_SEGUNDOS = 60;
-export const MAX_INTENTOS_OTP = 5;
+const MAX_INTENTOS_OTP = 5;
 
 function mensajeDeError(error: unknown): string {
   if (typeof error === "string") return error;

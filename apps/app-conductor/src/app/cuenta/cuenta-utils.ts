@@ -23,7 +23,7 @@ export async function cargarConductorCuenta(): Promise<ConductorCuenta | null> {
   };
 }
 
-export function fechaCuenta(fechaIso: string | null | undefined) {
+function fechaCuenta(fechaIso: string | null | undefined) {
   if (!fechaIso) return "Pendiente";
   return new Intl.DateTimeFormat("es-MX", { dateStyle: "medium" }).format(new Date(fechaIso));
 }

@@ -54,7 +54,7 @@ export interface CatalogoLicenciaItem {
   nombre: string;
 }
 
-export const ETIQUETAS_ENTIDAD_LICENCIA: Record<string, string> = {
+const ETIQUETAS_ENTIDAD_LICENCIA: Record<string, string> = {
   CDMX: "Ciudad de México (CDMX)",
   MEX: "Estado de México (MEX)",
   QRO: "Querétaro (QRO)",
@@ -63,7 +63,7 @@ export const ETIQUETAS_ENTIDAD_LICENCIA: Record<string, string> = {
   HGO: "Hidalgo (HGO)"
 };
 
-export const CATALOGO_LICENCIAS: readonly CatalogoLicenciaItem[] = [
+const CATALOGO_LICENCIAS: readonly CatalogoLicenciaItem[] = [
   { entidad: "CDMX", tipo: "A", nombre: "Automóvil particular" },
   { entidad: "CDMX", tipo: "A1", nombre: "Motocicleta" },
   { entidad: "CDMX", tipo: "A2", nombre: "Automóvil + motocicleta" },
@@ -102,7 +102,7 @@ export const OPCIONES_LICENCIA_SELECT = CATALOGO_LICENCIAS.map((item) => ({
   grupo: ETIQUETAS_ENTIDAD_LICENCIA[item.entidad] ?? item.entidad
 }));
 
-export const TIPOS_LICENCIA: readonly string[] = OPCIONES_LICENCIA_SELECT.map((o) => o.valor);
+const TIPOS_LICENCIA: readonly string[] = OPCIONES_LICENCIA_SELECT.map((o) => o.valor);
 
 export const TIPOS_ARCHIVO_PERMITIDOS = new Set(["image/jpeg", "image/png", "image/webp", "application/pdf"]);
 
@@ -110,7 +110,7 @@ export type DocumentoKey = keyof typeof TIPOS_DOCUMENTO;
 export type EstadoDocumento = "pendiente" | "listo" | "subiendo" | "subido" | "error";
 export type EstadoGuardadoRemoto = "inactivo" | "guardando" | "guardado" | "sin_conexion" | "error";
 
-export const TEXTO_GUARDADO_REMOTO: Record<EstadoGuardadoRemoto, string> = {
+const TEXTO_GUARDADO_REMOTO: Record<EstadoGuardadoRemoto, string> = {
   inactivo: "",
   guardando: "Guardando…",
   guardado: "Guardado",

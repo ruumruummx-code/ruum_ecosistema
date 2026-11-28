@@ -182,7 +182,7 @@ export function formatoDuracion(horas: number) {
   return `${Math.floor(horas / 24)} d ${Math.floor(horas % 24)} h`;
 }
 
-export function slaObjetivoHoras(gravedad: GravedadIncidencia) {
+function slaObjetivoHoras(gravedad: GravedadIncidencia) {
   if (gravedad === "grave") return 2;
   if (gravedad === "media") return 8;
   return 24;

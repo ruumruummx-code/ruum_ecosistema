@@ -25,7 +25,7 @@ export interface GastoData {
   registrado_en: string;
 }
 
-export function labelGasto(tipo: GastoData["tipo"]): string {
+function labelGasto(tipo: GastoData["tipo"]): string {
   switch (tipo) {
     case "combustible":
       return "Gasolina";

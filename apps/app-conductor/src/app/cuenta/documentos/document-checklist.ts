@@ -4,7 +4,7 @@ import { estadoVigenciaLicencia, vencimientoDocumentoDesdeLicencia } from "@ruum
 import type { ConductorCuenta } from "../cuenta-utils";
 
 export type DriverDocument = Database["public"]["Tables"]["documentos_conductor"]["Row"];
-export const REQUIRED_DOCUMENTS: { type: TipoDocumentoConductor; title: string; icon: "id" | "passport" | "document" }[] = [
+const REQUIRED_DOCUMENTS: { type: TipoDocumentoConductor; title: string; icon: "id" | "passport" | "document" }[] = [
   { type: "licencia_frente", title: "Licencia - Frente", icon: "id" },
   { type: "licencia_reverso", title: "Licencia - Reverso", icon: "id" },
   { type: "identificacion_oficial", title: "Identificación Oficial (INE / Pasaporte)", icon: "passport" },

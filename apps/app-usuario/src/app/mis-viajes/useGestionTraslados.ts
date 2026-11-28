@@ -37,7 +37,7 @@ export function folioCorto(trasladoId: string | null | undefined): string {
   return trasladoId ? `#RR-${trasladoId.slice(0, 4).toUpperCase()}` : "#RR-—";
 }
 
-export function formatoDuracion(horas: number | null | undefined): string | null {
+function formatoDuracion(horas: number | null | undefined): string | null {
   if (horas == null || Number.isNaN(Number(horas))) return null;
   const totalMin = Math.round(Number(horas) * 60);
   const h = Math.floor(totalMin / 60);
@@ -47,7 +47,7 @@ export function formatoDuracion(horas: number | null | undefined): string | null
   return `${h}h ${m.toString().padStart(2, "0")}m`;
 }
 
-export function formatoGastado(total: number): string {
+function formatoGastado(total: number): string {
   if (total >= 1000) {
     const miles = total / 1000;
     return `$${miles >= 100 ? Math.round(miles).toString() : miles.toFixed(1).replace(/\.0$/, "")}k`;
@@ -60,7 +60,7 @@ export function vehiculoNombre(p: Pasaporte): string {
   return partes.length > 0 ? partes.join(" ") : "Vehículo";
 }
 
-export function vehiculoTipo(p: Pasaporte): string {
+function vehiculoTipo(p: Pasaporte): string {
   if (!p.vehiculo_tipo) return "Tipo no disponible";
   return ETIQUETA_TIPO_VEHICULO[p.vehiculo_tipo] ?? p.vehiculo_tipo;
 }

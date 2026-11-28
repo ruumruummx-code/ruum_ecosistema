@@ -28,7 +28,7 @@ export function leerRolSimulado(): string | null {
  * o en smoke tests con rol simulado (solo en modo demo).
  * La autoridad de datos sigue en `es_admin()` / RLS; esto es coherencia UX.
  */
-export function GuardRutaRol({ children }: { children: ReactNode }) {
+function GuardRutaRol({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [listo, setListo] = useState(() => {

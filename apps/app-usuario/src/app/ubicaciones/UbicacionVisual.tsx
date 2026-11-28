@@ -32,7 +32,7 @@ export function EtiquetaUbicacion({ ubicacion, className }: { ubicacion: Ubicaci
   );
 }
 
-export function iconoDeUbicacion(u: UbicacionUsuario): LucideIcon {
+function iconoDeUbicacion(u: UbicacionUsuario): LucideIcon {
   return u.fuentes.includes("perfil") ? House : u.fuentes.includes("trabajo") ? BriefcaseBusiness : MapPin;
 }
 

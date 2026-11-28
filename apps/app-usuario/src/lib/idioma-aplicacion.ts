@@ -1,6 +1,6 @@
 /** RUUM-UX-006 · Opción B: solo se ofrece el idioma que tiene traducción real. */
 export const IDIOMA_DISPONIBLE = 'es' as const;
-export const IDIOMA_DOCUMENTO = 'es-MX';
+const IDIOMA_DOCUMENTO = 'es-MX';
 export const AVISO_IDIOMA = 'La interfaz está disponible únicamente en español. El inglés aún no está disponible.';
 
 /** Normaliza únicamente el campo de idioma; mantiene intactos los demás cambios. */

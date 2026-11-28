@@ -19,12 +19,12 @@ export interface CoordenadasParada {
 }
 
 /** F-3: rangos válidos WGS84. Fuera de rango → null (no se persiste basura). */
-export function normalizarLatitud(valor: unknown): number | null {
+function normalizarLatitud(valor: unknown): number | null {
   if (typeof valor !== "number" || !Number.isFinite(valor)) return null;
   return valor >= -90 && valor <= 90 ? valor : null;
 }
 
-export function normalizarLongitud(valor: unknown): number | null {
+function normalizarLongitud(valor: unknown): number | null {
   if (typeof valor !== "number" || !Number.isFinite(valor)) return null;
   return valor >= -180 && valor <= 180 ? valor : null;
 }
@@ -34,7 +34,7 @@ function normalizarNoNegativo(valor: unknown): number | null {
   return valor >= 0 ? valor : null;
 }
 
-export const ZONA_HORARIA_PREDETERMINADA = "America/Mexico_City";
+const ZONA_HORARIA_PREDETERMINADA = "America/Mexico_City";
 
 function zonaValida(zona: string | undefined): string {
   if (!zona) return ZONA_HORARIA_PREDETERMINADA;

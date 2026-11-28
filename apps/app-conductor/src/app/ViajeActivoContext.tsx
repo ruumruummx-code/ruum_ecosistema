@@ -18,7 +18,7 @@ type ViajeActivoContextValue = {
 
 const ViajeActivoContext = createContext<ViajeActivoContextValue | null>(null);
 
-export { viajeEsOperacionActiva, viajePermiteEmergencia };
+export { viajeEsOperacionActiva,  };
 
 export function ViajeActivoProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();

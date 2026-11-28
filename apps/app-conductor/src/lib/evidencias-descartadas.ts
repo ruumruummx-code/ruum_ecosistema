@@ -14,7 +14,7 @@ export interface EvidenciaDescartada {
   tipo?: string;
 }
 
-export const CLAVE_EVIDENCIAS_DESCARTADAS = "ruum_evidencias_descartadas";
+const CLAVE_EVIDENCIAS_DESCARTADAS = "ruum_evidencias_descartadas";
 
 /**
  * Lee la lista de evidencias descartadas desde almacenamiento seguro local.
@@ -62,7 +62,7 @@ export async function registrarEvidenciaDescartada(item: EvidenciaDescartada): P
 /**
  * Obtiene las evidencias descartadas correspondientes a un traslado específico.
  */
-export async function obtenerEvidenciasDescartadasPorTraslado(
+async function obtenerEvidenciasDescartadasPorTraslado(
   trasladoId: string
 ): Promise<EvidenciaDescartada[]> {
   const todas = await leerEvidenciasDescartadas();
@@ -85,7 +85,7 @@ export async function resolverEvidenciaDescartada(localId: string): Promise<void
 /**
  * Limpia todas las evidencias descartadas registradas.
  */
-export async function limpiarTodasEvidenciasDescartadas(): Promise<void> {
+async function limpiarTodasEvidenciasDescartadas(): Promise<void> {
   try {
     await eliminarJsonLocalSeguro(CLAVE_EVIDENCIAS_DESCARTADAS);
   } catch {

@@ -18,7 +18,7 @@ export interface PuntoMapa {
  * Si hay ubicación del conductor, dibuja también la ruta calculada con
  * Directions; si no, solo marca el punto de destino.
  */
-export async function construirUrlMapaRutaOrigen(
+async function construirUrlMapaRutaOrigen(
   destino: PuntoMapa,
   origenConductor: PuntoMapa | null,
   opciones: { ancho?: number; alto?: number } = {}
@@ -50,7 +50,7 @@ export async function construirUrlMapaRutaOrigen(
  * entre el origen y el destino del traslado, marcando opcionalmente la posición
  * actual del conductor/vehículo.
  */
-export async function construirUrlMapaRutaConduccion(
+async function construirUrlMapaRutaConduccion(
   origen: PuntoMapa,
   destino: PuntoMapa,
   ubicacionActual: PuntoMapa | null,

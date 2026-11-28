@@ -20,7 +20,7 @@ export interface ActividadItem {
   enlace?: string;
 }
 
-export const TIPS_SEMANA = [
+const TIPS_SEMANA = [
   "Mantén tu información actualizada para recibir notificaciones importantes sobre tus traslados.",
   "Revisa el Pasaporte Digital para dar seguimiento en tiempo real y consultar la evidencia fotográfica.",
   "Consulta y actualiza tus datos fiscales desde Facturación.",

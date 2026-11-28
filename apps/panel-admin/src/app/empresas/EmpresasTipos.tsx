@@ -66,7 +66,7 @@ export const USUARIO_INICIAL: UsuarioEmpresaForm = {
   metodo_pago_registrado: false
 };
 
-export const ETIQUETA_ESTADO: Record<EstadoVerificacion, string> = {
+const ETIQUETA_ESTADO: Record<EstadoVerificacion, string> = {
   pendiente: "Pendiente",
   en_revision: "En revisión",
   verificado: "Aprobado",
@@ -131,7 +131,7 @@ export function moneda(valor: number | null | undefined) {
   return new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 0 }).format(valor ?? 0);
 }
 
-export function badgeEstado(estado: EstadoVerificacion | string) {
+function badgeEstado(estado: EstadoVerificacion | string) {
   if (estado === "verificado" || estado === "activa" || estado === "aprobado") return "border-ui-success/30 bg-ui-success-soft text-ui-success";
   if (estado === "rechazado" || estado === "suspendida") return "border-ui-danger/25 bg-ui-danger-soft text-ui-danger";
   return "border-ui-warning/40 bg-ui-warning-soft text-ui-warning";

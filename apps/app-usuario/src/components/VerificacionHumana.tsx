@@ -53,7 +53,7 @@ function cargarTurnstile(): Promise<TurnstileApi> {
   return cargaScript;
 }
 
-export function turnstileSiteKey(): string | null {
+function turnstileSiteKey(): string | null {
   return process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() || null;
 }
 

@@ -12,12 +12,12 @@ const clavePublica = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-export const TIMEOUT_INICIO_PAGO_MS =
+const TIMEOUT_INICIO_PAGO_MS =
   typeof process !== "undefined" && process.env.NEXT_PUBLIC_STRIPE_TIMEOUT_MS
     ? Number(process.env.NEXT_PUBLIC_STRIPE_TIMEOUT_MS)
     : 15_000;
 
-export const TIMEOUT_AVISO_ESPERA_MS =
+const TIMEOUT_AVISO_ESPERA_MS =
   typeof process !== "undefined" && process.env.NEXT_PUBLIC_STRIPE_AVISO_MS
     ? Number(process.env.NEXT_PUBLIC_STRIPE_AVISO_MS)
     : 5_000;
@@ -66,7 +66,7 @@ const aparienciaStripe: Appearance = {
   },
 };
 
-export function obtenerClavePublica(propKey?: string): string | undefined {
+function obtenerClavePublica(propKey?: string): string | undefined {
   return (
     propKey ||
     clavePublica ||
@@ -76,7 +76,7 @@ export function obtenerClavePublica(propKey?: string): string | undefined {
   );
 }
 
-export function tieneStripePublicoConfigurado(): boolean {
+function tieneStripePublicoConfigurado(): boolean {
   return Boolean(obtenerClavePublica());
 }
 

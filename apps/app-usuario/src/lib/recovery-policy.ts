@@ -43,7 +43,7 @@ export function hashIdentificador(valor: string): string {
   return crypto.createHash("sha256").update(valor).digest("hex").slice(0, 32);
 }
 
-export function captchaConfigurado(): boolean {
+function captchaConfigurado(): boolean {
   // Igual que login: secret de servidor y site key pública, o no se exige.
   return Boolean(process.env.TURNSTILE_SECRET_KEY?.trim() && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim());
 }

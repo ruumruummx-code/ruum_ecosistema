@@ -4,8 +4,8 @@ import { getRedis } from "@/lib/csp-rate-limit";
 import { logStructuredWarn } from "@/lib/logger";
 import { hashPseudonimoViajes } from "./viajes-policy";
 
-export const VERSION_TARIFA = "2.0";
-export const SNAPSHOT_TTL_MS = 15 * 60 * 1000; // 15 minutos (acotado a la ventana de creación del wizard)
+const VERSION_TARIFA = "2.0";
+const SNAPSHOT_TTL_MS = 15 * 60 * 1000; // 15 minutos (acotado a la ventana de creación del wizard)
 
 export interface InputsTarifaSnapshot {
   origenCodigoPostal: string;

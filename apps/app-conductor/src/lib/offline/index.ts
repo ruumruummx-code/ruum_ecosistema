@@ -92,7 +92,7 @@ export async function purgarColaExpirada(): Promise<number> {
   return aPurgar.size;
 }
 
-export const OfflineOrchestrator = {
+const OfflineOrchestrator = {
   // Evidencia
   evidencia: {
     encolar: encolarEvidencia,
@@ -133,4 +133,3 @@ export const OfflineOrchestrator = {
   isOnline: () => (typeof navigator === "undefined" ? true : navigator.onLine),
 } as const;
 
-export default OfflineOrchestrator;

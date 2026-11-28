@@ -9,7 +9,7 @@ import {
   type ClaveRequisitoCertificacion,
 } from "@ruum/shared/constants";
 
-export { ETIQUETA_NIVEL_CERTIFICACION, REQUISITOS_MINIMOS_CERTIFICACION };
+;
 export type { ClaveRequisitoCertificacion };
 
 export interface EntradasChecklist {

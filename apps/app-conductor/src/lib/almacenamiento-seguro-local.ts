@@ -78,7 +78,7 @@ async function obtenerSecretoInstalacion() {
 let cachedKey: CryptoKey | null = null;
 let cachedSecret: string | null = null;
 
-export function resetCachedKeyForTesting() {
+function resetCachedKeyForTesting() {
   cachedKey = null;
   cachedSecret = null;
 }

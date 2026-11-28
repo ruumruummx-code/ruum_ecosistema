@@ -13,7 +13,7 @@ export function hashIdentificador(valor: string): string {
  * puede renderizar el widget (site key pública). Con solo una de las dos
  * mitades el 428 sería permanente y nadie podría entrar.
  */
-export function captchaConfigurado(): boolean {
+function captchaConfigurado(): boolean {
   return Boolean(process.env.TURNSTILE_SECRET_KEY?.trim() && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim());
 }
 

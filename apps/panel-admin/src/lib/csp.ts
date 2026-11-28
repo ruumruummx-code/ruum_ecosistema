@@ -4,8 +4,8 @@
  */
 
 export {
-  CSP_ORIGINS,
-  CSP_PRESETS,
+  
+  
   PERMISSIONS_POLICY,
   HSTS_HEADER,
   IMAGES_REMOTE_PATTERNS,
@@ -19,6 +19,6 @@ export function buildCspPanel(nonce: string, isProd: boolean): string {
 }
 
 /** Fallback estático para `next.config.ts` (sin nonce). */
-export function buildCspEstaticoPanel(isProd: boolean): string {
+function buildCspEstaticoPanel(isProd: boolean): string {
   return buildCsp({ nonce: null, isProd, extras: CSP_PRESETS.panel });
 }

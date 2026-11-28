@@ -13,7 +13,7 @@ export type PanelReviewState = {
   enviadoEn?: string | null;
 };
 
-export function nombreVehiculo(viaje: PasaporteRow) {
+function nombreVehiculo(viaje: PasaporteRow) {
   return [viaje.vehiculo_marca, viaje.vehiculo_modelo, viaje.vehiculo_anio].filter(Boolean).join(" ") || "Vehículo";
 }
 
@@ -21,7 +21,7 @@ export function folioViaje(viaje: PasaporteRow) {
   return viaje.traslado_id ? viaje.traslado_id.slice(0, 8).toUpperCase() : "Sin folio";
 }
 
-export function destinoOperativo(viaje: PasaporteRow) {
+function destinoOperativo(viaje: PasaporteRow) {
   if (!viaje.estado) return "Seguimiento operativo";
 
   const presentation = getTripPresentation(viaje.estado);
@@ -39,11 +39,11 @@ export function destinoOperativo(viaje: PasaporteRow) {
   return vaADestino ? "Punto de entrega" : "Punto de recolección";
 }
 
-export function usaDestinoActual(action: ReturnType<typeof getTripPresentation>["primaryAction"]["action"]) {
+function usaDestinoActual(action: ReturnType<typeof getTripPresentation>["primaryAction"]["action"]) {
   return ["go_destination", "mark_arrived_destination", "capture_destination_record", "confirm_delivery", "close_trip"].includes(action);
 }
 
-export function puntoActual(viaje: PasaporteRow, action: ReturnType<typeof getTripPresentation>["primaryAction"]["action"]) {
+function puntoActual(viaje: PasaporteRow, action: ReturnType<typeof getTripPresentation>["primaryAction"]["action"]) {
   if (["contact_support", "review_status", "view_available_trips", "none"].includes(action)) {
     return {
       lat: null,
@@ -60,7 +60,7 @@ export function puntoActual(viaje: PasaporteRow, action: ReturnType<typeof getTr
   };
 }
 
-export function contactoRelevante(viaje: PasaporteRow, action: ReturnType<typeof getTripPresentation>["primaryAction"]["action"]) {
+function contactoRelevante(viaje: PasaporteRow, action: ReturnType<typeof getTripPresentation>["primaryAction"]["action"]) {
   if (["contact_support", "review_status", "view_available_trips", "none"].includes(action)) {
     return {
       role: "soporte" as ContactRole,
@@ -77,7 +77,7 @@ export function contactoRelevante(viaje: PasaporteRow, action: ReturnType<typeof
   };
 }
 
-export function fechaViaje(viaje: PasaporteRow) {
+function fechaViaje(viaje: PasaporteRow) {
   const fecha = viaje.creado_en ?? viaje.actualizado_en;
   if (!fecha) return "Fecha por confirmar";
   return new Intl.DateTimeFormat("es-MX", {
@@ -90,7 +90,7 @@ export function fechaViaje(viaje: PasaporteRow) {
   }).format(new Date(fecha));
 }
 
-export function esViajePorCerrar(viaje: PasaporteRow) {
+function esViajePorCerrar(viaje: PasaporteRow) {
   return Boolean(
     viaje.estado &&
       ["llegada_a_destino", "evidencia_final_en_proceso", "evidencia_final_completada", "entrega_confirmada"].includes(viaje.estado)

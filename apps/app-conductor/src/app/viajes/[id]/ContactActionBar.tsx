@@ -35,7 +35,7 @@ function supportWhatsAppUrl(text: string) {
   return `${CONTACTOS_SOPORTE_CONDUCTOR.soporte.whatsapp.href}${separator}text=${encodeURIComponent(text)}`;
 }
 
-export function ContactActionBar({ trasladoId, role, name, phone }: ContactActionBarProps) {
+function ContactActionBar({ trasladoId, role, name, phone }: ContactActionBarProps) {
   const [busy, setBusy] = useState<"call" | string | null>(null);
   const [message, setMessage] = useState<{ tone: "info" | "danger"; text: string } | null>(null);
   const isSupport = role === "soporte";

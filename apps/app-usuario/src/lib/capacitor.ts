@@ -7,11 +7,11 @@
 import { esNativo, plataformaActual } from "@ruum/api/capacitor";
 import { logStructuredWarn } from "./logger";
 
-export { esNativo, plataformaActual };
+;
 
 export const APP_ID_TIENDA_USUARIO = "com.moviliax.ruumruum.usuario";
 export const ESQUEMA_DEEPLINK_USUARIO = "ruumusuario";
-export const DOMINIO_PRODUCCION_USUARIO = "usuario.ruumruum-moviliax.online";
+const DOMINIO_PRODUCCION_USUARIO = "usuario.ruumruum-moviliax.online";
 
 const RUTAS_DEEPLINK_PERMITIDAS = [
   "/",

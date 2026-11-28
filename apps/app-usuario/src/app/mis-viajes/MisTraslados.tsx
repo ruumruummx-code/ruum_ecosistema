@@ -26,7 +26,7 @@ import { useGestionTraslados, type PestañaFiltro, type ViajeLista } from "./use
 
 export const POR_PAGINA = 8;
 /** Desde este ancho la lista convive con el panel de detalle (master-detail). */
-export const QUERY_PANEL = "(min-width: 1280px)";
+const QUERY_PANEL = "(min-width: 1280px)";
 
 const OPCIONES_FECHA = [
   { valor: "todas", etiqueta: "Todas las fechas" },

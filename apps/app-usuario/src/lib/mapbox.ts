@@ -7,9 +7,9 @@ function obtenerTokenPublico(): string | undefined {
   return process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 }
 const URL_GEOCODIFICACION = "https://api.mapbox.com/search/geocode/v6/forward";
-export const MAPBOX_GEOCODING_TIMEOUT_MS = 8_000;
-export const MAPBOX_GEOCODING_MAX_INTENTOS = 3;
-export const MAPBOX_GEOCODING_RETRY_DELAY_MS = 300;
+const MAPBOX_GEOCODING_TIMEOUT_MS = 8_000;
+const MAPBOX_GEOCODING_MAX_INTENTOS = 3;
+const MAPBOX_GEOCODING_RETRY_DELAY_MS = 300;
 
 // Sec1: rate limiter cliente Mapbox — evita agotar cuota (600 req/min). Token bucket simple.
 const MAPBOX_RPS_LIMIT = 8; // 480/min con margen bajo 600
@@ -50,14 +50,14 @@ async function adquirirPermisoMapbox(signal?: AbortSignal): Promise<void> {
   }
 }
 
-export function __resetMapboxRateLimitForTest() {
+function __resetMapboxRateLimitForTest() {
   mapboxTimestamps.length = 0;
 }
 
 export interface CoordenadasGeocodificadas { lat: number; lng: number; }
 export interface RutaMapboxCalculada { distanciaKm: number; tiempoEstimadoHoras: number; }
 
-export class MapboxUsuarioError extends Error {
+class MapboxUsuarioError extends Error {
   constructor(
     message: string,
     public readonly status: number

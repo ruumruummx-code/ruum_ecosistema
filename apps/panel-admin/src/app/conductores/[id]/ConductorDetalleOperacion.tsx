@@ -97,7 +97,7 @@ export function DesempenoScore({
   );
 }
 
-export function AccionesCriticasPasaporte({
+function AccionesCriticasPasaporte({
   conductor,
   onActualizado,
   onAviso
@@ -255,7 +255,7 @@ export function AccionesCriticasPasaporte({
   );
 }
 
-export function CampoEditable({
+function CampoEditable({
   label,
   value,
   onChange,

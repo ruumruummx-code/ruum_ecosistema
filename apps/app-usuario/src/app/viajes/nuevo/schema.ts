@@ -4,13 +4,13 @@
  * sincronizada entre cliente, API y base de datos.
  */
 export {
-  ANTICIPACION_MINIMA_HORAS,
-  ANIO_MINIMO_VEHICULO,
-  MAX_PARADAS_TRASLADO,
-  REGEX_CODIGO_POSTAL,
-  REGEX_TELEFONO_10_DIGITOS,
-  obtenerAnioMaximoVehiculo,
-  esquemaParada,
+  
+  
+  
+  
+  
+  
+  
   esquemaSolicitudTraslado,
   erroresFormulario
 } from "@ruum/shared/validacion";

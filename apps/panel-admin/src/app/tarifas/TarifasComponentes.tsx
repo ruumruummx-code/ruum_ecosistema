@@ -95,7 +95,7 @@ export function PrincipiosTarifarios() {
   );
 }
 
-export function PasoFormula({
+function PasoFormula({
   numero,
   etiqueta,
   children
@@ -117,11 +117,11 @@ export function PasoFormula({
   );
 }
 
-export function Var({ children }: { children: ReactNode }) {
+function Var({ children }: { children: ReactNode }) {
   return <span className="font-semibold text-ui-brand-soft-fg">{children}</span>;
 }
 
-export function Op({ children }: { children: ReactNode }) {
+function Op({ children }: { children: ReactNode }) {
   return <span className="text-ui-fg-muted">{children}</span>;
 }
 

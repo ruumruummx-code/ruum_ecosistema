@@ -15,7 +15,7 @@ import type {
 
 /** Objeto vacío de 13 campos: antes triplicado en cada salida temprana de
  * `obtenerDatos` (sin env, sin pasaporte, catch). Una sola fábrica. */
-export function datosVaciosTraslado() {
+function datosVaciosTraslado() {
   return {
     pasaporte: null,
     traslado: null,

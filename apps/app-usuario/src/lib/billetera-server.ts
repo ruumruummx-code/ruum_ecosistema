@@ -4,7 +4,7 @@ import { createHash } from "node:crypto";
 import { crearClienteServicio } from "./supabase-servicio";
 import { obtenerClienteBilleteraServidor, vincularClienteBilleteraServidor } from "@ruum/api/services";
 
-export function serviciosBilletera() {
+function serviciosBilletera() {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) throw new Error("La billetera no está disponible temporalmente.");
   const modo = /^(sk|rk)_test_/.test(key) ? "test" : "live";

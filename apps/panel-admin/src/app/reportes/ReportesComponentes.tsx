@@ -181,7 +181,7 @@ export function PanelTablaPlaceholder() {
   );
 }
 
-export function EstadoMetricaBadge({ estado, compacto = false }: { estado: EstadoMetrica; compacto?: boolean }) {
+function EstadoMetricaBadge({ estado, compacto = false }: { estado: EstadoMetrica; compacto?: boolean }) {
   const clase =
     estado === "ok"
       ? "border-ui-success/30 bg-ui-success-soft text-ui-success"
@@ -212,7 +212,7 @@ export function EstadoMetricaBadge({ estado, compacto = false }: { estado: Estad
   );
 }
 
-export function Ayuda({ texto }: { texto: string }) {
+function Ayuda({ texto }: { texto: string }) {
   return (
     <span className="group relative inline-flex">
       <span className="inline-flex size-7 items-center justify-center rounded-full border border-ui-line bg-ui-muted font-body text-xs font-semibold text-ui-fg-muted">
@@ -307,7 +307,7 @@ export function ModalExportacion({
   );
 }
 
-export function DatoModal({ etiqueta, valor }: { etiqueta: string; valor: string }) {
+function DatoModal({ etiqueta, valor }: { etiqueta: string; valor: string }) {
   return (
     <div>
       <dt className="font-body text-xs font-semibold uppercase tracking-wide text-ui-fg-muted">{etiqueta}</dt>

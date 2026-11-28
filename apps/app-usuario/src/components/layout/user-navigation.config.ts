@@ -157,7 +157,7 @@ export const NAVEGACION_USUARIO: ItemNavegacionUsuario[] = [
   },
 ];
 
-export const ITEMS_NAVEGACION_VISIBLES = NAVEGACION_USUARIO.filter((item) => item.disponible !== false);
+const ITEMS_NAVEGACION_VISIBLES = NAVEGACION_USUARIO.filter((item) => item.disponible !== false);
 
 /** Devuelve el id del item activo (una sola opción activa, la más específica). */
 export function obtenerItemActivo(

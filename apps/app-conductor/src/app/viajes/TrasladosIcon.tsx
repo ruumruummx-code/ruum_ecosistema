@@ -4,7 +4,7 @@ export function TrasladosIcon({ name }: { name: "menu" | "bell" | "home" | "truc
   return <ConductorIcon name={name as ConductorIconName} size={23} strokeWidth={1.8} />;
 }
 
-export function TrasladosEmptyIllustration() {
+function TrasladosEmptyIllustration() {
   return <svg viewBox="0 0 220 112" width="180" height="92" aria-hidden="true">
     <path d="M10 101c-1-24 18-41 41-40C59 15 92 5 117 10c29 4 46 22 52 49 25 0 42 15 43 42Z" fill="var(--conductor-surface-secondary)" />
     <circle cx="111" cy="60" r="42" fill="var(--conductor-surface)" />

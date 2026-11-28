@@ -35,7 +35,7 @@ export const TABS: Array<{ value: TabPasaporte; label: string }> = [
 
 export const ESTADOS_TERMINALES = new Set<string>(["servicio_cerrado", "servicio_cancelado", "traslado_fallido"]);
 
-export function normalizar(valor: string) {
+function normalizar(valor: string) {
   return valor.trim().toUpperCase().replace(/\s+/g, " ");
 }
 
@@ -83,7 +83,7 @@ export function tonoDocumento(estado?: string | null): TonoBadge {
   return "neutral";
 }
 
-export function construirAlertas(
+function construirAlertas(
   empresa: Empresa,
   usuarios: Usuario[],
   vehiculos: Vehiculo[],

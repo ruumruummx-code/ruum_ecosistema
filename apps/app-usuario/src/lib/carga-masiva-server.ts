@@ -7,7 +7,7 @@ import { validarFila, type FilaValidada } from "./carga-masiva";
 import { clasificarVehiculoMasivo, eliminarCheckoutMasivoServidor, limpiarCheckoutsMasivosSinIntentServidor } from "@ruum/api/services";
 import { logStructuredError, logStructuredWarn } from "./logger";
 
-export { eliminarCheckoutMasivoServidor, limpiarCheckoutsMasivosSinIntentServidor };
+;
 
 function rutaCatalogoCP(prefijo: string): string {
   const cwd = process.cwd();
@@ -74,7 +74,7 @@ export async function validarFilasServidor(entradas: Record<string, string>[]): 
 }
 
 /** Stripe REST evita agregar otro SDK al bundle de la aplicación. */
-export const STRIPE_API_VERSION = "2026-09-30.endive";
+const STRIPE_API_VERSION = "2026-09-30.endive";
 
 export async function stripeMasivo(endpoint: string, parametros?: URLSearchParams, idempotencia?: string) {
   const key = process.env.STRIPE_SECRET_KEY;

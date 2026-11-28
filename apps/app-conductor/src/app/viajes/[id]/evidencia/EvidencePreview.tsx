@@ -21,7 +21,7 @@ function IconoReloj() {
   );
 }
 
-export function BadgeSincronizacion({ sincronizada }: { sincronizada: boolean }) {
+function BadgeSincronizacion({ sincronizada }: { sincronizada: boolean }) {
   return (
     <span
       className={[

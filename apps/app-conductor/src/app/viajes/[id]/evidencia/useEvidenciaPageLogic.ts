@@ -28,7 +28,7 @@ type PasaporteDigitalRow = Database["public"]["Views"]["pasaporte_digital"]["Row
 type EstadoTraslado = "pendiente_de_conductor" | "conductor_asignado" | "conductor_en_camino_al_origen" | "conductor_en_punto_de_recoleccion" | "verificacion_vehiculo_en_proceso" | "evidencia_inicial_en_proceso" | "traslado_en_curso" | "llegada_a_destino" | "evidencia_final_en_proceso" | "servicio_cerrado";
 
 // Map trip state to evidence type
-export function tipoEvidenciaPorEstado(estado: EstadoTraslado): TipoEvidencia | null {
+function tipoEvidenciaPorEstado(estado: EstadoTraslado): TipoEvidencia | null {
   if (["conductor_en_punto_de_recoleccion", "verificacion_vehiculo_en_proceso", "evidencia_inicial_en_proceso"].includes(estado)) {
     return "inicial";
   }

@@ -10,7 +10,7 @@ import { TripSupportDialog } from "./TripSupportDialog";
 
 const DockContext = createContext<{ primary: HTMLElement | null; quick: HTMLElement | null; setReturnPath: (path: string | null) => void } | undefined>(undefined);
 
-export function useTripReturnPath(path: string) {
+function useTripReturnPath(path: string) {
   const setReturnPath = useContext(DockContext)?.setReturnPath;
   useLayoutEffect(() => {
     setReturnPath?.(path);
@@ -44,7 +44,7 @@ export function TripOperationalFrame({ children }: { children: ReactNode }) {
   </DockContext.Provider>;
 }
 
-export function TripDockPortal({ children, quick = false }: { children: ReactNode; quick?: boolean }) {
+function TripDockPortal({ children, quick = false }: { children: ReactNode; quick?: boolean }) {
   const dock = useContext(DockContext);
   if (!dock) return children;
   const target = quick ? dock.quick : dock.primary;
