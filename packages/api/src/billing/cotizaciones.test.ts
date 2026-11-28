@@ -18,7 +18,6 @@ describe("billing / cotizaciones", () => {
     const client = createMockSupabaseClient({
       rpcData: { admin_emite_cotizacion: null }
     });
-    const originalRpc = client.rpc;
     client.rpc = (async (fn: string, args: any) => {
       if (fn === "admin_emite_cotizacion") {
         llamadaRpc = true;

@@ -1,28 +1,12 @@
 import { forwardRef, useId, type ReactNode } from "react";
 import { LogoMarca, type LogoVariante } from "@ruum/ui";
 
-const fondoPublico = "bg-surface-elevated";
-const fondoPublicoTransparente = "bg-surface";
 const bordePublico = "border-border";
 const campoPublico = "bg-surface";
 const textoSecundarioPublico = "text-text-secondary";
 const textoFuncionalPublico = "text-text-tertiary";
 const focoPublico = "focus:border-[var(--ruum-teal-deep)] focus:ring-[var(--ruum-teal)]/25";
 const focoAcentoPublico = "focus-visible:ring-focus focus-visible:ring-offset-surface";
-
-export function PantallaPublica({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return (
-    <main className={`user-v2-scope user-v2-page user-v2-secondary-screen ruum-auth-shell ruum-public-shell min-h-dvh ${fondoPublico} px-4 text-text-primary sm:px-6 ${className}`}>
-      <div className={`ruum-public-shell__content relative mx-auto min-h-dvh w-full max-w-md overflow-hidden ${fondoPublicoTransparente} shadow-[var(--ruum-shadow-4)]`}>
-        <div
-          aria-hidden
-          className="ruum-public-shell__overlay pointer-events-none absolute inset-0 opacity-40"
-        />
-        <div className="relative z-10">{children}</div>
-      </div>
-    </main>
-  );
-}
 
 export function LogoRuum({
   variante = "vertical",

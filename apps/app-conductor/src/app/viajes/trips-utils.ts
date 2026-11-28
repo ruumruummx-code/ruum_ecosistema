@@ -1,6 +1,5 @@
 import { ETIQUETA_TIPO_VEHICULO, GLOSARIO_OPERATIVO, type EstadoEconomicoExplicito } from "@ruum/shared/constants";
 import type { Database } from "@ruum/shared/types";
-import type { Coordenadas } from "../../lib/ubicacion";
 
 export type PasaporteRow = Database["public"]["Views"]["pasaporte_digital"]["Row"];
 export type EstadoTraslado = Database["public"]["Enums"]["estado_traslado"];
@@ -46,18 +45,6 @@ export const VISTAS: { id: VistaTraslados; etiqueta: string }[] = [
   { id: "disponibles", etiqueta: "Disponibles" },
   { id: "mis-Traslados", etiqueta: "Mis Traslados" },
   { id: "historial", etiqueta: "Historial" }
-];
-
-export const GRUPOS_MIS_Traslados: { id: GrupoMisTraslados; etiqueta: string }[] = [
-  { id: "en-curso", etiqueta: "En curso" },
-  { id: "proximos", etiqueta: "Próximos" },
-  { id: "por-cerrar", etiqueta: "Por cerrar" }
-];
-
-export const FILTROS_FECHA: { id: FiltroFecha; etiqueta: string }[] = [
-  { id: "todos", etiqueta: "Todas las fechas" },
-  { id: "hoy", etiqueta: "Hoy" },
-  { id: "semana", etiqueta: "Esta semana" }
 ];
 
 const ESTADOS_FINALIZADOS = new Set<EstadoTraslado>([
@@ -114,18 +101,6 @@ export function formatearFecha(fecha: string) {
   }).format(new Date(fecha));
 }
 
-export function formatearDiaCalendario(fecha: Date) {
-  return formatearFecha(fecha.toISOString());
-}
-
-export function formatearDiaSelector(fecha: Date) {
-  return new Intl.DateTimeFormat("es-MX", {
-    weekday: "short",
-    day: "numeric",
-    timeZone: ZONA_HORARIA_VIAJE
-  }).format(fecha);
-}
-
 export function claveDia(fecha: string | Date) {
   const partes = new Intl.DateTimeFormat("en-CA", {
     year: "numeric",
@@ -137,22 +112,9 @@ export function claveDia(fecha: string | Date) {
   return `${valor.year}-${valor.month}-${valor.day}`;
 }
 
-export function formatearHora(fecha: string) {
-  return new Intl.DateTimeFormat("es-MX", {
-    hour: "2-digit",
-    minute: "2-digit",
-    timeZone: ZONA_HORARIA_VIAJE
-  }).format(new Date(fecha));
-}
-
 export function formatearDistancia(km: number | null) {
   if (km == null || !Number.isFinite(km)) return "Por confirmar";
   return `${new Intl.NumberFormat("es-MX", { maximumFractionDigits: km < 10 ? 1 : 0 }).format(km)} km`;
-}
-
-export function formatearDistanciaAproximadaAlOrigen(km: number | null) {
-  if (km == null || !Number.isFinite(km)) return "Activa ubicación";
-  return `Aproximadamente a ${formatearDistancia(km)} de ti`;
 }
 
 export function formatearDuracion(horas: number | null) {
@@ -161,28 +123,6 @@ export function formatearDuracion(horas: number | null) {
   const h = Math.floor(totalMin / 60);
   const m = totalMin % 60;
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
-}
-
-export function distanciaKmEntre(a: Coordenadas, b: { lat: number | null; lng: number | null }) {
-  if (b.lat == null || b.lng == null) return null;
-  const radioTierraKm = 6371;
-  const lat1 = a.lat * Math.PI / 180;
-  const lat2 = b.lat * Math.PI / 180;
-  const deltaLat = (b.lat - a.lat) * Math.PI / 180;
-  const deltaLng = (b.lng - a.lng) * Math.PI / 180;
-  const h =
-    Math.sin(deltaLat / 2) ** 2 +
-    Math.cos(lat1) * Math.cos(lat2) * Math.sin(deltaLng / 2) ** 2;
-  return 2 * radioTierraKm * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
-}
-
-export function formatearActualizacion(fecha: Date | null) {
-  if (!fecha) return "Sin actualizar";
-  return new Intl.DateTimeFormat("es-MX", {
-    hour: "2-digit",
-    minute: "2-digit",
-    timeZone: ZONA_HORARIA_VIAJE
-  }).format(fecha);
 }
 
 function partesFechaMexico(fecha: string | Date) {
@@ -210,14 +150,6 @@ function inicioSemanaDomingo(fecha = new Date()) {
   return fechaMexico;
 }
 
-export function estaSemanaActual(fechaIso: string, referencia = new Date()) {
-  const inicio = inicioSemanaDomingo(referencia);
-  const fin = new Date(inicio);
-  fin.setUTCDate(inicio.getUTCDate() + 7);
-  const clave = claveDia(fechaIso);
-  return clave >= claveDia(inicio) && clave < claveDia(fin);
-}
-
 export function diasSemanaActual(referencia = new Date()) {
   const inicio = inicioSemanaDomingo(referencia);
   return Array.from({ length: 7 }, (_, i) => {
@@ -243,14 +175,6 @@ export function normalizarVista(valor: string | null): VistaTraslados {
   return VISTAS.some((vista) => vista.id === valor) ? (valor as VistaTraslados) : "disponibles";
 }
 
-export function normalizarGrupo(valor: string | null): GrupoMisTraslados {
-  return GRUPOS_MIS_Traslados.some((grupo) => grupo.id === valor) ? (valor as GrupoMisTraslados) : "en-curso";
-}
-
-export function normalizarFecha(valor: string | null): FiltroFecha {
-  return FILTROS_FECHA.some((fecha) => fecha.id === valor) ? (valor as FiltroFecha) : "todos";
-}
-
 export function clasificarMisTraslados(viaje: PasaporteRow): GrupoMisTraslados | null {
   if (!viaje.estado) return null;
   const estado = viaje.estado as EstadoTraslado;
@@ -258,20 +182,6 @@ export function clasificarMisTraslados(viaje: PasaporteRow): GrupoMisTraslados |
   if (ESTADOS_PROXIMOS.has(estado)) return "proximos";
   if (ESTADOS_POR_CERRAR.has(estado)) return "por-cerrar";
   return "en-curso";
-}
-
-export function filtrarPorFecha(Traslados: PasaporteRow[], detalles: Record<string, DetalleOperativo>, filtro: FiltroFecha) {
-  if (filtro === "todos") return Traslados;
-  return Traslados.filter((viaje) => {
-    const fecha = (viaje.traslado_id ? detalles[viaje.traslado_id] : null)?.fechaHora ?? detalleFallback(viaje).fechaHora;
-    if (filtro === "hoy") return esHoy(fecha);
-    return estaSemanaActual(fecha);
-  });
-}
-
-export function filtrarPorEstado(Traslados: PasaporteRow[], estado: string) {
-  if (!estado || estado === "todos") return Traslados;
-  return Traslados.filter((viaje) => viaje.estado === estado);
 }
 
 export function crearCalendario(

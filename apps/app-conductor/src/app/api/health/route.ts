@@ -13,7 +13,6 @@ const GENERIC_UNAVAILABLE_MESSAGE = "Servicio no disponible";
 export async function GET() {
   const iniciado = Date.now();
   const version = process.env.NEXT_PUBLIC_APP_VERSION ?? "unknown";
-  const ambiente = process.env.NEXT_PUBLIC_RUUM_AMBIENTE ?? process.env.NODE_ENV ?? "unknown";
 
   let supabase: HealthStatus = "ok";
   let supabaseLatencyMs: number | null = null;

@@ -10,14 +10,6 @@ import { TripSupportDialog } from "./TripSupportDialog";
 
 const DockContext = createContext<{ primary: HTMLElement | null; quick: HTMLElement | null; setReturnPath: (path: string | null) => void } | undefined>(undefined);
 
-export function useTripReturnPath(path: string) {
-  const setReturnPath = useContext(DockContext)?.setReturnPath;
-  useLayoutEffect(() => {
-    setReturnPath?.(path);
-    return () => setReturnPath?.(null);
-  }, [path, setReturnPath]);
-}
-
 export function TripOperationalFrame({ children }: { children: ReactNode }) {
   const { id } = useParams<{ id: string }>();
   const pathname = usePathname();

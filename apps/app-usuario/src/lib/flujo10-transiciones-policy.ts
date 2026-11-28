@@ -83,11 +83,6 @@ export const ESTADOS_VALIDOS_POR_ACCION: Record<AccionFlujo10, readonly EstadoTr
 };
 
 /**
- * Zona horaria canónica para operaciones y plazos de Flujo 10 (CB-3 / T8 / CA-6).
- */
-export const ZONA_HORARIA_CANONICA_F10 = "America/Mexico_City";
-
-/**
  * Límite contractual de 72 horas para calificación y disputas, con margen de gracia técnico (CB-3 / T8 / CA-6).
  * Margen de gracia: 15 minutos (0.25 horas / 900,000 ms) para absorber desviaciones de reloj o latencia de red.
  */

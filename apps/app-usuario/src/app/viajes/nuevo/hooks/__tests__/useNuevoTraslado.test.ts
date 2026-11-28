@@ -5,7 +5,7 @@ import React from "react";
 import { AppStateProvider, useNuevoTrasladoState } from "@/state/AppStateProvider";
 import { aceptarCotizacionUsuario } from "@ruum/api/services";
 import { haCambiadoTarifa, generarTarifaSnapshot, CAMPOS_PASO_TARIFA } from "../../tarifa-gate";
-import { guardarBorradorTrasladoLocal, leerBorradorTrasladoLocal, limpiarBorradorTrasladoLocal } from "@/lib/borrador-traslado";
+import { leerBorradorTrasladoLocal, limpiarBorradorTrasladoLocal } from "@/lib/borrador-traslado";
 
 // Mock next/navigation
 vi.mock("next/navigation", () => ({

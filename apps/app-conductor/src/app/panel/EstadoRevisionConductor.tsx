@@ -17,7 +17,6 @@ import {
   type EventoRegistroConductor,
   type TipoDocumentoConductor
 } from "@ruum/api/services";
-import { enmascararNombreArchivo } from "../cuenta/datos-sensibles";
 import { DiditVerificationModal } from "../registro/DiditVerificationModal";
 
 import { ConductorIcon } from "@/components/icons";
@@ -45,11 +44,6 @@ const DOCUMENTO_FISCAL: { valor: TipoDocumentoConductor; etiqueta: string } = {
   etiqueta: "Documento fiscal"
 };
 
-const ETIQUETA_EXPEDIENTE: Record<Database["public"]["Enums"]["estado_expediente_conductor"], string> = {
-  borrador: "Borrador", correo_pendiente: "Correo pendiente", datos_incompletos: "Datos incompletos",
-  documentos_pendientes: "Documentos pendientes", listo_para_enviar: "Listo para enviar", en_revision: "En revisión",
-  requiere_correccion: "Requiere corrección", aprobado: "Aprobado", rechazado: "Rechazado", suspendido: "Suspendido"
-};
 
 interface Props {
   conductorId?: string;
@@ -67,7 +61,7 @@ interface DocumentoSeleccionado {
   doc?: DocumentoConductorRow;
 }
 
-export function EstadoRevisionConductor({ conductorId, solicitudId, nombre, documentosIniciales, estadoExpediente, enviadoEn, onSalir }: Props) {
+export function EstadoRevisionConductor({ conductorId, solicitudId, nombre, documentosIniciales, estadoExpediente, onSalir }: Props) {
   const [documentos, setDocumentos] = useState(documentosIniciales);
   const [estadoActual, setEstadoActual] = useState(estadoExpediente);
   const [subiendo, setSubiendo] = useState<TipoDocumentoConductor | null>(null);
@@ -208,13 +202,8 @@ export function EstadoRevisionConductor({ conductorId, solicitudId, nombre, docu
     }
   }
 
-  const todosAprobados = TIPOS_DOCUMENTO.every((t) => documentoDe(t.valor)?.estado === "aprobado");
   const documentoFiscal = documentoDe(DOCUMENTO_FISCAL.valor);
   const documentosRequeridos = documentoFiscal ? [...TIPOS_DOCUMENTO, DOCUMENTO_FISCAL] : TIPOS_DOCUMENTO;
-  const actuales = TIPOS_DOCUMENTO.map((tipo) => documentoDe(tipo.valor)).filter(Boolean);
-  const documentosActuales = [...actuales, documentoFiscal].filter(Boolean);
-  const rechazados = documentosActuales.filter((documento) => documento?.estado === "rechazado" || documento?.estado === "vencido").length;
-  const pendientes = TIPOS_DOCUMENTO.filter((tipo) => !documentoDe(tipo.valor)).length;
   const cuentaAprobada = !["borrador", "correo_pendiente"].includes(estadoActual);
   const documentosAprobados = documentosRequeridos.filter((tipo) => documentoDe(tipo.valor)?.estado === "aprobado").length;
   const totalRequisitos = documentosRequeridos.length + 1;

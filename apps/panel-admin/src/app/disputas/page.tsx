@@ -9,7 +9,7 @@ import type { Database } from "@ruum/shared/types";
 import { crearClienteNavegador, puedeUsarDatosDemo, tieneSupabaseConfigurado } from "../../lib/supabase-browser";
 import { listarDisputasAdmin, listarTrasladosAdmin, resolverDisputaAdmin } from "@ruum/api/services";
 import { AdminPageHeader, AdminFiltroActivo, limpiarParamsFiltroUrl } from "../admin-ui";
-import { AdminLoadingState, AdminEmptyState, AdminErrorState, AdminBadge } from "../admin-components";
+import { AdminLoadingState, AdminEmptyState, AdminErrorState } from "../admin-components";
 
 type Disputa = Database["public"]["Tables"]["disputas"]["Row"];
 type Pasaporte = Database["public"]["Views"]["pasaporte_digital"]["Row"];

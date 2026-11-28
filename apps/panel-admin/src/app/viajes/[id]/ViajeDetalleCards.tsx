@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { Aviso, PassportCard } from "@ruum/ui";
 import { ETIQUETA_TIPO_VEHICULO } from "@ruum/shared/constants";
 import { resumenClasificacionVehiculo } from "@ruum/shared/catalogos";

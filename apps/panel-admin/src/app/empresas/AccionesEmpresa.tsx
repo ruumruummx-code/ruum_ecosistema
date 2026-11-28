@@ -51,7 +51,6 @@ export function AccionesEmpresa({
   documentos,
   Traslados,
   versionesFiscales,
-  versionesCondiciones,
   cambiosPendientes,
   onActualizado
 }: AccionesEmpresaProps) {

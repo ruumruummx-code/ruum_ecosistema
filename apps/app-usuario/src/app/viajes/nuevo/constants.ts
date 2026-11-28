@@ -9,24 +9,6 @@ export const PASOS = [
   "Pago"
 ] as const;
 
-/** Subtítulos cortos del encabezado ("Paso X de 5 · …"). */
-export const SUBTITULOS_PASO = [
-  "",
-  "Datos del vehículo",
-  "Origen y destino",
-  "Detalles del servicio",
-  "Pago seguro"
-] as const;
-
-/** Descripción visible de cada paso. */
-export const DESCRIPCIONES_PASO = [
-  "Ingresa los datos básicos para obtener una estimación inmediata del costo.",
-  "Proporciona los datos completos del vehículo y la documentación mínima requerida.",
-  "Define los domicilios de origen y destino, y los contactos de entrega y recepción.",
-  "Confirma los parámetros operativos y la tarifa final antes de proceder al pago.",
-  "Completa el pago de forma segura. La transacción se procesa a través de Stripe."
-] as const;
-
 export const CAMPOS_PASO_VEHICULO_ESENCIAL = new Set(["marca", "modelo", "anio", "condicion", "transmision"]);
 export const CAMPOS_PASO_VEHICULO_DETALLE = new Set(["vehiculoSeleccionadoId", "color", "placas", "vin", "estadoGeneral", "tieneTarjeta", "tieneVerificacion", "tienePlacas", "puedeCircular"]);
 export const CAMPOS_PASO_VEHICULO = new Set([...CAMPOS_PASO_VEHICULO_ESENCIAL, ...CAMPOS_PASO_VEHICULO_DETALLE]);

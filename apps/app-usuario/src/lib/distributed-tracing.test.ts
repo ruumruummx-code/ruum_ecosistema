@@ -4,7 +4,6 @@ import * as Sentry from "@sentry/nextjs";
 import {
   HEADER_BAGGAGE,
   HEADER_SENTRY_TRACE,
-  HEADER_SPAN_ID,
   HEADER_TRACEPARENT,
   HEADER_TRACE_ID,
   construirBaggageSentry,

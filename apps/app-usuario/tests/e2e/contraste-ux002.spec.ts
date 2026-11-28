@@ -42,7 +42,6 @@ for (const theme of ['light', 'dark']) for (const width of [390, 1440]) {
    report.push({ route, violations: result.violations, incomplete: result.incomplete, gradient });
    await page.screenshot({ path: path.join(evidence, route.replaceAll('/', '_') + '.png'), fullPage: true });
    fs.writeFileSync(path.join(evidence, 'contrast.json'), JSON.stringify(report, null, 2));
-   console.log(theme, width, route, result.violations.flatMap(v => v.nodes.map(n => n.target)));
   }
   await testInfo.attach('contrast.json', { body: JSON.stringify(report, null, 2), contentType: 'application/json' });
   expect(report.flatMap(r => r.gradient.filter(n => n.ratio < 4.5))).toEqual([]);

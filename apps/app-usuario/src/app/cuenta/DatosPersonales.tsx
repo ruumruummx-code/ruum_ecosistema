@@ -5,18 +5,14 @@ import { Tabs } from "@ruum/ui";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Icono } from "@ruum/ui";
 import type { Database } from "@ruum/shared/types";
 import {
   actualizarFechaNacimientoUsuario,
   actualizarPerfilUsuario,
-  obtenerUrlFotoPerfilUsuario,
-  subirFotoPerfil,
   ejecutarSagaActualizacionPerfil,
   obtenerUsuarioActual,
   ErrorConflictoVersionPerfil,
-  ErrorValidacionPerfilServer,
 } from "@ruum/api/services";
 import { consultarCodigoPostalMx } from "../../lib/codigos-postales";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "../../lib/supabase-browser";
@@ -103,19 +99,8 @@ export interface DatosPersonalesProps {
   escritorio?: boolean;
 }
 
-function esErrorEsquemaFechaNacimiento(err: unknown): boolean {
-  if (!err || typeof err !== "object") return false;
-  const e = err as { code?: string | number; status?: number; message?: string };
-  return (
-    e.code === "PGRST204" ||
-    e.code === "42703" ||
-    (typeof e.message === "string" &&
-      e.message.includes("fecha_nacimiento") && (e.message.includes("schema cache") || e.message.includes("column")))
-  );
-}
 
 export function DatosPersonales({ usuario, fotoUrlInicial, correoRegistro, escritorio = false }: DatosPersonalesProps) {
-  const router = useRouter();
   const guardadoRef = useRef(false);
   const subidaRef = useRef(false);
   const temporalFotoRef = useRef<string | null>(null);

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { EstadoMetrica, ExportacionRealizada, PeriodoReporte, RESUMEN_EJECUTIVO, GRUPOS_REPORTE } from "./ReportesTipos";
+import type { EstadoMetrica, ExportacionRealizada, RESUMEN_EJECUTIVO, GRUPOS_REPORTE } from "./ReportesTipos";
 
 export function FiltroSegmentado<T extends string>({
   label,

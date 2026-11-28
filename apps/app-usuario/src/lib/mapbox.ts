@@ -1,4 +1,4 @@
-import { MapboxDirectionsError, obtenerRutaDirectionsMapbox } from "@ruum/shared/utils";
+import { MapboxDirectionsError } from "@ruum/shared/utils";
 import { recordOperationalEvent } from "./observability";
 import { registrarEventoUx } from "./analytics";
 import { obtenerHeadersCsrf } from "./csrf";
@@ -48,10 +48,6 @@ async function adquirirPermisoMapbox(signal?: AbortSignal): Promise<void> {
     });
     if (!continuo) return;
   }
-}
-
-export function __resetMapboxRateLimitForTest() {
-  mapboxTimestamps.length = 0;
 }
 
 export interface CoordenadasGeocodificadas { lat: number; lng: number; }

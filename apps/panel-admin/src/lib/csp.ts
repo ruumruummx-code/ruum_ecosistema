@@ -18,7 +18,3 @@ export function buildCspPanel(nonce: string, isProd: boolean): string {
   return buildCsp({ nonce, isProd, extras: CSP_PRESETS.panel });
 }
 
-/** Fallback estático para `next.config.ts` (sin nonce). */
-export function buildCspEstaticoPanel(isProd: boolean): string {
-  return buildCsp({ nonce: null, isProd, extras: CSP_PRESETS.panel });
-}

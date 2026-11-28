@@ -236,10 +236,6 @@ export function trasladoSinCoordenadas(traslado: TrasladoMapa) {
   return traslado.origen_lat === null || traslado.origen_lng === null || traslado.destino_lat === null || traslado.destino_lng === null;
 }
 
-export function trasladoSinSenal(traslado: TrasladoMapa) {
-  return calidadUbicacion(traslado, new Date()).estadoSenal === "sin_senal";
-}
-
 export function calidadUbicacion(traslado: TrasladoMapa, ahora: Date | null) {
   const gpsDisponible = traslado.conductor_lat !== null && traslado.conductor_lng !== null && traslado.gps_actualizado_en !== null;
   const minutos = minutosDesdeActualizacion(traslado.gps_actualizado_en ?? traslado.actualizado_en, ahora);

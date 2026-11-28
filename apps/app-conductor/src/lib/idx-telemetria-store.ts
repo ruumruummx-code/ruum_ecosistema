@@ -101,10 +101,6 @@ export class IndexedDBTelemetryQueueStorage {
   }
 }
 
-export function reiniciarBaseDeDatosParaTesting() {
-  dbPromise = null;
-}
-
 /**
  * Instancia compartida del almacenamiento IndexedDB para telemetría.
  * Se expone para permitir inyección en tests y reuso en otros módulos.

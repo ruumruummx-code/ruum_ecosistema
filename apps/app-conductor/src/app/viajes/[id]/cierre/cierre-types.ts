@@ -25,19 +25,3 @@ export interface GastoData {
   registrado_en: string;
 }
 
-export function labelGasto(tipo: GastoData["tipo"]): string {
-  switch (tipo) {
-    case "combustible":
-      return "Gasolina";
-    case "caseta":
-      return "Caseta";
-    case "maniobra":
-      return "Maniobra";
-    case "estadia":
-      return "Estadía";
-    case "penalizacion":
-      return "Penalización";
-    default:
-      return "Otro";
-  }
-}

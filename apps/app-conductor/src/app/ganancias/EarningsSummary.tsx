@@ -1,11 +1,9 @@
 "use client";
 
 import { Button as BaseButton } from "@ruum/ui/base";
-import Link from "next/link";
 import { Card, FinancialCard } from "@ruum/ui";
 import {
   formatearMoneda,
-  formatearRango,
   ResumenGanancias
 } from "./useEarningsLedger";
 
@@ -20,8 +18,6 @@ interface EarningsSummaryProps {
 export function EarningsSummary({
   resumen,
   fechaDispersion,
-  periodoActivo,
-  rangoActual,
   setInfoSheet
 }: EarningsSummaryProps) {
   return (

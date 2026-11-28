@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@ruum/shared/types";
-import { assertAdminAnyPermission, assertAdminPermission } from "../services/permisos-admin";
+import { assertAdminPermission } from "../services/permisos-admin";
 import { registrarEvento } from "../services/auditoria";
 import { obtenerAdminIdParaAuditoria } from "../identity/admins";
 import { esRecursoSupabasePendiente } from "../operations/infrastructure/supabase-errores";

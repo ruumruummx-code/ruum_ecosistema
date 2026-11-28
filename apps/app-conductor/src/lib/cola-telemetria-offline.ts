@@ -45,22 +45,6 @@ export class SecureTelemetryQueueStorage implements TelemetryQueueStorage {
   }
 }
 
-export class InMemoryTelemetryQueueStorage implements TelemetryQueueStorage {
-  constructor(private items: PuntoTelemetriaLocal[] = []) {}
-
-  async read() {
-    return normalizar(this.items);
-  }
-
-  async write(items: PuntoTelemetriaLocal[]) {
-    this.items = normalizar(items);
-  }
-
-  async clear() {
-    this.items = [];
-  }
-}
-
 /**
  * Almacenamiento dual: escribe siempre en el storage configurado (cifrado)
  * Y en IndexedDB como fallback obligatorio. Lee del storage configurado;
@@ -187,9 +171,6 @@ function serializar<T>(operacion: () => Promise<T>): Promise<T> {
  const siguiente = operacionPendiente.then(operacion, operacion);
  operacionPendiente = siguiente.catch(() => undefined); return siguiente;
 }
-export function configurarStorageTelemetria(storage: TelemetryQueueStorage) {
-  storageTelemetria = storage;
-}
 
 function normalizar(items: unknown): PuntoTelemetriaLocal[] {
   if (!Array.isArray(items)) return [];
@@ -272,10 +253,6 @@ export async function contarColaTelemetria(
   }
   const cola = await leerColaTelemetria(trasladoId);
   return usuarioId ? cola.filter((item) => item.usuarioId === usuarioId).length : cola.length;
-}
-
-export async function contarColaTelemetriaDeUsuario(usuarioId: string): Promise<number> {
-  return contarColaTelemetria({ usuarioId });
 }
 
 function puedeReintentarse(item: PuntoTelemetriaLocal, ahoraMs = Date.now()) {
@@ -373,8 +350,6 @@ export async function limpiarColaTelemetria(usuarioIdExplicito?: string | null):
   }
   await limpiarColaTelemetriaCompleta();
 }
-
-export const OFFLINE_TELEMETRY_QUEUE_KEY = CLAVE_COLA_TELEMETRIA;
 
 export function encolarPuntoTelemetria(...args: Parameters<typeof encolarPuntoTelemetriaInterno>) {
   return serializar(() => encolarPuntoTelemetriaInterno(...args));

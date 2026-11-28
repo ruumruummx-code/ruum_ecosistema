@@ -10,7 +10,6 @@ import {
   subirFotoPerfil,
   actualizarPerfilUsuario,
   iniciarVerificacionDiditUsuario,
-  obtenerEstadoVerificacionDiditUsuario,
   obtenerUsuarioActual,
   type PerfilUsuarioActualizable
 } from "@ruum/api/services";

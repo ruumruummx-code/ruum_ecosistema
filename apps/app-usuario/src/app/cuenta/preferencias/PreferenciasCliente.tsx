@@ -8,7 +8,7 @@ import { BotonTema } from "../../TemaProvider";
 import { PassportCard } from "@ruum/ui";
 import { NavegacionUsuario } from "../../NavegacionUsuario";
 import { Preferencias as SeccionPreferencias } from "../Preferencias";
-import type { CuentaReal, Usuario } from "../cuenta-ui";
+import type { CuentaReal } from "../cuenta-ui";
 import { crearClienteNavegador } from "../../../lib/supabase-browser";
 import { UserDashboardLayout } from "../../../components/layout/UserDashboardLayout";
 import { construirNotificaciones } from "../../../lib/inicio";
@@ -31,7 +31,7 @@ interface PreferenciasClienteProps {
 export function PreferenciasCliente({ cuenta }: PreferenciasClienteProps) {
   const usuario = cuenta.usuario;
   const idiomaAvisoId = useId();
-  const { modo, fijarModo, alternar } = useTema();
+  const { modo, fijarModo } = useTema();
 
   // Estados locales hidratados con el contrato unificado y aislados por usuario
   const [idioma, setIdioma] = useState<typeof IDIOMA_DISPONIBLE>(() => obtenerPreferenciasIniciales(usuario).idioma);

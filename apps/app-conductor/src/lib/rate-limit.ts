@@ -14,7 +14,6 @@ import {
   getRedisClient,
   __resetRateLimitStateForTest,
   type RateLimitStore,
-  type RateLimitOptions as ApiRateLimitOptions,
   type RateLimitResult
 } from "@ruum/api/rate-limit";
 

@@ -17,21 +17,6 @@ export type ResultadoRutaCP = {
 };
 
 // Cache en memoria para pares únicos de CP (origen -> destino)
-const cacheRutasCPPares = new Map<string, ResultadoRutaCP>();
-const promesasEnVueloRutas = new Map<string, Promise<ResultadoRutaCP | null>>();
-
-/** Limpia el cache en memoria (útil en pruebas) */
-export function limpiarCacheCoordenadasCP(): void {
-  cacheCoordenadasCP.clear();
-  promesasEnVueloCP.clear();
-  cacheRutasCPPares.clear();
-  promesasEnVueloRutas.clear();
-}
-
-export function limpiarCacheRutasCPPares(): void {
-  cacheRutasCPPares.clear();
-  promesasEnVueloRutas.clear();
-}
 
 /**
  * Obtiene las coordenadas [lng, lat] para un código postal mexicano.
@@ -101,56 +86,3 @@ export async function coordenadaPostalMasiva(cp: string, token: string): Promise
   }
 }
 
-/**
- * Obtiene la ruta entre un par único de CP (origen y destino) con cache en memoria y deduplicación.
- * Reduce drásticamente las llamadas a la API de Directions de Mapbox cuando varios traslados
- * comparten el mismo par de códigos postales.
- */
-export async function obtenerRutaEntreCPParesMasiva(
-  origenCP: string,
-  destinoCP: string,
-  origenCoord: [number, number],
-  destinoCoord: [number, number],
-  token: string
-): Promise<ResultadoRutaCP | null> {
-  const clavePar = `${origenCP.trim()}:${destinoCP.trim()}`;
-
-  // 1. Revisar cache en memoria
-  if (cacheRutasCPPares.has(clavePar)) {
-    return cacheRutasCPPares.get(clavePar)!;
-  }
-
-  // 2. Revisar si ya hay una petición en curso para este mismo par
-  if (promesasEnVueloRutas.has(clavePar)) {
-    return promesasEnVueloRutas.get(clavePar)!;
-  }
-
-  const promesa = (async (): Promise<ResultadoRutaCP | null> => {
-    const { obtenerRutaDirectionsMapboxConParadas } = await import("@ruum/shared/utils");
-    const ruta = await obtenerRutaDirectionsMapboxConParadas(
-      origenCoord,
-      destinoCoord,
-      [],
-      token,
-      { lanzarErrores: true, maxIntentos: 2, timeoutMs: 8000, demoraReintentoMs: 300 }
-    );
-
-    if (!ruta || ruta.distanciaKm == null || ruta.tiempoHoras == null) {
-      return null;
-    }
-
-    const resultado: ResultadoRutaCP = {
-      distanciaKm: ruta.distanciaKm,
-      tiempoHoras: ruta.tiempoHoras,
-    };
-    cacheRutasCPPares.set(clavePar, resultado);
-    return resultado;
-  })();
-
-  promesasEnVueloRutas.set(clavePar, promesa);
-  try {
-    return await promesa;
-  } finally {
-    promesasEnVueloRutas.delete(clavePar);
-  }
-}

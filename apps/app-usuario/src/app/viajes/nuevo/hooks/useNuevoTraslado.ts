@@ -9,11 +9,10 @@ import { registrarEventoUx, iniciarFlujoTraslado, registrarPasoIniciado, registr
 import { logStructuredWarn } from "@/lib/logger";
 import {
   mensajeErrorMapbox,
-  sugerirDireccionesAutocomplete,
   tieneMapboxConfigurado
 } from "@/lib/mapbox";
 import { tipoSugeridoParaVehiculo } from "@/lib/catalogo-vehiculos";
-import { CAMPOS_PASO_TARIFA, codigoPostalCompleto, generarTarifaSnapshot, haCambiadoTarifa } from "../tarifa-gate";
+import { CAMPOS_PASO_TARIFA, codigoPostalCompleto, haCambiadoTarifa } from "../tarifa-gate";
 import { useEnvioTraslado } from "./useEnvioTraslado";
 import { useGeocodificacion } from "./useGeocodificacion";
 import { useAutocompleteDirecciones } from "./useAutocompleteDirecciones";
@@ -27,14 +26,8 @@ import { useValidacionTraslado } from "./useValidacionTraslado";
 import { useSettersFormulario } from "./useSettersFormulario";
 import { useNuevoTrasladoState } from "@/state/AppStateProvider";
 import {
-  CAMPOS_PASO_RUTA,
-  CAMPOS_PASO_VEHICULO,
-  CAMPOS_PASO_VEHICULO_DETALLE,
-  CAMPOS_RUTA_DESTINO_CONTACTOS,
-  CAMPOS_RUTA_ORIGEN,
   domicilioCompleto,
-  telefonoLocalMx,
-  type PrefijoDomicilio
+  telefonoLocalMx
 } from "../constants";
 import type {
   CondicionVehiculo,
@@ -65,7 +58,6 @@ export function useNuevoTraslado() {
     cpAviso,
     cpOpciones,
     placesOpciones,
-    subpasoRuta,
     vehiculosGuardados,
     vehiculoSeleccionadoId,
     errorPaso,
@@ -96,7 +88,6 @@ export function useNuevoTraslado() {
   const estadoTrasladoId = trasladoCreado?.id ?? "nuevo";
 
   const {
-    setFormulario,
     setEstadoGuardado,
     setTiempoUltimoGuardado,
     setPaso,
@@ -142,9 +133,6 @@ export function useNuevoTraslado() {
     cotizacionAceptada,
     aceptandoCotizacion,
     errorAceptacion,
-    setCotizacionAceptada,
-    setAceptandoCotizacion,
-    setErrorAceptacion,
     reintentarAceptacion,
   } = useCotizacionTraslado({
     estadoTrasladoId,

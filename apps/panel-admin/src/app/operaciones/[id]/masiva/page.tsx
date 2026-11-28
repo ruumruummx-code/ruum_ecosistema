@@ -6,7 +6,6 @@ import Link from "next/link";
 import { Button } from "@ruum/ui";
 import {
   crearCargaMasivaOperacion,
-  listarCargasDeOperacion,
   obtenerProgresoCarga,
   obtenerResumenOperacionMasiva,
   previsualizarCargaOperacion,

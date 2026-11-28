@@ -51,7 +51,6 @@ export function MobileProgress({ estado, currentLabel }: EstadoStepperProps) {
         {ETAPAS_TRASLADO.map((etapa, i) => {
           const pasada = !esRamificado && i < indiceActual;
           const actual = !esRamificado && i === indiceActual;
-          const activa = pasada || actual || esRamificado;
           return (
             <span
               key={etapa.id}
