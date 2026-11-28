@@ -1,14 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
-import { Aviso, Card, FinancialAmount, FinancialCard } from "@ruum/ui";
+import { useEffect, useMemo, useState } from "react";
 import type { EstadoEconomicoExplicito } from "@ruum/shared/constants";
 import type { Database } from "@ruum/shared/types";
 import { traducirErrorOperativo } from "@ruum/shared/utils";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "../../lib/supabase-browser";
 import { obtenerConductorActual, obtenerGananciasConductor, type TrasladoConductorGanancia } from "@ruum/api/services";
-import { PanelSupportSheet } from "../panel/PanelSupportSheet";
 
 import { estadoLiquidacion } from "../../lib/estado-liquidacion";
 

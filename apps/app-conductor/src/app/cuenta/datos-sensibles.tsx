@@ -46,13 +46,6 @@ export function enmascararUltimos(valor: string | null | undefined, visibles = 4
   return `${"•".repeat(Math.min(8, limpio.length - visibles))}${limpio.slice(-visibles)}`;
 }
 
-export function enmascararNombreArchivo(nombre: string | null | undefined) {
-  const limpio = nombre?.trim() ?? "";
-  if (!limpio) return "";
-  const extension = limpio.includes(".") ? `.${limpio.split(".").pop()}` : "";
-  return `Documento protegido${extension}`;
-}
-
 export function DatosSensiblesInfo({ tipo, compacto = false }: { tipo: TipoDatoSensible; compacto?: boolean }) {
   const texto = TEXTOS[tipo];
   return (

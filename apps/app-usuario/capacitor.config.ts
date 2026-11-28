@@ -2,7 +2,6 @@ import type { CapacitorConfig } from "@capacitor/cli";
 
 // Decisión de diseño: WebView remota al dominio de producción (ADR 002)
 const URL_PRODUCCION = "https://usuario.ruumruum-moviliax.online";
-const ES_PRODUCCION = process.env.NODE_ENV === "production";
 
 const config: CapacitorConfig = {
   appId: "com.moviliax.ruumruum.usuario",

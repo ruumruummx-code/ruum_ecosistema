@@ -1,4 +1,4 @@
-import { logStructuredInfo, logStructuredWarn, logStructuredError } from "@/lib/logger";
+import { logStructuredInfo, logStructuredWarn } from "@/lib/logger";
 
 const SCOPE_TELEMETRIA = "telemetria/carga_masiva";
 

@@ -3,15 +3,13 @@ import type { Database, FotoEvidencia } from "@ruum/shared/types";
 import { transicionValida } from "@ruum/shared/states";
 import { evidenciaCompleta } from "@ruum/shared/rules";
 import { clasificarTrasladoFallido } from "@ruum/shared/rules";
-import { assertAdminAnyPermission, assertAdminPermission } from "../services/permisos-admin";
-import { registrarEvento } from "../services/auditoria";
+import { assertAdminPermission } from "../services/permisos-admin";
 import { withIdempotentRetry } from "../operations/infrastructure/retry";
 
 type Cliente = SupabaseClient<Database>;
 type EvidenciaRow = Database["public"]["Tables"]["evidencia_fotos"]["Row"];
 type TipoEvidencia = Database["public"]["Enums"]["tipo_evidencia"];
 type EstadoTraslado = Database["public"]["Enums"]["estado_traslado"];
-type TrasladoRow = Database["public"]["Tables"]["traslados"]["Row"];
 type CausaFallido = Database["public"]["Enums"]["causa_fallido"];
 
 function aFotoEvidencia(fila: EvidenciaRow): FotoEvidencia {

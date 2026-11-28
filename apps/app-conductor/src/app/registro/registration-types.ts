@@ -110,14 +110,6 @@ export type DocumentoKey = keyof typeof TIPOS_DOCUMENTO;
 export type EstadoDocumento = "pendiente" | "listo" | "subiendo" | "subido" | "error";
 export type EstadoGuardadoRemoto = "inactivo" | "guardando" | "guardado" | "sin_conexion" | "error";
 
-export const TEXTO_GUARDADO_REMOTO: Record<EstadoGuardadoRemoto, string> = {
-  inactivo: "",
-  guardando: "Guardando…",
-  guardado: "Guardado",
-  sin_conexion: "Sin conexión",
-  error: "Error al guardar"
-};
-
 export function estadoInicialDocumentos(): Record<DocumentoKey, EstadoDocumento> {
   return {
     licenciaFrente: "pendiente",

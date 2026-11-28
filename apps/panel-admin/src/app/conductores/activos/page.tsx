@@ -4,12 +4,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Aviso } from "@ruum/ui";
 import { AdminPageHeader } from "../../admin-ui";
-import { AdminButton } from "../../admin-components";
 import type { Database } from "@ruum/shared/types";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "@/lib/supabase-browser";
 import {
-  listarConductoresAdminPaginados,
-  type PaginacionConductores
+  listarConductoresAdminPaginados
 } from "@ruum/api/services";
 
 type ConductorRow = Database["public"]["Tables"]["conductores"]["Row"];
@@ -43,7 +41,7 @@ export default function PaginaConductoresActivos() {
   const [busqueda, setBusqueda] = useState("");
   const [estadoFiltro, setEstadoFiltro] = useState<EstadoConductor | "todos">("todos");
   const [pagina, setPagina] = useState(1);
-  const [tamanoPagina, setTamanoPagina] = useState(25);
+  const [tamanoPagina] = useState(25);
   const [total, setTotal] = useState(0);
   const [totalPaginas, setTotalPaginas] = useState(0);
   const [error, setError] = useState<string | null>(null);

@@ -21,7 +21,6 @@ import {
 
 const unir = cn;
 
-
 /** Variantes del panel → variantes de @ruum/ui/base. */
 const botonVariante = {
   primary: "primary",
@@ -54,20 +53,6 @@ export function AdminButton({ variant = "primary", loading = false, disabled, cl
   );
 }
 
-type AdminIconButtonProps = Omit<AdminButtonProps, "children"> & {
-  "aria-label": string;
-  icon: ReactNode;
-};
-
-export function AdminIconButton({ icon, className, variant = "quiet", ...props }: AdminIconButtonProps) {
-  return (
-    <AdminButton {...props} variant={variant} className={unir("size-11 px-0", className)}>
-      <span aria-hidden="true" className="flex items-center justify-center">
-        {icon}
-      </span>
-    </AdminButton>
-  );
-}
 
 type CampoBaseProps = {
   label: string;
@@ -313,12 +298,3 @@ export function AdminLoadingState({ label = "Cargando información" }: { label?:
   );
 }
 
-export function AdminLastUpdated({ value, label = "Última actualización" }: { value?: string | Date | null; label?: string }) {
-  if (!value) return <span className="text-xs text-ui-fg-muted">{label}: sin fecha</span>;
-  const fecha = value instanceof Date ? value : new Date(value);
-  return (
-    <time dateTime={fecha.toISOString()} className="text-xs text-ui-fg-muted">
-      {label}: {new Intl.DateTimeFormat("es-MX", { dateStyle: "medium", timeStyle: "short" }).format(fecha)}
-    </time>
-  );
-}

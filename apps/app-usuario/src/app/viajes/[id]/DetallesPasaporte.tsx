@@ -5,7 +5,6 @@ import { validarVentana72Horas } from "@/lib/flujo10-transiciones-policy";
 
 
 
-import Link from"next/link";
 import { Aviso } from"@ruum/ui";
 import { formatearPrecio } from"@ruum/shared/utils";
 import { ETIQUETA_TIPO_INCIDENCIA, ETIQUETA_TIPO_VEHICULO, MENSAJES_CLAVE_UX } from"@ruum/shared/constants";
@@ -40,8 +39,6 @@ import {
   FilaInfo,
 
   TarjetaPasaporte,
-  calcularHorasDesdeCierre,
-
   formatoFecha,
   humanizar,
   IconoAuto,
@@ -78,7 +75,6 @@ export function DetallesPasaporte({
   reclamosSeguro,
   calificacion,
   pagos,
-  ultimaUbicacion,
   seccion,
   ocultarCalificacion = false,
   onAbrirChat,
@@ -99,7 +95,6 @@ export function DetallesPasaporte({
   const fechaCierreReferencia = pasaporte.cerrado_en ?? pasaporte.actualizado_en;
   const ventana72h = validarVentana72Horas(fechaCierreReferencia);
   const dentroDeVentanaPostCierre = ventana72h.permitido;
-  const horasDesdeCierre = ventana72h.horasDesdeCierre;
   const mostrarPromptCalificacion =
     estado ==="servicio_cerrado" &&
     !calificacion &&

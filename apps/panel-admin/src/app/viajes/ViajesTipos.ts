@@ -348,78 +348,6 @@ export function folioCorto(v: PasaporteRow) {
   return v.traslado_id ? v.traslado_id.slice(0, 8).toUpperCase() : "SIN FOLIO";
 }
 
-export function construirResultadosAccionMasiva(
-  traslados: PasaporteRow[],
-  accion: AccionMasivaId
-): ResultadoAccionMasiva[] {
-  return traslados.map((traslado) => {
-    const folio = folioCorto(traslado);
-    const id = idTrasladoOperativo(traslado);
-    if (accion === "escalar") {
-      return {
-        trasladoId: id,
-        folio,
-        estado: "aplicado",
-        detalle: "Escalado a supervisión operativa."
-      };
-    }
-    if (accion === "asignar_responsable") {
-      return {
-        trasladoId: id,
-        folio,
-        estado: "aplicado",
-        detalle: "Responsable operativo actualizado."
-      };
-    }
-    if (accion === "cambiar_prioridad") {
-      return {
-        trasladoId: id,
-        folio,
-        estado: "aplicado",
-        detalle: "Prioridad operativa ajustada."
-      };
-    }
-    if (accion === "etiquetar") {
-      return {
-        trasladoId: id,
-        folio,
-        estado: "aplicado",
-        detalle: "Etiqueta operativa asignada."
-      };
-    }
-    if (accion === "actualizar_estado") {
-      if (traslado.estado && ESTADOS_TERMINALES.includes(traslado.estado)) {
-        return {
-          trasladoId: id,
-          folio,
-          estado: "bloqueado",
-          detalle: "Estado terminal protegido contra edición masiva."
-        };
-      }
-      return {
-        trasladoId: id,
-        folio,
-        estado: "aplicado",
-        detalle: "Transición preparada para confirmación dual."
-      };
-    }
-    return {
-      trasladoId: id,
-      folio,
-      estado: "aplicado",
-      detalle: "Acción procesada para la selección."
-    };
-  });
-}
-
-export function resolverEstadoAccion(resultados: ResultadoAccionMasiva[]): EstadoAccionMasiva {
-  if (resultados.length === 0) return "pendiente";
-  const aplicados = resultados.filter((item) => item.estado === "aplicado").length;
-  if (aplicados === resultados.length) return "exitoso";
-  if (aplicados === 0) return "bloqueado";
-  return "parcial";
-}
-
 export function exportarTrasladosCsv(traslados: PasaporteRow[]) {
   const encabezados = [
     "Folio",
@@ -451,21 +379,6 @@ export function exportarTrasladosCsv(traslados: PasaporteRow[]) {
   ]);
   const csv = [encabezados, ...filas].map((fila) => fila.map(valorCsv).join(",")).join("\n");
   descargarArchivo(`traslados-operativos-${new Date().toISOString().slice(0, 10)}.csv`, "text/csv;charset=utf-8;", csv);
-}
-
-export function exportarEvidencia(traslados: PasaporteRow[]) {
-  const manifiesto = {
-    generado_en: new Date().toISOString(),
-    total: traslados.length,
-    traslados: traslados.map((v) => ({
-      folio: folioCorto(v),
-      traslado_id: v.traslado_id,
-      estado: v.estado,
-      georreferencia: sinCoordenadas(v) ? "incompleta" : "disponible",
-      incidencias: v.incidencias_abiertas ?? 0
-    }))
-  };
-  descargarArchivo(`manifiesto-evidencia-${new Date().toISOString().slice(0, 10)}.json`, "application/json", JSON.stringify(manifiesto, null, 2));
 }
 
 export function valorCsv(valor: string | number | null | undefined) {

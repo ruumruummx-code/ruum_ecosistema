@@ -50,7 +50,6 @@ async function setRecoveryCookie(
 }
 
 function clearRecoveryCookie(cookieStore: Awaited<ReturnType<typeof cookies>>) {
-  const opts = { path: RUTA_COOKIE_RECOVERY } as const;
   try {
     cookieStore.delete(COOKIE_RECOVERY);
     cookieStore.delete("ruum_recovery");
@@ -176,12 +175,10 @@ function clasificarCausaError(error: unknown, searchParams: URLSearchParams): "e
   });
 
   // Detectar cuenta abierta previamente para evitar cambio silencioso de sesión
-  let usuarioPrevioEmail: string | null = null;
   let usuarioPrevioId: string | null = null;
   try {
     const { data: dataPrevia } = await supabase.auth.getUser();
     usuarioPrevioId = dataPrevia?.user?.id ?? null;
-    usuarioPrevioEmail = dataPrevia?.user?.email ?? null;
   } catch {
     // Sin sesión previa activa
   }

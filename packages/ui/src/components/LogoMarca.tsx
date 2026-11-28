@@ -238,7 +238,6 @@ export function SimboloVectorial({
 
 export function LogoMarca({
   variante = "horizontal",
-  tema = "auto",
   tamano,
   mostrarRespaldo = false,
   mostrarDescriptor = true,

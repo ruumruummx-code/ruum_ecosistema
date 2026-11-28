@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@ruum/shared/types";
-import { assertAdminPermission, type PermisoAdmin } from "./permisos-admin";
+import { assertAdminPermission } from "./permisos-admin";
 
 type Cliente = SupabaseClient<Database>;
 export type AdminColaborador = Pick<Database["public"]["Tables"]["admins"]["Row"], "id" | "nombre" | "rol_operativo" | "creado_en">;

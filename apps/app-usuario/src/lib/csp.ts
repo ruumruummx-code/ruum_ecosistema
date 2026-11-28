@@ -14,11 +14,8 @@
 import {
   buildCsp,
   CSP_PRESETS,
-  CSP_ORIGINS,
   PERMISSIONS_POLICY,
   HSTS_HEADER,
-  IMAGES_REMOTE_PATTERNS,
-  IMAGE_FORMATS,
 } from "../../../../packages/shared/src/seguridad/index";
 
 // Re-export everything for backward compatibility

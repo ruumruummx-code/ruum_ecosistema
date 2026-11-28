@@ -1,7 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, EstadoDocumentoConductor } from "@ruum/shared/types";
-import { assertAdminAnyPermission, assertAdminPermission } from "../services/permisos-admin";
-import { transicionValida } from "@ruum/shared/states";
+import { assertAdminPermission } from "../services/permisos-admin";
 import { registrarEvento } from "../services/auditoria";
 import { obtenerAdminIdParaAuditoria } from "../identity/admins";
 import { DOCUMENTOS_OBLIGATORIOS_CONDUCTOR, obtenerDetalleConductorAdmin } from "./conductores";
@@ -351,7 +350,7 @@ export async function aprobarSolicitudConductorAdmin(cliente: Cliente, solicitud
   
   // Validar documentos obligatorios aprobados
   if (solicitud.data.conductor_id) {
-    const { conductor, documentos } = await obtenerDetalleConductorAdmin(cliente, solicitud.data.conductor_id);
+    const { documentos } = await obtenerDetalleConductorAdmin(cliente, solicitud.data.conductor_id);
     const faltantes = DOCUMENTOS_OBLIGATORIOS_CONDUCTOR.filter(
       (tipo) => !documentos.some((d) => d.tipo === tipo && d.estado === "aprobado")
     );

@@ -220,19 +220,6 @@ export function CampoFiltro({ etiqueta, children }: { etiqueta: string; children
   );
 }
 
-export function FiltroToggle({ activo, onClick, children }: { activo: boolean; onClick: () => void; children: ReactNode }) {
-  return (
-    <button
-      type="button"
-      aria-pressed={activo}
-      onClick={onClick}
-      className={`rounded-full border px-3 py-1.5 font-body text-sm font-semibold ${activo ? "border-ui-brand bg-ui-brand text-ui-fg" : "border-ui-line-strong bg-ui-card text-ui-fg-muted hover:border-ui-brand/40"}`}
-    >
-      {children}
-    </button>
-  );
-}
-
 export function ChipFiltro({ etiqueta, onRemove }: { etiqueta: string; onRemove: () => void }) {
   return (
     <span className="inline-flex items-center gap-2 rounded-full border border-ui-line bg-ui-muted px-3 py-1.5 font-body text-sm text-ui-fg-muted">

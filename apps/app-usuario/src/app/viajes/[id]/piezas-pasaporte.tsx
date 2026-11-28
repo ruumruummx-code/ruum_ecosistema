@@ -126,11 +126,6 @@ export function estadoDePaso(
   return "pendiente";
 }
 
-export function calcularHorasDesdeCierre(actualizadoEn: string | null) {
-  if (!actualizadoEn) return Number.POSITIVE_INFINITY;
-  return (Date.now() - new Date(actualizadoEn).getTime()) / (1000 * 60 * 60);
-}
-
 export function humanizar(valor: string | null | undefined): string | null {
   if (!valor) return null;
   const texto = valor.replaceAll("_", " ").trim();
@@ -180,7 +175,6 @@ export function IconoPersona({ className = "size-8" }: { className?: string }) {
 
 export function TarjetaPasaporte({
   id,
-  titulo,
   children,
 }: {
   id: string;

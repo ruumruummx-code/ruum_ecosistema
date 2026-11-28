@@ -1,5 +1,4 @@
 import {
-  eliminarJsonLocalSeguro,
   guardarJsonLocalSeguro,
   leerJsonLocalSeguro
 } from "./almacenamiento-seguro-local";
@@ -60,16 +59,6 @@ export async function registrarEvidenciaDescartada(item: EvidenciaDescartada): P
 }
 
 /**
- * Obtiene las evidencias descartadas correspondientes a un traslado específico.
- */
-export async function obtenerEvidenciasDescartadasPorTraslado(
-  trasladoId: string
-): Promise<EvidenciaDescartada[]> {
-  const todas = await leerEvidenciasDescartadas();
-  return todas.filter((e) => e.trasladoId === trasladoId);
-}
-
-/**
  * Resuelve/descarta el aviso de una evidencia específica tras confirmación.
  */
 export async function resolverEvidenciaDescartada(localId: string): Promise<void> {
@@ -82,13 +71,3 @@ export async function resolverEvidenciaDescartada(localId: string): Promise<void
   }
 }
 
-/**
- * Limpia todas las evidencias descartadas registradas.
- */
-export async function limpiarTodasEvidenciasDescartadas(): Promise<void> {
-  try {
-    await eliminarJsonLocalSeguro(CLAVE_EVIDENCIAS_DESCARTADAS);
-  } catch {
-    // ignorar fallo de almacenamiento
-  }
-}

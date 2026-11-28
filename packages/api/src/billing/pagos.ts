@@ -1,11 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@ruum/shared/types";
-import { assertAdminAnyPermission, assertAdminPermission } from "../services/permisos-admin";
+import { assertAdminPermission } from "../services/permisos-admin";
 import { numeroMetrica, objetoMetrica } from "../operations/infrastructure/metricas";
 
 type Cliente = SupabaseClient<Database>;
 type PagoRow = Database["public"]["Tables"]["pagos"]["Row"];
-type TrasladoRow = Database["public"]["Tables"]["traslados"]["Row"];
 type PasaporteRow = Database["public"]["Views"]["pasaporte_digital"]["Row"];
 type PayoutRow = Database["public"]["Tables"]["payouts_conductor"]["Row"];
 type DatosBancariosConductorRow = Database["public"]["Tables"]["datos_bancarios_conductor"]["Row"];

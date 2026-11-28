@@ -1,10 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@ruum/shared/types";
-import { assertAdminAnyPermission, assertAdminPermission } from "../services/permisos-admin";
+import { assertAdminPermission } from "../services/permisos-admin";
 import {
   columnaOrdenPasaporte,
-  esRecursoSupabasePendiente,
-  esRpcNoEncontrado,
   esRpcPaginacionNoDisponible
 } from "../operations/infrastructure/supabase-errores";
 

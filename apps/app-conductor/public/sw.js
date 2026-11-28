@@ -70,7 +70,6 @@ function esNavegacionHTML(url) {
 
 // Instalación: Cachear recursos estáticos uno por uno (no falla todo si uno falla)
 self.addEventListener("install", (event) => {
-  console.log("[SW] Installing...");
   self.skipWaiting();
 
   event.waitUntil(
@@ -87,13 +86,11 @@ self.addEventListener("install", (event) => {
 
 // Activación: Limpiar caches viejos y tomar control
 self.addEventListener("activate", (event) => {
-  console.log("[SW] Activating...");
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME && cacheName !== ASSETS_CACHE_NAME) {
-            console.log(`[SW] Deleting old cache: ${cacheName}`);
             return caches.delete(cacheName);
           }
         })
@@ -220,10 +217,3 @@ self.addEventListener("message", (event) => {
     );
   }
 });
-
-// Eventos de conexión
-self.addEventListener("online", () => {
-  console.log("[SW] Online");
-});
-
-console.log("[SW] Ruum Conductor Service Worker loaded");

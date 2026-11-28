@@ -78,11 +78,6 @@ async function obtenerSecretoInstalacion() {
 let cachedKey: CryptoKey | null = null;
 let cachedSecret: string | null = null;
 
-export function resetCachedKeyForTesting() {
-  cachedKey = null;
-  cachedSecret = null;
-}
-
 async function llaveAes() {
   const secreto = await obtenerSecretoInstalacion();
   if (cachedKey && cachedSecret === secreto) {

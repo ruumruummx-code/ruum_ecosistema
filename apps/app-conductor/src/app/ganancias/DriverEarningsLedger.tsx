@@ -3,7 +3,6 @@ import { Button as BaseButton } from "@ruum/ui/base";
 import { ConductorScreen, ConductorPageHeader } from "../components/ConductorScreen";
 
 import { useState } from "react";
-import Link from "next/link";
 import { Aviso } from "@ruum/ui";
 import { ConductorIcon } from "@/components/icons";
 import { useEarningsLedger } from "./useEarningsLedger";
@@ -18,9 +17,6 @@ import { estatusPayout, obtenerRangoPeriodo, formatearRango } from "./useEarning
 
 export default function PaginaGanancias() {
   const {
-    datosBancarios,
-    payouts,
-    traslados,
     error,
     cargando,
     periodoActivo,
@@ -28,7 +24,6 @@ export default function PaginaGanancias() {
     viajeExpandido,
     soporteAbierto,
     hoy,
-    registrosTraslados,
     rangoActual,
     TrasladosFiltrados,
     payoutsFiltrados,

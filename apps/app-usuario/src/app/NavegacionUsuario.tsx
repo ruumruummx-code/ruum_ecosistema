@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { NotificacionInicio } from "../lib/inicio";
 import { RuumHeader } from "@ruum/ui";
-import { MarcoPantalla } from "@ruum/ui/base";
 
 type VarianteNavegacion = "claro" | "oscuro";
 
@@ -78,11 +77,6 @@ function estaActivo(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-function primerNombre(nombre: string | null | undefined) {
-  const valor = nombre?.trim().split(/\s+/)[0];
-  if (!valor) return null;
-  return valor.charAt(0).toUpperCase() + valor.slice(1).toLowerCase();
-}
 
 export interface NavegacionUsuarioProps {
   variante?: VarianteNavegacion;
@@ -96,12 +90,9 @@ export interface NavegacionUsuarioProps {
 
 export function NavegacionUsuario({
   variante = "oscuro",
-  nombreUsuario,
-  titulo,
   mostrarEnAcceso = false,
   mostrarNavegacionInferior = true,
   notificacionesCount = 0,
-  notificaciones = [],
 }: NavegacionUsuarioProps) {
   const pathname = usePathname();
   const esInicio = pathname === "/";
@@ -121,9 +112,6 @@ export function NavegacionUsuario({
   const esVehiculos = pathname === "/cuenta/vehiculos" || pathname.startsWith("/cuenta/vehiculos/");
   const cabeceraCompacta = esMisTraslados || esCuenta || esVehiculos || esMasivo;
   const etiquetaFab = esVehiculos ? "Agregar vehículo" : "Solicitar traslado";
-  const nombre = primerNombre(nombreUsuario);
-  const saludo = nombre ? `¡Hola, ${nombre}!` : "¡Hola!";
-  const textoCabecera = titulo ?? (pathname === "/" ? "Ruum Ruum" : saludo);
 
   useEffect(() => {
     if (esAcceso && !mostrarEnAcceso) return;

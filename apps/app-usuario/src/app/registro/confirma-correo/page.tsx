@@ -41,34 +41,8 @@ function formatearTiempo(segundos: number): string {
    Iconos SVG accesibles
 ───────────────────────────────────────────────────────────── */
 
-function IconoSignal({ className = "size-3.5" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M2 18h3v4H2v-4zm6-5h3v9H8v-9zm6-5h3v14h-3V8zm6-5h3v19h-3V3z" />
-    </svg>
-  );
-}
 
-function IconoWifi({ className = "size-3.5" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M5 12.55a11 11 0 0 1 14.08 0" />
-      <path d="M1.42 9a16 16 0 0 1 21.16 0" />
-      <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
-      <line x1="12" y1="20" x2="12.01" y2="20" strokeWidth="3" />
-    </svg>
-  );
-}
 
-function IconoBateria({ className = "size-4" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <rect x="2" y="7" width="16" height="10" rx="2" fill="none" stroke="currentColor" strokeWidth="2" />
-      <rect x="4" y="9" width="11" height="6" rx="1" />
-      <path d="M20 10v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
-}
 
 function IconoFlechaAtras({ className = "size-4" }: { className?: string }) {
   return (

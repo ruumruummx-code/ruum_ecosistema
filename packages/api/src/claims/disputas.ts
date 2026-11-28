@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@ruum/shared/types";
-import { assertAdminAnyPermission, assertAdminPermission } from "../services/permisos-admin";
+import { assertAdminPermission } from "../services/permisos-admin";
 
 type Cliente = SupabaseClient<Database>;
 type DisputaRow = Database["public"]["Tables"]["disputas"]["Row"];

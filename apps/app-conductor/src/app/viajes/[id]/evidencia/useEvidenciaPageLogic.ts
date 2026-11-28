@@ -1,26 +1,20 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
-import { Aviso, MapaEstatico } from "@ruum/ui";
-import { TEXTOS_CARGANDO } from "@ruum/shared/constants";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import type { AnguloEvidencia, Database, FotoEvidencia, TipoEvidencia } from "@ruum/shared/types";
 import { traducirErrorOperativo } from "@ruum/shared/utils";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "@/lib/supabase-browser";
-import { CONTACTOS_SOPORTE_CONDUCTOR } from "@/lib/contactos-soporte";
 import { esNativo } from "@/lib/capacitor";
-import { capturarFoto, seleccionarFotoGaleria, comprimirDataUrl, evaluarNitidez } from "@/lib/camara";
+import { capturarFoto, comprimirDataUrl, evaluarNitidez } from "@/lib/camara";
 import {
   obtenerPasaporteDigital,
   obtenerEvidenciaDeTraslado,
   confirmarEvidenciaCompleta,
   firmarUrlsEvidencia,
-  registrarEvento,
-  obtenerResumenVerificacionRepuve
+  registrarEvento
 } from "@ruum/api/services";
 import { useEvidenceQueue } from "./useEvidenceQueue";
-import { fotoSrc } from "./evidence-requirements";
 import { obtenerInspeccionTraslado, guardarInspeccionTraslado } from "@ruum/api/drivers";
 import { useLiveRegion } from "@/components/LiveRegionProvider";
 
@@ -168,7 +162,6 @@ export function useEvidenciaPageLogic(id: string): UseEvidenciaPageLogic {
   const [enviando, setEnviando] = useState<AnguloEvidencia | "guardar" | "confirmar" | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
   const [avisoExito, setAvisoExito] = useState<string | null>(null);
-  const [procesando, setProcesando] = useState(false);
   const [borradorLocalGuardado,setBorradorLocalGuardado]=useState(false);
   const [error, setError] = useState<string | null>(null);
 
