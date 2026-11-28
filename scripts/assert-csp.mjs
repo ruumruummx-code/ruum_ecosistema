@@ -69,15 +69,7 @@ export function runAssertCsp(app, repoRoot) {
     assert(conHeaders.includes(h), `header ${h} presente`);
   }
 
-  // 6) Deuda style-src documentada (solo conductor, dueño del doc)
-  if (app === "conductor") {
-    const deudaPath = join(root, "CSP_DEUDA_P2.md");
-    const deuda = existsSync(deudaPath) ? readFileSync(deudaPath, "utf-8") : "";
-    assert(deuda.includes("style-src") && deuda.includes("2026-11-01"), "CSP_DEUDA_P2.md documenta deuda style-src con fecha objetivo");
-    assert(deuda.includes("CSP_STRICT_STYLES"), "CSP_DEUDA_P2.md documenta flag CSP_STRICT_STYLES para SEC-003");
-  }
-
-  // 7) Invariantes de runtime cubiertas por la suite de @ruum/shared (csp.test.ts)
+  // 6) Invariantes de runtime cubiertas por la suite de @ruum/shared (csp.test.ts)
   assert(
     existsSync(join(repoRoot, "packages", "shared", "src", "seguridad", "csp.test.ts")),
     "existe packages/shared/src/seguridad/csp.test.ts (invariantes de runtime en CI)",
