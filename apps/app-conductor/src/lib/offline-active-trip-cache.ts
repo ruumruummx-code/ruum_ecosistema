@@ -5,7 +5,7 @@ import { eliminarJsonLocalSeguro, guardarJsonLocalSeguro, leerJsonLocalSeguro } 
 import type { Coordenadas } from "./ubicacion";
 import { FOTOS_REQUERIDAS_EVIDENCIA } from "@ruum/shared/states";
 
-export type EstadoTraslado = Database["public"]["Enums"]["estado_traslado"];
+type EstadoTraslado = Database["public"]["Enums"]["estado_traslado"];
 export type PasaporteRow = Database["public"]["Views"]["pasaporte_digital"]["Row"];
 
 export type OfflineSyncStatus =
@@ -188,28 +188,7 @@ export async function leerCacheViajeActivo(): Promise<OfflineActiveTripCache | n
   return cache;
 }
 
-<<<<<<< HEAD
-async function actualizarUltimaUbicacionCache(ubicacion: Coordenadas) {
-  const cache = await leerCacheViajeActivo();
-  if (!cache) return;
-  await guardarCacheViajeActivo({
-    ...cache,
-    ultimaUbicacionConocida: {
-      ...ubicacion,
-      registradaEn: new Date().toISOString()
-    }
-  });
-}
-
-=======
->>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77
 export async function limpiarCacheViajeActivo() {
   await eliminarJsonLocalSeguro(CLAVE_CACHE_VIAJE_ACTIVO);
   if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("ruum:offline-cache-updated"));
 }
-
-<<<<<<< HEAD
-const OFFLINE_ACTIVE_TRIP_CACHE_KEY = CLAVE_CACHE_VIAJE_ACTIVO;
-
-=======
->>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77

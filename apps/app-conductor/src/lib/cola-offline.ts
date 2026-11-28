@@ -14,10 +14,6 @@ import { recordOperationalEvent } from "./observability";
 // PERF-004 — timeouts para sync offline
 const TIMEOUT_UPLOAD_MS = 15_000;
 const TIMEOUT_UPSERT_MS = 10_000;
-<<<<<<< HEAD
-const CONCURRENCIA_SYNC_EVIDENCIA = 1;
-=======
->>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77
 import {
   eliminarJsonLocalSeguro,
   guardarJsonLocalSeguro,
@@ -59,7 +55,7 @@ export interface ItemColaEvidencia {
   conflictoCustodia?: true;
 }
 
-export interface EvidenceQueueStorage {
+interface EvidenceQueueStorage {
   read(): Promise<ItemColaEvidencia[]>;
   write(items: ItemColaEvidencia[]): Promise<void>;
   clear(): Promise<void>;
@@ -618,8 +614,4 @@ async function conLockNavegador<T>(fn: () => Promise<T>): Promise<T> {
 }
 export function encolarEvidencia(...args: Parameters<typeof encolarEvidenciaInterna>) { return serializar(() => conLockNavegador(() => encolarEvidenciaInterna(...args))); }
 export function sincronizarColaEvidencia(...args: Parameters<typeof sincronizarColaEvidenciaInterna>) { return serializar(() => conLockNavegador(() => sincronizarColaEvidenciaInterna(...args))); }
-<<<<<<< HEAD
-function quitarDeColaEvidencia(...args: Parameters<typeof quitarDeColaEvidenciaInterna>) { return serializar(() => conLockNavegador(() => quitarDeColaEvidenciaInterna(...args))); }
-=======
->>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77
 export async function hashBlob(blob: Blob): Promise<string> { return Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", await blob.arrayBuffer()))).map((n) => n.toString(16).padStart(2,"0")).join(""); }

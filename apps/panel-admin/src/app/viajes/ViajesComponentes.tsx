@@ -220,7 +220,6 @@ export function CampoFiltro({ etiqueta, children }: { etiqueta: string; children
   );
 }
 
-<<<<<<< HEAD
 function FiltroToggle({ activo, onClick, children }: { activo: boolean; onClick: () => void; children: ReactNode }) {
   return (
     <button
@@ -234,8 +233,6 @@ function FiltroToggle({ activo, onClick, children }: { activo: boolean; onClick:
   );
 }
 
-=======
->>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77
 export function ChipFiltro({ etiqueta, onRemove }: { etiqueta: string; onRemove: () => void }) {
   return (
     <span className="inline-flex items-center gap-2 rounded-full border border-ui-line bg-ui-muted px-3 py-1.5 font-body text-sm text-ui-fg-muted">

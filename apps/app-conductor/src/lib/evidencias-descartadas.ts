@@ -59,19 +59,6 @@ export async function registrarEvidenciaDescartada(item: EvidenciaDescartada): P
 }
 
 /**
-<<<<<<< HEAD
- * Obtiene las evidencias descartadas correspondientes a un traslado específico.
- */
-async function obtenerEvidenciasDescartadasPorTraslado(
-  trasladoId: string
-): Promise<EvidenciaDescartada[]> {
-  const todas = await leerEvidenciasDescartadas();
-  return todas.filter((e) => e.trasladoId === trasladoId);
-}
-
-/**
-=======
->>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77
  * Resuelve/descarta el aviso de una evidencia específica tras confirmación.
  */
 export async function resolverEvidenciaDescartada(localId: string): Promise<void> {
@@ -83,17 +70,3 @@ export async function resolverEvidenciaDescartada(localId: string): Promise<void
     // ignorar fallo de almacenamiento
   }
 }
-
-<<<<<<< HEAD
-/**
- * Limpia todas las evidencias descartadas registradas.
- */
-async function limpiarTodasEvidenciasDescartadas(): Promise<void> {
-  try {
-    await eliminarJsonLocalSeguro(CLAVE_EVIDENCIAS_DESCARTADAS);
-  } catch {
-    // ignorar fallo de almacenamiento
-  }
-}
-=======
->>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77

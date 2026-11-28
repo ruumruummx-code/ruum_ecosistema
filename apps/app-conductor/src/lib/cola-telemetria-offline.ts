@@ -25,7 +25,7 @@ export interface PuntoTelemetriaLocal {
   critical?: boolean;
 }
 
-export interface TelemetryQueueStorage {
+interface TelemetryQueueStorage {
   read(): Promise<PuntoTelemetriaLocal[]>;
   write(items: PuntoTelemetriaLocal[]): Promise<void>;
   clear(): Promise<void>;
@@ -45,25 +45,6 @@ class SecureTelemetryQueueStorage implements TelemetryQueueStorage {
   }
 }
 
-<<<<<<< HEAD
-class InMemoryTelemetryQueueStorage implements TelemetryQueueStorage {
-  constructor(private items: PuntoTelemetriaLocal[] = []) {}
-
-  async read() {
-    return normalizar(this.items);
-  }
-
-  async write(items: PuntoTelemetriaLocal[]) {
-    this.items = normalizar(items);
-  }
-
-  async clear() {
-    this.items = [];
-  }
-}
-
-=======
->>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77
 /**
  * Almacenamiento dual: escribe siempre en el storage configurado (cifrado)
  * Y en IndexedDB como fallback obligatorio. Lee del storage configurado;
@@ -190,13 +171,6 @@ function serializar<T>(operacion: () => Promise<T>): Promise<T> {
  const siguiente = operacionPendiente.then(operacion, operacion);
  operacionPendiente = siguiente.catch(() => undefined); return siguiente;
 }
-<<<<<<< HEAD
-function configurarStorageTelemetria(storage: TelemetryQueueStorage) {
-  storageTelemetria = storage;
-}
-=======
->>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77
-
 function normalizar(items: unknown): PuntoTelemetriaLocal[] {
   if (!Array.isArray(items)) return [];
   return items
@@ -280,13 +254,6 @@ export async function contarColaTelemetria(
   return usuarioId ? cola.filter((item) => item.usuarioId === usuarioId).length : cola.length;
 }
 
-<<<<<<< HEAD
-async function contarColaTelemetriaDeUsuario(usuarioId: string): Promise<number> {
-  return contarColaTelemetria({ usuarioId });
-}
-
-=======
->>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77
 function puedeReintentarse(item: PuntoTelemetriaLocal, ahoraMs = Date.now()) {
   if (!item.lastAttemptAt) return true;
   const ultimoIntentoMs = new Date(item.lastAttemptAt).getTime();
@@ -383,11 +350,6 @@ export async function limpiarColaTelemetria(usuarioIdExplicito?: string | null):
   await limpiarColaTelemetriaCompleta();
 }
 
-<<<<<<< HEAD
-const OFFLINE_TELEMETRY_QUEUE_KEY = CLAVE_COLA_TELEMETRIA;
-
-=======
->>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77
 export function encolarPuntoTelemetria(...args: Parameters<typeof encolarPuntoTelemetriaInterno>) {
   return serializar(() => encolarPuntoTelemetriaInterno(...args));
 }

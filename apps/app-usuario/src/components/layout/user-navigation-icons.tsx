@@ -142,15 +142,3 @@ export function IconoChevron({ className }: IconoProps) {
     </svg>
   );
 }
-
-<<<<<<< HEAD
-function IconoVolver({ className }: IconoProps) {
-  return (
-    <svg {...base(className)}>
-      <path d="M19 12H5" />
-      <path d="m11 18-6-6 6-6" />
-    </svg>
-  );
-}
-=======
->>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77

@@ -5,7 +5,7 @@ import type { Database } from "@ruum/shared/types";
 
 export type EstadoTraslado = Database["public"]["Enums"]["estado_traslado"];
 
-export type AccionFlujo10 =
+type AccionFlujo10 =
   | "aceptar_cotizacion"
   | "pagar_traslado"
   | "cancelar_traslado"
@@ -83,22 +83,14 @@ const ESTADOS_VALIDOS_POR_ACCION: Record<AccionFlujo10, readonly EstadoTraslado[
 };
 
 /**
-<<<<<<< HEAD
- * Zona horaria canónica para operaciones y plazos de Flujo 10 (CB-3 / T8 / CA-6).
- */
-const ZONA_HORARIA_CANONICA_F10 = "America/Mexico_City";
-
-/**
-=======
->>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77
  * Límite contractual de 72 horas para calificación y disputas, con margen de gracia técnico (CB-3 / T8 / CA-6).
  * Margen de gracia: 15 minutos (0.25 horas / 900,000 ms) para absorber desviaciones de reloj o latencia de red.
  */
-export const HORAS_VENTANA_POST_CIERRE = 72;
+const HORAS_VENTANA_POST_CIERRE = 72;
 const MARGEN_GRACIA_MINUTOS = 15;
 const MARGEN_GRACIA_HORAS = MARGEN_GRACIA_MINUTOS / 60; // 0.25 h
 
-export interface ResultadoValidacionVentana72h {
+interface ResultadoValidacionVentana72h {
   permitido: boolean;
   horasDesdeCierre: number;
   dentroDeGracia: boolean;
@@ -242,7 +234,7 @@ export function exigirTransicionFlujo10(
 /**
  * Especificación de evidencia requerida para acreditar la excepción por falla mecánica o seguridad (CB-3).
  */
-export interface EvidenciaFallaMecanica {
+interface EvidenciaFallaMecanica {
   /** Descripción del desperfecto mecánico o anomalía de seguridad (mínimo 20 caracteres) */
   descripcion: string;
   /** URLs de evidencia fotográfica del desperfecto (al menos 1 fotografía requerida en reporte de usuario) */
@@ -291,13 +283,13 @@ function validarAcreditacionFallaMecanica(
 /**
  * Contrato formal de penalización de cancelación (CB-3 / T6, T7 / CA-5).
  */
-export interface ExcepcionCancelacion {
+interface ExcepcionCancelacion {
   tipo: "retraso_conductor" | "incidencia_mecanica" | "fuerza_mayor_soporte";
   justificacion: string;
   evidenciaMecanica?: EvidenciaFallaMecanica;
 }
 
-export interface ResultadoCalculoPenalizacionF10 {
+interface ResultadoCalculoPenalizacionF10 {
   porcentaje_cargo: number;
   monto_cargo: number;
   mensaje: string;

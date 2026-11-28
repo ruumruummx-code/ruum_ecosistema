@@ -1,8 +1,4 @@
-import type { Database } from "@ruum/shared/types";
-import type { AnguloEvidencia, FotoEvidencia, TipoEvidencia } from "@ruum/shared/types";
-
-export type EstadoTraslado = Database["public"]["Enums"]["estado_traslado"];
-export type PasaporteRow = Database["public"]["Views"]["pasaporte_digital"]["Row"];
+import type { AnguloEvidencia, FotoEvidencia } from "@ruum/shared/types";
 
 export type EvidenceRequirement = {
   angulo: AnguloEvidencia;
@@ -13,149 +9,10 @@ export type EvidenceRequirement = {
   permiteNoAplica: boolean;
 };
 
-export interface InspeccionEvidencia {
-  combustible: string;
-  kilometraje: string;
-  llavesRecibidas: string;
-  hologramaVerificacion: "" | "si" | "no";
-  talonVerificacion: string;
-  tarjetaCirculacion: string;
-  placaDelantera: string;
-  placaTrasera: string;
-  notas: string;
-}
-
-<<<<<<< HEAD
-type CampoInspeccion = keyof InspeccionEvidencia;
-
-const CAMPOS_INSPECCION: Array<{ campo: CampoInspeccion; etiqueta: string; obligatorio: boolean }> = [
-  { campo: "combustible", etiqueta: "Combustible", obligatorio: true },
-  { campo: "kilometraje", etiqueta: "Kilometraje", obligatorio: true },
-  { campo: "llavesRecibidas", etiqueta: "Llaves recibidas", obligatorio: true },
-  { campo: "hologramaVerificacion", etiqueta: "Holograma de verificación", obligatorio: true },
-  { campo: "talonVerificacion", etiqueta: "Talón de verificación", obligatorio: true },
-  { campo: "tarjetaCirculacion", etiqueta: "Tarjeta de circulación", obligatorio: true },
-  { campo: "placaDelantera", etiqueta: "Placa delantera", obligatorio: true },
-  { campo: "placaTrasera", etiqueta: "Placa trasera", obligatorio: true },
-  { campo: "notas", etiqueta: "Notas o comentarios", obligatorio: false }
-];
-
-const CAMPOS_INSPECCION_OBLIGATORIOS = CAMPOS_INSPECCION.filter((campo) => campo.obligatorio);
-
-function campoInspeccionCompleto(inspeccion: InspeccionEvidencia, campo: CampoInspeccion) {
-  return inspeccion[campo].trim().length > 0;
-}
-
-function camposInspeccionFaltantes(inspeccion: InspeccionEvidencia) {
-  return CAMPOS_INSPECCION_OBLIGATORIOS.filter(({ campo }) => !campoInspeccionCompleto(inspeccion, campo));
-}
-
-function totalCamposInspeccionCompletados(inspeccion: InspeccionEvidencia) {
-  return CAMPOS_INSPECCION_OBLIGATORIOS.filter(({ campo }) => campoInspeccionCompleto(inspeccion, campo)).length;
-}
-
-const INSPECCION_INICIAL: InspeccionEvidencia = {
-  combustible: "",
-  kilometraje: "",
-  llavesRecibidas: "",
-  hologramaVerificacion: "",
-  talonVerificacion: "",
-  tarjetaCirculacion: "",
-  placaDelantera: "",
-  placaTrasera: "",
-  notas: ""
-};
-
-const OPCIONES_COMBUSTIBLE = ["R", "1/8", "1/4", "3/8", "1/2", "3/4", "1/1"];
-const OPCIONES_LLAVES = ["1", "2", "3"];
-const OPCIONES_SI_NO = [
-  { valor: "si", etiqueta: "Sí" },
-  { valor: "no", etiqueta: "No" }
-];
-=======
->>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77
-
-const ETIQUETA_ANGULO: Record<AnguloEvidencia, string> = {
-  frente: "Frente",
-  lado_piloto: "Lado piloto",
-  lado_copiloto: "Lado copiloto",
-  trasera: "Trasera",
-  tablero: "Tablero",
-  dano_previo: "Daño previo",
-  adicional: "Adicional"
-};
-
-<<<<<<< HEAD
-function listaEvidenciaObligatoria(tipo: TipoEvidencia): EvidenceRequirement[] {
-  const prefijo = tipo === "inicial" ? "antes de moverlo" : "antes de entregar";
-  return [
-    {
-      angulo: "frente",
-      titulo: "Frente",
-      instruccion: `Toma el vehículo completo de frente ${prefijo}. Incluye placas y defensa.`,
-      guia: "Alinea la defensa dentro del marco.",
-      obligatorio: true,
-      permiteNoAplica: false
-    },
-    {
-      angulo: "lado_piloto",
-      titulo: "Lado piloto",
-      instruccion: "Captura todo el costado del conductor, de espejo a defensa trasera.",
-      guia: "Coloca el vehículo horizontal dentro de la silueta.",
-      obligatorio: true,
-      permiteNoAplica: false
-    },
-    {
-      angulo: "lado_copiloto",
-      titulo: "Lado copiloto",
-      instruccion: "Captura todo el costado del copiloto, sin cortar defensas ni llantas.",
-      guia: "Deja aire alrededor de las cuatro llantas.",
-      obligatorio: true,
-      permiteNoAplica: false
-    },
-    {
-      angulo: "trasera",
-      titulo: "Trasera",
-      instruccion: "Toma la parte trasera completa. Incluye placas, cajuela y defensa.",
-      guia: "Centra la placa y la defensa.",
-      obligatorio: true,
-      permiteNoAplica: false
-    },
-    {
-      angulo: "tablero",
-      titulo: "Tablero",
-      instruccion: "Captura el tablero con kilometraje visible y sin reflejos fuertes.",
-      guia: "El odómetro debe quedar legible.",
-      obligatorio: true,
-      permiteNoAplica: false
-    },
-    {
-      angulo: "dano_previo",
-      titulo: tipo === "inicial" ? "Daños preexistentes" : "Daños visibles",
-      instruccion:
-        tipo === "inicial"
-          ? "Registra golpes, rayones o piezas dañadas antes de iniciar el traslado."
-          : "Registra cualquier cambio visible detectado al llegar al destino.",
-      guia: "Acércate al daño y toma una foto clara.",
-      obligatorio: false,
-      permiteNoAplica: true
-    }
-  ];
-}
-
-=======
->>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77
 export function fotoSrc(foto?: FotoEvidencia) {
   if (!foto) return null;
   if (foto.local_path) return foto.local_path;
   if (foto.url_visual) return foto.url_visual;
   if (foto.url?.startsWith("data:") || foto.url?.startsWith("blob:")) return foto.url;
-  return null;
-}
-
-// PRD §4.4 - tipo de evidencia según en qué punto del flujo está el viaje.
-function tipoEvidenciaPorEstado(estado: EstadoTraslado): TipoEvidencia | null {
-  if (estado === "verificacion_vehiculo_en_proceso" || estado === "evidencia_inicial_en_proceso") return "inicial";
-  if (estado === "llegada_a_destino" || estado === "evidencia_final_en_proceso") return "final";
   return null;
 }

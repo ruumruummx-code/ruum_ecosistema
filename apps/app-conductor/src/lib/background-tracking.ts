@@ -48,13 +48,6 @@ export async function obtenerEstadoTrackingNativo() {
   return BackgroundTracking.getStatus();
 }
 
-<<<<<<< HEAD
-async function actualizarEstadoTrackingNativo(tripState: string) {
-  return BackgroundTracking.updateTripState({ tripState });
-}
-
-=======
->>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77
 export async function obtenerSecretoKeystoreNativo(): Promise<{ secret: string; backedByKeystore: boolean } | null> {
   if (!soportaTrackingNativo()) return null;
   try {

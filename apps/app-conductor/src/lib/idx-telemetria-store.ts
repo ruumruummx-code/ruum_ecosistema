@@ -101,13 +101,6 @@ class IndexedDBTelemetryQueueStorage {
   }
 }
 
-<<<<<<< HEAD
-function reiniciarBaseDeDatosParaTesting() {
-  dbPromise = null;
-}
-
-=======
->>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77
 /**
  * Instancia compartida del almacenamiento IndexedDB para telemetría.
  * Se expone para permitir inyección en tests y reuso en otros módulos.

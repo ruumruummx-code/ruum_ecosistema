@@ -3,7 +3,6 @@ import { ConductorIcon, type ConductorIconName } from "../icons";
 import type { ButtonHTMLAttributes } from "react";
 
 export type ConductorButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "quiet" | "emergency";
-export type ConductorStatus = "assigned" | "pending" | "active" | "success" | "error" | "neutral";
 
 function baseVariant(variant: ConductorButtonVariant) {
   return variant === "secondary" ? "outline" : variant === "quiet" ? "ghost" : variant === "emergency" ? "danger" : variant;
@@ -46,55 +45,3 @@ export function ConductorButton({
     </BaseButton>
   );
 }
-
-<<<<<<< HEAD
-function ConductorStatusBadge({
-  status,
-  label,
-  className = ""
-}: {
-  status: ConductorStatus;
-  label: string;
-  className?: string;
-}) {
-  const tone = { assigned: "info", pending: "warning", active: "info", success: "success", error: "danger", neutral: "neutral" } as const;
-
-  return (
-    <Badge tone={tone[status]} dot className={className}>{label}</Badge>
-  );
-}
-
-function ConductorOperationalCard({
-  children,
-  className = "",
-  as: Element = "article"
-}: {
-  children: ReactNode;
-  className?: string;
-  as?: "article" | "section" | "div";
-}) {
-  return <Element className={cn("rounded-lg border border-ui-line bg-ui-card p-4 text-ui-fg shadow-ui-sm", className)}>{children}</Element>;
-}
-
-function ConductorFeedback({
-  tone = "info",
-  children,
-  className = ""
-}: {
-  tone?: "info" | "warning" | "error" | "success";
-  children: ReactNode;
-  className?: string;
-}) {
-  return (
-    <div
-      role={tone === "error" ? "alert" : "status"}
-      aria-live={tone === "error" ? "assertive" : "polite"}
-      className={cn("rounded-lg border p-3 text-sm", { info: "border-ui-line bg-ui-brand-soft text-ui-brand-soft-fg", warning: "border-ui-warning bg-ui-warning-soft text-ui-warning", error: "border-ui-danger bg-ui-danger-soft text-ui-danger", success: "border-ui-success bg-ui-success-soft text-ui-success" }[tone], className)}
-    >
-      {children}
-    </div>
-  );
-}
-
-=======
->>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77

@@ -76,13 +76,6 @@ function obtenerClavePublica(propKey?: string): string | undefined {
   );
 }
 
-<<<<<<< HEAD
-function tieneStripePublicoConfigurado(): boolean {
-  return Boolean(obtenerClavePublica());
-}
-
-=======
->>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77
 export interface PagoStripeProps {
   clientSecretExterno?: string;
   stripePublishableKey?: string;

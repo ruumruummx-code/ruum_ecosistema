@@ -50,15 +50,8 @@ async function adquirirPermisoMapbox(signal?: AbortSignal): Promise<void> {
   }
 }
 
-<<<<<<< HEAD
-function __resetMapboxRateLimitForTest() {
-  mapboxTimestamps.length = 0;
-}
-
-=======
->>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77
-export interface CoordenadasGeocodificadas { lat: number; lng: number; }
-export interface RutaMapboxCalculada { distanciaKm: number; tiempoEstimadoHoras: number; }
+interface CoordenadasGeocodificadas { lat: number; lng: number; }
+interface RutaMapboxCalculada { distanciaKm: number; tiempoEstimadoHoras: number; }
 
 class MapboxUsuarioError extends Error {
   constructor(

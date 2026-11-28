@@ -1,7 +1,6 @@
 import type { Database } from "@ruum/shared/types";
 
 export type PasaporteRow = Database["public"]["Views"]["pasaporte_digital"]["Row"];
-export type EstadoTraslado = Database["public"]["Enums"]["estado_traslado"];
 
 export interface InspeccionData {
   tipo: "inicial" | "final";
@@ -15,32 +14,3 @@ export interface InspeccionData {
   placa_trasera: string | null;
   notas: string | null;
 }
-
-export interface GastoData {
-  id: string;
-  tipo: "combustible" | "caseta" | "maniobra" | "estadia" | "penalizacion" | "otro";
-  monto: number;
-  descripcion: string | null;
-  comprobante_ruta?: string | null;
-  registrado_en: string;
-}
-
-<<<<<<< HEAD
-function labelGasto(tipo: GastoData["tipo"]): string {
-  switch (tipo) {
-    case "combustible":
-      return "Gasolina";
-    case "caseta":
-      return "Caseta";
-    case "maniobra":
-      return "Maniobra";
-    case "estadia":
-      return "Estadía";
-    case "penalizacion":
-      return "Penalización";
-    default:
-      return "Otro";
-  }
-}
-=======
->>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77

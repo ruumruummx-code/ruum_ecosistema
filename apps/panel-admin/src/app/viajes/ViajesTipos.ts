@@ -348,7 +348,6 @@ export function folioCorto(v: PasaporteRow) {
   return v.traslado_id ? v.traslado_id.slice(0, 8).toUpperCase() : "SIN FOLIO";
 }
 
-<<<<<<< HEAD
 function construirResultadosAccionMasiva(
   traslados: PasaporteRow[],
   accion: AccionMasivaId
@@ -421,8 +420,6 @@ function resolverEstadoAccion(resultados: ResultadoAccionMasiva[]): EstadoAccion
   return "parcial";
 }
 
-=======
->>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77
 export function exportarTrasladosCsv(traslados: PasaporteRow[]) {
   const encabezados = [
     "Folio",
@@ -456,7 +453,6 @@ export function exportarTrasladosCsv(traslados: PasaporteRow[]) {
   descargarArchivo(`traslados-operativos-${new Date().toISOString().slice(0, 10)}.csv`, "text/csv;charset=utf-8;", csv);
 }
 
-<<<<<<< HEAD
 function exportarEvidencia(traslados: PasaporteRow[]) {
   const manifiesto = {
     generado_en: new Date().toISOString(),
@@ -472,10 +468,7 @@ function exportarEvidencia(traslados: PasaporteRow[]) {
   descargarArchivo(`manifiesto-evidencia-${new Date().toISOString().slice(0, 10)}.json`, "application/json", JSON.stringify(manifiesto, null, 2));
 }
 
-function valorCsv(valor: string | number | null | undefined) {
-=======
 export function valorCsv(valor: string | number | null | undefined) {
->>>>>>> 99920eaeaf3251d9baeea164ac31f794d1715d77
   const texto = String(valor ?? "");
   return `"${texto.replace(/"/g, '""')}"`;
 }
