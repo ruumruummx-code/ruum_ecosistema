@@ -94,7 +94,7 @@ Para garantizar que el outbox no sea meramente nominal y cuente con un ejecutor 
 
 1. **Endpoint Interno del Consumidor**:
    - **Ruta:** `POST /functions/v1/limpiar-documentos-cuenta-obsoletos`
-   - **Implementación:** [`supabase/functions/limpiar-documentos-cuenta-obsoletos/index.ts`](file:///c:/ruum_ecosistema-main/supabase/functions/limpiar-documentos-cuenta-obsoletos/index.ts)
+   - **Implementación:** [`supabase/functions/limpiar-documentos-cuenta-obsoletos/index.ts`](../../../../supabase/functions/limpiar-documentos-cuenta-obsoletos/index.ts)
 2. **Autenticación y Modo Fail-Closed**:
    - Requiere cabecera: `Authorization: Bearer <STORAGE_CLEANUP_SECRET>` o `x-cleanup-secret`.
    - **Fail-Closed:** Si el secreto está ausente, no coincide o las variables `SUPABASE_URL` / credencial de rol de servicio faltan, el endpoint rechaza inmediatamente con `401 Unauthorized` o `500 Internal Error` sin procesar ninguna fila.
@@ -120,7 +120,7 @@ Se excluye deliberadamente la ejecución de un escáner antivirus sincrónico en
 Para sustituir el antivirus sincrónico sin reducir la postura de seguridad, se implementa una mitigación estricta de cuatro capas:
 
 1. **Validación Binaria de Magic Bytes y Firmas**:
-   - En [`_shared/validacion-documento.ts`](file:///c:/ruum_ecosistema-main/supabase/functions/_shared/validacion-documento.ts), todo archivo debe cumplir con los bytes mágicos canónicos:
+   - En [`_shared/validacion-documento.ts`](../../../../supabase/functions/_shared/validacion-documento.ts), todo archivo debe cumplir con los bytes mágicos canónicos:
      - JPEG: `0xFF 0xD8 0xFF`
      - PNG: `0x89 0x50 0x4E 0x47 0x0D 0x0A 0x1A 0x0A`
      - PDF: `0x25 0x50 0x44 0x46` (`%PDF-`)

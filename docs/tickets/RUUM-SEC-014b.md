@@ -9,7 +9,7 @@
 - **Prioridad:** 🟠 Alta (Bloqueante de distribución de producto móvil)
 - **Fase:** Fase 3 (Mobile Hardening & Distribution / F3.2 ampliado)
 - **Vinculado a:** `RUUM-SEC-007` (F0.6: Desactivación de `webContentsDebuggingEnabled`)
-- **Documento de Escalamiento:** [escalamiento-comite-android-release-pipeline.md](file:///c:/ruum_ecosistema-main/docs/escalamiento-comite-android-release-pipeline.md)
+- **Documento de Escalamiento:** [escalamiento-comite-android-release-pipeline.md](../escalamiento-comite-android-release-pipeline.md)
 - **Estado:** To Do
 
 ---

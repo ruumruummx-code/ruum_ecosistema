@@ -183,7 +183,6 @@ export function useEvidenciaPageLogic(id: string): UseEvidenciaPageLogic {
     (process.env.NODE_ENV !== "production" ? "San Mateo Atenco" : "Origen no especificado");
   const folio = pasaporte?.traslado_id?.slice(0, 8).toUpperCase() || id.slice(0, 8).toUpperCase();
 
-  // Load inspection from database
   const loadInspeccion = useCallback(async (tipoEvidencia: TipoEvidencia) => {
     const cliente = crearClienteNavegador();
     const data = await obtenerInspeccionTraslado(cliente, id, tipoEvidencia);
@@ -273,7 +272,6 @@ export function useEvidenciaPageLogic(id: string): UseEvidenciaPageLogic {
     catch {setBorradorLocalGuardado(false);setAviso("No se pudo guardar el borrador en este dispositivo. Guarda en el servidor antes de salir.");}
   },[cargando,tipo,pasaporte?.conductor_id,id,kilometraje,llavesCount,gasolinaSegments,tarjetaCirculacion,talonVerificacion,hologramaVerificacion,placaDelantera,placaTrasera,notas,presentaDanosNuevos]);
 
-  // Handle local file selection
   async function registrarFotoLocal(angulo: AnguloEvidencia, dataUrl: string) {
     if (!tipo) return;
     setEnviando(angulo);

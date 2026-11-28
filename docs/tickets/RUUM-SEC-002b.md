@@ -27,7 +27,7 @@ Sin embargo, el script `pnpm check:supabase-drift` no pudo ejecutar la comparaci
    supabase login
    ```
 2. Ejecutar `pnpm check:supabase-drift` (o `supabase db diff --linked`) contra Producción (`asmzetwwwugaoowiukdv`) y Staging (`ytqhzrbmiczzwzzuzgbq`).
-3. Mergear el output completo de las diferencias en [supabase-drift-2026-11.md](file:///c:/ruum_ecosistema-main/docs/supabase-drift-2026-11.md).
+3. Mergear el output completo de las diferencias en [supabase-drift-2026-11.md](../supabase-drift-2026-11.md).
 4. Listar exhaustivamente todos los drifts detectados (esquemas de tablas, índices, extensiones, triggers y publicaciones).
 5. Si se identifican drifts estructurales adicionales a los 2 conocidos, emitir tickets de resolución correspondientes para Fase 1.4 o Fase 2.
 

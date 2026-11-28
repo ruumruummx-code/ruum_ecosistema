@@ -23,21 +23,21 @@ Todas las mitigaciones implementadas son quirúrgicas, reversibles en menos de 1
 
 | Ticket | Tarea | Componente Afectado | Tipo de Acción | Estado | Artefacto / Fichero Clave |
 | :--- | :--- | :--- | :--- | :---: | :--- |
-| **RUUM-SEC-001** | F0.0 | Monorepo completo (46 endpoints) | Inventario & Gobernanza | ✅ | [inventario-endpoints-service-role.md](file:///c:/ruum_ecosistema-main/docs/inventario-endpoints-service-role.md)<br>[fase-0-owners.md](file:///c:/ruum_ecosistema-main/docs/fase-0-owners.md) |
-| **RUUM-SEC-002** | F0.4 | Supabase Cloud & `@ruum/api` | Auditoría de Drift & Grants | ✅ | [grants-reales-2026-11.md](file:///c:/ruum_ecosistema-main/docs/grants-reales-2026-11.md)<br>[supabase-drift-2026-11.md](file:///c:/ruum_ecosistema-main/docs/supabase-drift-2026-11.md)<br>[security-advisor-2026-11.md](file:///c:/ruum_ecosistema-main/docs/security-advisor-2026-11.md)<br>[deuda-tecnica-ruum-sec-002b-drift.md](file:///c:/ruum_ecosistema-main/docs/deuda-tecnica-ruum-sec-002b-drift.md) |
-| **RUUM-SEC-003** | F0.3 | `app-usuario/src/lib/tarifa-snapshot.ts` | Eliminación de Secreto & Fail-Closed | ✅ | [tarifa-snapshot.ts](file:///c:/ruum_ecosistema-main/apps/app-usuario/src/lib/tarifa-snapshot.ts)<br>[tarifa-snapshot.test.ts](file:///c:/ruum_ecosistema-main/apps/app-usuario/src/lib/tarifa-snapshot.test.ts)<br>[vercel-env-2026-11.md](file:///c:/ruum_ecosistema-main/docs/vercel-env-2026-11.md)<br>[deuda-tecnica-ruum-sec-003-vercel.md](file:///c:/ruum_ecosistema-main/docs/deuda-tecnica-ruum-sec-003-vercel.md) |
-| **RUUM-SEC-004** | F0.5 | Supabase Cloud (prod/staging) | HIBP + MFA Admin + Timeouts | ✅ | [supabase-auth-config-2026-11.md](file:///c:/ruum_ecosistema-main/docs/supabase-auth-config-2026-11.md)<br>[hibp-prod.json](file:///c:/ruum_ecosistema-main/docs/evidencias/2026-11/hibp-prod.json)<br>[timeouts-prod.json](file:///c:/ruum_ecosistema-main/docs/evidencias/2026-11/timeouts-prod.json) |
-| **RUUM-SEC-005** | F0.1 | `app-usuario/src/middleware.ts` | Aislamiento RBAC (401/403) | ✅ | [middleware.ts](file:///c:/ruum_ecosistema-main/apps/app-usuario/src/middleware.ts)<br>[middleware-sensitive-endpoints.test.ts](file:///c:/ruum_ecosistema-main/apps/app-usuario/src/middleware-sensitive-endpoints.test.ts) |
-| **RUUM-SEC-006** | F0.2 | `app-usuario/src/app/api/ruta` | Auth Guard + Rate Limit + Decisión | ✅ | [route.ts](file:///c:/ruum_ecosistema-main/apps/app-usuario/src/app/api/ruta/route.ts)<br>[decision-proxy-mapbox.md](file:///c:/ruum_ecosistema-main/docs/decision-proxy-mapbox.md) |
-| **RUUM-SEC-007** | F0.6 | `app-usuario` Android / Capacitor | Disable WebContentsDebugging | ✅ | [capacitor.config.ts](file:///c:/ruum_ecosistema-main/apps/app-usuario/capacitor.config.ts)<br>[capacitor.config.json](file:///c:/ruum_ecosistema-main/apps/app-usuario/android/app/src/main/assets/capacitor.config.json)<br>[escalamiento-comite-android-release-pipeline.md](file:///c:/ruum_ecosistema-main/docs/escalamiento-comite-android-release-pipeline.md) |
-| **RUUM-SEC-008** | F0.7 | `panel-admin/src/app/api/csp-report` | Telemetría CSP + Rate Limit | ✅ | [route.ts](file:///c:/ruum_ecosistema-main/apps/panel-admin/src/app/api/csp-report/route.ts)<br>[csp-report-panel-admin.md](file:///c:/ruum_ecosistema-main/docs/csp-report-panel-admin.md) |
+| **RUUM-SEC-001** | F0.0 | Monorepo completo (46 endpoints) | Inventario & Gobernanza | ✅ | [inventario-endpoints-service-role.md](inventario-endpoints-service-role.md)<br>[fase-0-owners.md](fase-0-owners.md) |
+| **RUUM-SEC-002** | F0.4 | Supabase Cloud & `@ruum/api` | Auditoría de Drift & Grants | ✅ | [grants-reales-2026-11.md](grants-reales-2026-11.md)<br>[supabase-drift-2026-11.md](supabase-drift-2026-11.md)<br>[security-advisor-2026-11.md](security-advisor-2026-11.md)<br>[deuda-tecnica-ruum-sec-002b-drift.md](deuda-tecnica-ruum-sec-002b-drift.md) |
+| **RUUM-SEC-003** | F0.3 | `app-usuario/src/lib/tarifa-snapshot.ts` | Eliminación de Secreto & Fail-Closed | ✅ | [tarifa-snapshot.ts](../apps/app-usuario/src/lib/tarifa-snapshot.ts)<br>[tarifa-snapshot.test.ts](../apps/app-usuario/src/lib/tarifa-snapshot.test.ts)<br>[vercel-env-2026-11.md](vercel-env-2026-11.md)<br>[deuda-tecnica-ruum-sec-003-vercel.md](deuda-tecnica-ruum-sec-003-vercel.md) |
+| **RUUM-SEC-004** | F0.5 | Supabase Cloud (prod/staging) | HIBP + MFA Admin + Timeouts | ✅ | [supabase-auth-config-2026-11.md](supabase-auth-config-2026-11.md)<br>[hibp-prod.json](evidencias/2026-11/hibp-prod.json)<br>[timeouts-prod.json](evidencias/2026-11/timeouts-prod.json) |
+| **RUUM-SEC-005** | F0.1 | `app-usuario/src/middleware.ts` | Aislamiento RBAC (401/403) | ✅ | [middleware.ts](../apps/app-usuario/src/middleware.ts)<br>[middleware-sensitive-endpoints.test.ts](../apps/app-usuario/src/middleware-sensitive-endpoints.test.ts) |
+| **RUUM-SEC-006** | F0.2 | `app-usuario/src/app/api/ruta` | Auth Guard + Rate Limit + Decisión | ✅ | [route.ts](../apps/app-usuario/src/app/api/ruta/route.ts)<br>[decision-proxy-mapbox.md](decision-proxy-mapbox.md) |
+| **RUUM-SEC-007** | F0.6 | `app-usuario` Android / Capacitor | Disable WebContentsDebugging | ✅ | [capacitor.config.ts](../apps/app-usuario/capacitor.config.ts)<br>[capacitor.config.json](../apps/app-usuario/android/app/src/main/assets/capacitor.config.json)<br>[escalamiento-comite-android-release-pipeline.md](escalamiento-comite-android-release-pipeline.md) |
+| **RUUM-SEC-008** | F0.7 | `panel-admin/src/app/api/csp-report` | Telemetría CSP + Rate Limit | ✅ | [route.ts](../apps/panel-admin/src/app/api/csp-report/route.ts)<br>[csp-report-panel-admin.md](csp-report-panel-admin.md) |
 
 ---
 
 ## 3. Resoluciones Específicas y Aclaraciones Técnicas
 
 ### 3.1. Clasificación Canónica de los 4 Lotes para F1.1 (RUUM-SEC-009 — CLOSE-02)
-La única fuente oficial y canónica para la ejecución del REVOKE masivo en Fase 1 es [grants-reales-2026-11.md](file:///c:/ruum_ecosistema-main/docs/grants-reales-2026-11.md):
+La única fuente oficial y canónica para la ejecución del REVOKE masivo en Fase 1 es [grants-reales-2026-11.md](grants-reales-2026-11.md):
 - **Lote 1 (18 funciones) — Admin & Auditoría:**  
   *Destino final:* `service_role` exclusivo / o `authenticated` validando rol admin en middleware y función. Se revoca `anon` y `public`.
 - **Lote 2 (26 funciones) — Operaciones de Negocio:**  
@@ -49,7 +49,7 @@ La única fuente oficial y canónica para la ejecución del REVOKE masivo en Fas
 *Total Canónico:* **18 + 26 + 28 + 19 = 91 funciones**.
 
 ### 3.2. Configuración de Timeouts de Sesión (Valores Reales Configurados — CLOSE-04)
-Configurados en Supabase Cloud y verificados en [timeouts-prod.json](file:///c:/ruum_ecosistema-main/docs/evidencias/2026-11/timeouts-prod.json) y [timeouts-staging.json](file:///c:/ruum_ecosistema-main/docs/evidencias/2026-11/timeouts-staging.json):
+Configurados en Supabase Cloud y verificados en [timeouts-prod.json](evidencias/2026-11/timeouts-prod.json) y [timeouts-staging.json](evidencias/2026-11/timeouts-staging.json):
 - **JWT Expiry (Access Token):** `1800` segundos (30 minutos).
 - **Refresh Token Rotation:** Activo con intervalo de reúso de `10` segundos.
 - **Inactivity Timeout:** `28,800` segundos (8 horas).
@@ -63,16 +63,16 @@ Configurados en Supabase Cloud y verificados en [timeouts-prod.json](file:///c:/
 
 ### 3.4. Confirmación de `TARIFA_SNAPSHOT_SECRET` en Vercel Prod (CLOSE-06)
 - **Estado de Provisión:** Confirmado en Vercel Dashboard para el proyecto `ruum-app-usuario` en los entornos `Production` y `Preview` con longitud de 64 caracteres hexadecimales (>= 32 requeridos).
-- **Evidencia y Documentación:** Ver [vercel-tarifa-snapshot.json](file:///c:/ruum_ecosistema-main/docs/evidencias/2026-11/vercel-tarifa-snapshot.json) y [vercel-env-2026-11.md](file:///c:/ruum_ecosistema-main/docs/vercel-env-2026-11.md). Se descarta el riesgo de falla de arranque por comportamiento fail-closed en el próximo despliegue.
+- **Evidencia y Documentación:** Ver [vercel-tarifa-snapshot.json](evidencias/2026-11/vercel-tarifa-snapshot.json) y [vercel-env-2026-11.md](vercel-env-2026-11.md). Se descarta el riesgo de falla de arranque por comportamiento fail-closed en el próximo despliegue.
 
 ---
 
 ## 4. Deudas Técnicas Formalizadas y Escalamiento al Comité
 
 1. **Sincronización `db diff --linked` con Credenciales Directas (`RUUM-SEC-002b`):**  
-   Documentado en [deuda-tecnica-ruum-sec-002b-drift.md](file:///c:/ruum_ecosistema-main/docs/deuda-tecnica-ruum-sec-002b-drift.md). Asignado a BS como primer entregable de F1.4.
+   Documentado en [deuda-tecnica-ruum-sec-002b-drift.md](deuda-tecnica-ruum-sec-002b-drift.md). Asignado a BS como primer entregable de F1.4.
 2. **Escalamiento de Release Pipeline y Firma Android (F0.6):**  
-   Documentado en [escalamiento-comite-android-release-pipeline.md](file:///c:/ruum_ecosistema-main/docs/escalamiento-comite-android-release-pipeline.md). Solicitud formal al Comité para incorporar el ticket `RUUM-SEC-014` (CI/CD móvil y custodia de Keystores en KMS/Vault) en la Fase 3.
+   Documentado en [escalamiento-comite-android-release-pipeline.md](escalamiento-comite-android-release-pipeline.md). Solicitud formal al Comité para incorporar el ticket `RUUM-SEC-014` (CI/CD móvil y custodia de Keystores en KMS/Vault) en la Fase 3.
 
 ---
 

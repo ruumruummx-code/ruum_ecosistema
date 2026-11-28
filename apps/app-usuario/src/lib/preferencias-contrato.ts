@@ -207,13 +207,13 @@ export function aplicarEfectosReales(prefs: Partial<PreferenciasUsuarioContrato>
     // Idioma del contenido real; no depende de una selección inexistente.
     aplicarIdiomaDisponible();
 
-    // 2. Unidades
+    // Unidades
     if (prefs.unidades) {
       raiz.setAttribute("data-units", prefs.unidades === "Imperial" ? "imperial" : "metric");
       window.dispatchEvent(new CustomEvent("ruum:unidades-actualizadas", { detail: { unidades: prefs.unidades } }));
     }
 
-    // 3. Accesibilidad
+    // Accesibilidad
     if (prefs.accesibilidad) {
       if (prefs.accesibilidad === "Texto grande") {
         raiz.setAttribute("data-a11y-font", "large");
@@ -230,7 +230,7 @@ export function aplicarEfectosReales(prefs: Partial<PreferenciasUsuarioContrato>
       }
     }
 
-    // 4. Uso de datos
+    // Uso de datos
     if (prefs.usoDatos) {
       if (prefs.usoDatos === "Desactivado") {
         desactivarTelemetriaActiva();
@@ -239,7 +239,6 @@ export function aplicarEfectosReales(prefs: Partial<PreferenciasUsuarioContrato>
       }
     }
 
-    // Disparar evento de edición
     window.dispatchEvent(new Event("ruum:preferencias-editadas"));
   } catch {
     // Ignorar errores de DOM en entornos restringidos

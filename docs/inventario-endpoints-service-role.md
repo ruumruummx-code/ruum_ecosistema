@@ -29,7 +29,7 @@ Este inventario audita el 100 % de los Route Handlers de las 3 aplicaciones (46 
 
 ## 2. Mapa de Owners Designados
 
-Para la gobernanza de las remediaciones de Fase 0 y Fase 1, se establecen los siguientes propietarios (ver desglose nominal completo y mandato formal en [fase-0-owners.md](file:///c:/ruum_ecosistema-main/docs/fase-0-owners.md)):
+Para la gobernanza de las remediaciones de Fase 0 y Fase 1, se establecen los siguientes propietarios (ver desglose nominal completo y mandato formal en [fase-0-owners.md](fase-0-owners.md)):
 
 | Dominio / Módulo | Owner Designado | Rol | Responsabilidad en Fase 0 |
 |---|---|---|---|
